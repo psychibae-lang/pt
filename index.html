@@ -584,12 +584,20 @@ ${drugListStr}
         })
       });
 
-      const data = await response.json();
+      const raw = await response.text();
+      console.log('API raw response:', raw);
+      let data;
+      try { data = JSON.parse(raw); } catch(e) { throw new Error('응답 파싱 실패: ' + raw.slice(0,200)); }
+
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      if (!data.content) throw new Error('응답에 content 없음: ' + JSON.stringify(data).slice(0,200));
 
       const text = data.content.map(i => i.text || '').join('');
-      const clean = text.replace(/```json|```/g, '').trim();
-      drugs = JSON.parse(clean);
+      console.log('Claude text:', text);
+      const clean = text.replace(/```json[\s\S]*?```|```[\s\S]*?```/g, m => m.replace(/```json|```/g,'')).trim();
+      const jsonMatch = clean.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error('JSON 배열을 찾을 수 없습니다: ' + clean.slice(0,200));
+      drugs = JSON.parse(jsonMatch[0]);
 
       renderTable(chartNo, drugs);
       setStatus('success', `${drugs.length}개 약물 추출 완료`);
