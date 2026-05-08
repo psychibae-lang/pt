@@ -387,6 +387,67 @@
     .result-meta { flex-direction: column; gap: 4px; }
     .result-header { flex-direction: column; align-items: flex-start; }
   }
+  .nav-tab {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text2);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 14px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .info-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .info-label {
+    color: var(--text2);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-width: 70px;
+  }
+  .info-value {
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+  .tag-new {
+    font-size: 10px;
+    background: rgba(45,212,160,0.15);
+    color: var(--success);
+    border: 1px solid rgba(45,212,160,0.3);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .tag-exist {
+    font-size: 10px;
+    background: rgba(79,142,247,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(79,142,247,0.2);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
 </style>
 </head>
 <body>
@@ -402,8 +463,14 @@
   <button onclick="saveKey()" style="background:#4f8ef7;color:white;border:none;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;white-space:nowrap;">저장</button>
   <span id="keyStatus" style="font-size:12px;color:#8890b0;"></span>
 </div>
+<div id="tabNav" style="background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:0;">
+  <button class="nav-tab active" id="navDrug" onclick="switchMainTab('drug')">💊 약물 입력</button>
+  <button class="nav-tab" id="navPatient" onclick="switchMainTab('patient')">👤 환자 관리</button>
+</div>
 <div class="container">
 
+  <!-- 약물입력 탭 -->
+  <div id="tabDrug">
   <!-- STEP 1 -->
   <div class="card">
     <div class="card-title">STEP 1 &nbsp; 환자 정보 입력</div>
@@ -483,7 +550,81 @@
     <div id="jsonView" class="hidden">
       <pre class="json-preview" id="jsonPreview"></pre>
     </div>
-  </div>
+  </div><!-- /resultCard -->
+  </div><!-- /tabDrug -->
+
+  <!-- 환자관리 탭 -->
+  <div id="tabPatient" class="hidden">
+
+    <!-- 환자 검색 -->
+    <div class="card">
+      <div class="card-title">환자 검색</div>
+      <div class="input-row" style="margin-bottom:0;">
+        <div class="input-group" style="max-width:200px;">
+          <label>챠트번호</label>
+          <input type="text" id="pChartNo" placeholder="예: 10587" oninput="clearPatientResult()">
+        </div>
+        <button class="btn btn-primary" onclick="searchPatient()" style="margin-bottom:1px;">🔍 조회</button>
+      </div>
+      <div id="searchStatus" class="hidden" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- 환자 정보 -->
+    <div class="card hidden" id="patientInfoCard">
+      <div class="card-title" id="patientInfoTitle">환자 정보</div>
+
+      <div class="info-box" style="margin-bottom:20px;">
+        <div class="info-row">
+          <span class="info-label">챠트번호</span>
+          <span class="info-value" id="piChart">—</span>
+          <span id="piTag"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">전화번호</span>
+          <span class="info-value" id="piPhone">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">최근내원일</span>
+          <span class="info-value" id="piVisit">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">다음내원일</span>
+          <span class="info-value" id="piNextVisit">—</span>
+        </div>
+      </div>
+
+      <!-- 전화번호 수정/등록 -->
+      <div style="margin-bottom:20px;">
+        <div class="card-title" style="margin-bottom:12px;">전화번호 등록/수정</div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>전화번호 (숫자만 입력 가능)</label>
+            <input type="text" id="pPhone" placeholder="01012345678 또는 01012345678" maxlength="13">
+          </div>
+          <button class="btn btn-primary" onclick="savePhone()">저장</button>
+        </div>
+        <div id="phoneSaveStatus" class="hidden" style="margin-top:10px;font-size:13px;"></div>
+      </div>
+
+      <!-- 내원일 수정/등록 -->
+      <div>
+        <div class="card-title" style="margin-bottom:12px;">내원일 등록/수정</div>
+        <div class="input-row">
+          <div class="input-group">
+            <label>내원일 (6자리: 예 260509)</label>
+            <input type="text" id="pVisitDate" placeholder="260509" maxlength="6">
+          </div>
+          <div class="input-group">
+            <label>다음내원일 (없으면 비워두기)</label>
+            <input type="text" id="pNextVisitDate" placeholder="260516" maxlength="6">
+          </div>
+          <button class="btn btn-primary" onclick="saveVisit()">저장</button>
+        </div>
+        <div id="visitSaveStatus" class="hidden" style="margin-top:10px;font-size:13px;"></div>
+      </div>
+    </div>
+
+  </div><!-- /tabPatient -->
 
 </div>
 
@@ -492,7 +633,7 @@
   const SUPABASE_PROXY = 'https://rurbfcocihvapbtdzbyt.supabase.co/functions/v1/claude-proxy';
   let SUPABASE_ANON_KEY = localStorage.getItem('sb_anon_key') || '';
   // 구글시트 Apps Script 웹앱 URL (다음 단계에서 입력)
-  const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbyVTcv9Q1LyY-0ZnqK0mNKfm92GNjr_d61YkaPj6TLyHr-A6GAFYoJ2RfzKEYsBDN-R/exec';
+  const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbx1qtGWka3_2Ue9XO4gy1hvYWn1yW-7YvPdrRBis96LOE_PDrf1dEq33ep5kHM0Ag/exec';
   // ─────────────────────────────────────────────────────
 
   // 약물코드 목록
@@ -758,6 +899,119 @@ ${drugListStr}
       saveBtn.innerHTML = '💾 구글시트에 저장';
     }
   }
+
+  // ── 메인 탭 전환 ───────────────────────────────────
+  function switchMainTab(tab) {
+    document.getElementById('tabDrug').classList.toggle('hidden', tab !== 'drug');
+    document.getElementById('tabPatient').classList.toggle('hidden', tab !== 'patient');
+    document.getElementById('navDrug').classList.toggle('active', tab === 'drug');
+    document.getElementById('navPatient').classList.toggle('active', tab === 'patient');
+  }
+
+  // ── 환자 검색 ──────────────────────────────────────
+  function clearPatientResult() {
+    document.getElementById('patientInfoCard').classList.add('hidden');
+    document.getElementById('searchStatus').classList.add('hidden');
+  }
+
+  async function searchPatient() {
+    const chartNo = document.getElementById('pChartNo').value.trim();
+    if (!chartNo) return;
+
+    setSearchStatus('loading', '조회 중...');
+    document.getElementById('patientInfoCard').classList.add('hidden');
+
+    try {
+      const url = SHEET_WEBHOOK + '?action=get_patient&chart_no=' + encodeURIComponent(chartNo);
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!data.success) throw new Error(data.error);
+
+      // 정보 표시
+      document.getElementById('piChart').textContent = chartNo;
+      document.getElementById('piPhone').textContent = data.phone || '미등록';
+      document.getElementById('piVisit').textContent = data.visit ? data.visit.visit_date : '없음';
+      document.getElementById('piNextVisit').textContent = (data.visit && data.visit.next_visit_date) ? data.visit.next_visit_date : '없음';
+
+      const isNew = !data.phone && !data.visit;
+      document.getElementById('piTag').innerHTML = isNew
+        ? '<span class="tag-new">신환</span>'
+        : '<span class="tag-exist">기존</span>';
+
+      // 기존 값 입력창에 채우기
+      document.getElementById('pPhone').value = data.phone || '';
+      document.getElementById('pVisitDate').value = data.visit ? data.visit.visit_date : '';
+      document.getElementById('pNextVisitDate').value = (data.visit && data.visit.next_visit_date) ? data.visit.next_visit_date : '';
+
+      document.getElementById('patientInfoCard').classList.remove('hidden');
+      setSearchStatus('success', isNew ? '신환입니다. 정보를 등록해주세요.' : '환자 정보를 불러왔습니다.');
+
+    } catch(err) {
+      setSearchStatus('error', '조회 실패: ' + err.message);
+    }
+  }
+
+  function setSearchStatus(type, msg) {
+    const el = document.getElementById('searchStatus');
+    el.className = 'status-bar';
+    el.classList.remove('hidden');
+    if (type === 'loading') { el.classList.add('status-loading'); el.innerHTML = '<div class="spinner"></div><span>' + msg + '</span>'; }
+    else if (type === 'success') { el.classList.add('status-success'); el.innerHTML = '✓ ' + msg; }
+    else { el.classList.add('status-error'); el.innerHTML = '✕ ' + msg; }
+  }
+
+  // ── 전화번호 저장 ───────────────────────────────────
+  async function savePhone() {
+    const chartNo = document.getElementById('pChartNo').value.trim();
+    const phone = document.getElementById('pPhone').value.trim();
+    if (!chartNo || !phone) return;
+
+    try {
+      await fetch(SHEET_WEBHOOK, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'save_phone', chart_no: chartNo, phone})
+      });
+      const el = document.getElementById('phoneSaveStatus');
+      el.className = 'status-bar status-success';
+      el.classList.remove('hidden');
+      el.textContent = '✓ 전화번호 저장됨';
+      searchPatient(); // 갱신
+    } catch(err) {
+      const el = document.getElementById('phoneSaveStatus');
+      el.className = 'status-bar status-error';
+      el.classList.remove('hidden');
+      el.textContent = '✕ 저장 실패: ' + err.message;
+    }
+  }
+
+  // ── 내원일 저장 ─────────────────────────────────────
+  async function saveVisit() {
+    const chartNo = document.getElementById('pChartNo').value.trim();
+    const visitDate = document.getElementById('pVisitDate').value.trim();
+    const nextVisitDate = document.getElementById('pNextVisitDate').value.trim();
+    if (!chartNo || !visitDate) return;
+
+    try {
+      await fetch(SHEET_WEBHOOK, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'save_visit', chart_no: chartNo, visit_date: visitDate, next_visit_date: nextVisitDate})
+      });
+      const el = document.getElementById('visitSaveStatus');
+      el.className = 'status-bar status-success';
+      el.classList.remove('hidden');
+      el.textContent = '✓ 내원일 저장됨';
+      searchPatient(); // 갱신
+    } catch(err) {
+      const el = document.getElementById('visitSaveStatus');
+      el.className = 'status-bar status-error';
+      el.classList.remove('hidden');
+      el.textContent = '✕ 저장 실패: ' + err.message;
+    }
+  }
+
 </script>
 </body>
 </html>
