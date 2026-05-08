@@ -623,16 +623,41 @@
       <!-- 내원일 업데이트 -->
       <div style="padding-top:16px;border-top:1px solid var(--border);">
         <div class="card-title" style="margin-bottom:12px;">내원일 업데이트</div>
-        <div class="input-row">
+        <div style="display:flex;flex-direction:column;gap:14px;">
           <div class="input-group">
-            <label>내원일 (6자리)</label>
-            <input type="text" id="pVisitDate" placeholder="260509" maxlength="6">
+            <label>내원일 (오늘)</label>
+            <input type="text" id="pVisitDate" maxlength="6" readonly
+              style="background:rgba(79,142,247,0.08);border-color:rgba(79,142,247,0.3);cursor:default;">
           </div>
           <div class="input-group">
-            <label>다음내원일 (없으면 비워두기)</label>
-            <input type="text" id="pNextVisitDate" placeholder="260516" maxlength="6">
+            <label>다음내원일 (선택)</label>
+            <div style="position:relative;">
+              <input type="text" id="pNextVisitDate" placeholder="미선택" maxlength="6" readonly
+                style="cursor:pointer;padding-right:40px;" onclick="toggleCalendar()">
+              <span onclick="toggleCalendar()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;">📅</span>
+              <button onclick="clearNextVisit()" id="clearNextBtn" class="hidden"
+                style="position:absolute;right:40px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:4px;">✕</button>
+            </div>
+            <!-- 달력 -->
+            <div id="calendarPicker" class="hidden" style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:8px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <button onclick="calNav(-1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:18px;padding:4px 8px;">‹</button>
+                <span id="calHeader" style="font-size:14px;font-weight:600;color:var(--text);"></span>
+                <button onclick="calNav(1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:18px;padding:4px 8px;">›</button>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">
+                <span style="font-size:11px;color:var(--danger);font-weight:700;">일</span>
+                <span style="font-size:11px;color:var(--text2);font-weight:700;">월</span>
+                <span style="font-size:11px;color:var(--text2);font-weight:700;">화</span>
+                <span style="font-size:11px;color:var(--text2);font-weight:700;">수</span>
+                <span style="font-size:11px;color:var(--text2);font-weight:700;">목</span>
+                <span style="font-size:11px;color:var(--text2);font-weight:700;">금</span>
+                <span style="font-size:11px;color:var(--text2);font-weight:700;">토</span>
+              </div>
+              <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:4px;"></div>
+            </div>
           </div>
-          <button class="btn btn-primary" onclick="saveVisit()">저장</button>
+          <button class="btn btn-primary" onclick="saveVisit()" style="align-self:flex-end;">저장</button>
         </div>
         <div id="visitSaveStatus" class="hidden" style="margin-top:10px;font-size:13px;"></div>
       </div>
@@ -920,6 +945,83 @@ ${drugListStr}
     }
   }
 
+  // ── 달력 ────────────────────────────────────────────────
+  let calYear, calMonth;
+
+  function initCalendar() {
+    const now = new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    renderCalendar();
+  }
+
+  function toggleCalendar() {
+    const cal = document.getElementById('calendarPicker');
+    if (cal.classList.contains('hidden')) {
+      if (!calYear) initCalendar();
+      cal.classList.remove('hidden');
+    } else {
+      cal.classList.add('hidden');
+    }
+  }
+
+  function calNav(dir) {
+    calMonth += dir;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    if (calMonth < 0)  { calMonth = 11; calYear--; }
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    const header = document.getElementById('calHeader');
+    const grid   = document.getElementById('calGrid');
+    header.textContent = calYear + '년 ' + (calMonth + 1) + '월';
+    grid.innerHTML = '';
+
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
+    const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
+    const today    = new Date();
+    const selectedVal = document.getElementById('pNextVisitDate').value;
+
+    // 빈 칸
+    for (let i = 0; i < firstDay; i++) {
+      grid.appendChild(Object.assign(document.createElement('div'), {}));
+    }
+
+    for (let d = 1; d <= lastDate; d++) {
+      const yy = String(calYear).slice(2);
+      const mm = String(calMonth + 1).padStart(2, '0');
+      const dd = String(d).padStart(2, '0');
+      const val = yy + mm + dd;
+
+      const isToday = (calYear === today.getFullYear() && calMonth === today.getMonth() && d === today.getDate());
+      const isSelected = val === selectedVal;
+      const isSun = (new Date(calYear, calMonth, d).getDay() === 0);
+
+      const btn = document.createElement('button');
+      btn.textContent = d;
+      btn.onclick = () => selectDate(val);
+      btn.style.cssText = [
+        'border:none;border-radius:6px;padding:6px 2px;font-size:13px;cursor:pointer;width:100%;',
+        isSelected ? 'background:var(--accent);color:white;font-weight:700;' :
+        isToday    ? 'background:rgba(79,142,247,0.15);color:var(--accent);font-weight:600;' :
+                     'background:none;color:' + (isSun ? 'var(--danger)' : 'var(--text)') + ';',
+      ].join('');
+      grid.appendChild(btn);
+    }
+  }
+
+  function selectDate(val) {
+    document.getElementById('pNextVisitDate').value = val;
+    document.getElementById('clearNextBtn').classList.remove('hidden');
+    document.getElementById('calendarPicker').classList.add('hidden');
+  }
+
+  function clearNextVisit() {
+    document.getElementById('pNextVisitDate').value = '';
+    document.getElementById('clearNextBtn').classList.add('hidden');
+  }
+
   // ── 날짜 유틸 ─────────────────────────────────────────
   function todayDate6() {
     const d = new Date();
@@ -1031,8 +1133,10 @@ ${drugListStr}
 
       // 기존 값 입력창에 채우기
       document.getElementById('pPhone').value = data.phone || '';
-      document.getElementById('pVisitDate').value = data.visit ? formatDate6(data.visit.visit_date) : todayDate6();
-      document.getElementById('pNextVisitDate').value = (data.visit && data.visit.next_visit_date) ? formatDate6(data.visit.next_visit_date) : '';
+      document.getElementById('pVisitDate').value = todayDate6();
+      document.getElementById('pNextVisitDate').value = '';
+      document.getElementById('clearNextBtn').classList.add('hidden');
+      initCalendar();
 
       // 복용약물 렌더링
       renderDrugList(data.drugs || []);
