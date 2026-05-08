@@ -396,6 +396,12 @@
   <span class="title">EMR 복용약물 변환기</span>
 </header>
 
+<div id="keySetupBanner" style="background:#1a1d27;border-bottom:1px solid #2e3350;padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+  <span style="font-size:12px;color:#8890b0;white-space:nowrap;">🔑 Supabase Anon Key</span>
+  <input type="password" id="keyInput" placeholder="eyJhbGci..." style="flex:1;min-width:200px;background:#0f1117;border:1px solid #2e3350;border-radius:6px;padding:6px 12px;color:#e8eaf6;font-family:monospace;font-size:12px;outline:none;">
+  <button onclick="saveKey()" style="background:#4f8ef7;color:white;border:none;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;white-space:nowrap;">저장</button>
+  <span id="keyStatus" style="font-size:12px;color:#8890b0;"></span>
+</div>
 <div class="container">
 
   <!-- STEP 1 -->
@@ -484,7 +490,7 @@
 <script>
   // ── 설정 ──────────────────────────────────────────────
   const SUPABASE_PROXY = 'https://rurbfcocihvapbtdzbyt.supabase.co/functions/v1/claude-proxy';
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY'; // ← 여기에 anon key 입력
+  let SUPABASE_ANON_KEY = localStorage.getItem('sb_anon_key') || '';
   // 구글시트 Apps Script 웹앱 URL (다음 단계에서 입력)
   const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbyVTcv9Q1LyY-0ZnqK0mNKfm92GNjr_d61YkaPj6TLyHr-A6GAFYoJ2RfzKEYsBDN-R/exec';
   // ─────────────────────────────────────────────────────
@@ -533,6 +539,36 @@
     const chartNo = document.getElementById('chartNo').value.trim();
     document.getElementById('convertBtn').disabled = !(chartNo && imageBase64);
   }
+
+  // 키 저장/로드
+  function saveKey() {
+    const val = document.getElementById('keyInput').value.trim();
+    if (!val.startsWith('eyJ')) {
+      document.getElementById('keyStatus').textContent = '❌ 형식이 올바르지 않습니다 (eyJ...로 시작해야 함)';
+      return;
+    }
+    localStorage.setItem('sb_anon_key', val);
+    SUPABASE_ANON_KEY = val;
+    document.getElementById('keyStatus').textContent = '✓ 저장됨';
+    document.getElementById('keyInput').value = '';
+    setTimeout(() => checkKeyBanner(), 300);
+  }
+
+  function checkKeyBanner() {
+    const key = localStorage.getItem('sb_anon_key');
+    const banner = document.getElementById('keySetupBanner');
+    const status = document.getElementById('keyStatus');
+    if (key) {
+      SUPABASE_ANON_KEY = key;
+      status.textContent = '✓ 키 로드됨';
+      banner.style.borderBottom = '1px solid rgba(45,212,160,0.3)';
+    } else {
+      status.textContent = '⚠️ 키를 입력해주세요';
+    }
+  }
+
+  // 페이지 로드 시 키 확인
+  window.addEventListener('DOMContentLoaded', checkKeyBanner);
 
   async function convertImage() {
     const chartNo = document.getElementById('chartNo').value.trim();
