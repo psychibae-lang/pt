@@ -484,10 +484,15 @@
 <script>
   // ── 설정 ──────────────────────────────────────────────
   const SUPABASE_PROXY = 'https://rurbfcocihvapbtdzbyt.supabase.co/functions/v1/claude-proxy';
-  const SUPABASE_ANON_KEY = 'sb_publishable_YuyR-f-1MNYl94StDUP8Mw_L_35j3QN'; // ← 여기에 anon key 입력
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY'; // ← 여기에 anon key 입력
   // 구글시트 Apps Script 웹앱 URL (다음 단계에서 입력)
   const SHEET_WEBHOOK = '';
   // ─────────────────────────────────────────────────────
+
+  // 약물코드 목록
+  const DRUG_LIST = {
+"aaalp012":"자나팜정0.125mg","AAALP025":"자나팜정0.25mg","aaalp025":"자나팜정0.25mg","aaalp05":"자나팜정0.5mg","aaalp1":"자나팜정1mg","aaato18":"아토목신캡슐18mg","aaato25":"아토목신캡슐25mg","aaatv05":"스리반정0.5mg","aaatv1":"스리반정1mg","aabroma":"명인브로마제팜정3mg","aaclona":"환인클로나제팜정0.5mg","aadepa25":"데파스정0.25mg","aadz2":"명인디아제팜정2mg","aadz5":"명인디아제팜정5mg","aalp25환인":"알프람정0.25mg","aaluna":"루나팜정","aamedi10":"메디키넷리타드캡슐10mg","aamedi20":"메디키넷리타드캡슐20mg","aapen10":"페니드정10mg","aaribon":"리보트릴정(내복)","aasti10":"졸피신정10mg","aasti12":"스틸녹스CR정12.5mg","aasti5":"졸피신정5mg(내복)","aastiI62":"스틸녹스CR정6.25mg","aazol125":"졸민정0.125mg","aazol25":"졸민정0.25mg","abili_1":"레피졸정1mg(내복)","abili10":"레피졸정10mg","abili15":"레피졸정15mg","ABILI152":"아빌리파이정15mg","abili2":"아빌리파이정2mg","abili30_":"레피졸정30mg(내복)","abili5":"레피졸정5mg","ABILI5_":"레피졸정5mg","ablil_2":"레피졸정2mg(내복)","acam":"명인아캄프로세이트정333mg(내복)","alma-2":"알마겔정","almagate":"알마겐트정","ami10":"명인 아미트리프틸린염산염정10mg","amit25":"에트라빌25mg정","ap650":"타이리콜8시간이알서방정","ATV05":"아티반정0.5mg","ATV1":"아티반정1mg","benz1":"명인벤즈트로핀메실산염정1mg","benz2":"명인벤즈트로핀메실레이트정2mg","bona":"보나링에이정","BONA-2":"보나링에이정","brin10":"브린텔릭스정10mg","brin5":"브린텔릭스정5mg","busp5":"명인염산부스피론정5mg","cbzcr200":"카르마인씨알정","cbzn200":"테그레톨씨알정200mg","cibe":"씨베리움캡슐(내복)","CON18-2":"콘서타OROS서방정18mg(내복)","CON27-2":"콘서타OROS서방정27mg(내복)","CON36-2":"콘서타OROS서방정36mg(내복)","con54-2":"콘서타OROS서방정54mg(내복)","cpz200":"명인클로르프로마진염산염정200mg","cpz50":"명인클로르프로마진염산염정50mg","depa500":"데파킨크로노정500mg","desv100":"에스벤서방정100mg(내복)","desv25":"에스벤서방정25mg(내복)","desv50":"에스벤서방정50mg(내복)","doxe3":"명세핀정3mg(내복)","dull30":"드록틴캡슐30mg","dull60":"드록틴캡슐60mg","DZ2":"삼진디아제팜정2mg","DZ5":"삼진디아제팜정5mg","flu20m":"푸록틴캡슐","flu20n":"유로작캡슐20mg","fluo10":"푸록틴캅셀10mg","fluo20":"국제플루옥세틴캡슐","gasmo":"가스모틴정5mg","GRIA-j":"종근당글리아티린연질캡슐","gria-j":"종근당글리아티린연질캡슐","hal5":"명인할로페리돌정5mg","hip10":"하이페질정10mg","hip5":"하이페질정5mg","IMIGRAN5":"이미그란정50mg","imipra25":"명인이미프라민염산염정","inde10":"인데놀정10mg","inde40":"인데놀정40mg","kcap":"케이캡정50밀리그램(테고프라잔)_","kcap210":"펙수클루정10mg(내복)","kcap240":"펙수클루정40mg(내복)","kcap25":"케이캡정25mg(내복)","lamo100":"라모스탈정100mg","lamo50":"라모스탈정50mg","LEX5-22":"렉사프로정5mg","lexa10":"뉴프람정 10mg","lexa15":"뉴프람정15mg","lexa20":"뉴프람정20mg","lexa5":"뉴프람정5mg","lith300b":"리단정","lodo100":"로도핀정100mg","lodo50":"로도핀정50mg","MELA-2":"서카딘서방정2mg","meman":"뉴로케이정","MEMAN-2":"뉴로케이정","mgo2":"삼천당산화마그네슘정250mg","mgo3":"마그밀정","migad":"미가드정2.5mg","mirt15":"멀타핀정15mg","mirt30":"멀타핀정30mg","mirt75":"멀타핀정7.5mg","msero12":"큐로켈정12.5mg(내복)","nalt50":"트락손정50mg","nicer":"동화니세르골린정30mg(내복)","olaa10":"자이프렉사자이디스확산정10mg(내복)","paki25":"파키놀정0.25mg","par12":"파록스씨알정12.5mg","par25":"파록스씨알정25mg","PARO25-2":"에이자트씨알정25mg","peni":"페니라민정","peni100":"명인페니토인100mg정","PHENI100":"환인히단토인정","PIRI":"신일피리독신정","ppz4":"명인페르페나진정4mg","PROI":"프로이머정","ris1M":"리스펜정1mg","rism0.5":"리스펜정0.5mg","rism2":"리스펜정2mg","RONA4":"로나센정4mg","sero100":"큐로켈정100mg","sero100-2":"쎄로켈정100mg(내복)","sero12":"쿠에타핀정12.5mg(내복)","sero200":"큐로켈정200mg","sero25":"큐로켈정25mg","sero300":"동화쿠에티아핀정300mg(내복)","sero50":"큐로켈정50mg","SOL100":"솔리안정100mg","sol400":"솔리안정400mg","stablon":"스타브론정","STI10":"스틸녹스정10mg","STRA182":"스트라테라캡슐18mg","STRA252":"스트라테라캡슐25mg","TOPA100-2":"토파메이트정100mg","topa25":"토파메이트정25mg","tra325":"트라몰정325mg","Trarin":"명인트라린정50mg","trazo25":"명인트라조돈캅셀25mg","triti25":"트리티코정25mg","triti50":"트리티코정50mg","uturn16":"유턴정16mg(내복)","val300":"바렙톨서방정","VAL300-O":"오르필서방정300mg","val600":"오르필서방정600mg","venla375":"코팩사엑스알서방캡슐37.5mg","venla75":"코팩사엑스알서방캡슐75mg","zanax0.5":"자낙스정0.5mg(내복)","zeldox25":"젤독스캡슐20mg(내복)","ZOL25":"졸민정0.25mg","zoloft50":"졸로푸트정50mg(내복)","ZYP10":"자이프렉사자이디스확산정10mg","olanm10":"뉴로자핀정10mg"
+  };
 
   let imageBase64 = null;
   let imageMime = 'image/png';
@@ -538,22 +543,26 @@
     document.getElementById('resultCard').classList.add('hidden');
     document.getElementById('saveResultBar').classList.add('hidden');
 
+    const drugListStr = Object.entries(DRUG_LIST).map(([k,v]) => k+'\t'+v).join('\n');
     const prompt = `다음은 EMR(전자의무기록) 시스템의 약물 처방 화면 캡처입니다.
 이미지에서 약물 처방 테이블을 읽어 JSON 배열로 변환해주세요.
+
+아래는 병원 약물코드 목록입니다. 이미지에서 읽은 코드를 이 목록과 대조해 가장 유사한 코드로 매칭하세요(대소문자 무시, 오타 교정 포함):
+${drugListStr}
 
 반환 형식 (JSON만, 다른 텍스트 없이):
 [
   {
-    "drug_code": "약물코드",
-    "drug_name": "약물명",
+    "drug_code": "목록에서 매칭된 정확한 코드",
+    "drug_name": "목록에서 가져온 정확한 약물명",
     "dose": "용량 숫자",
     "daily_freq": "일투 숫자",
     "days": "일수 숫자",
-    "method": "용법 코드 (b1, b2, b12 등)"
+    "method": "용법 코드 (b1, b2, b12, b4, prn 등 이미지에서 읽은 그대로)"
   }
 ]
 
-반드시 JSON 배열만 반환하세요. 코드가 없으면 약물명에서 추정하고, 없으면 null 처리.`;
+반드시 JSON 배열만 반환하세요. 목록에 없는 코드면 이미지에서 읽은 값 그대로 사용.`;
 
     try {
       const response = await fetch(SUPABASE_PROXY, {
