@@ -3,1401 +3,644 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MED·RX — EMR 복용약물 변환기</title>
+<title>MED·RX — 한강의원</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0f1117;
-    --surface: #1a1d27;
-    --surface2: #22263a;
-    --border: #2e3350;
-    --accent: #4f8ef7;
-    --accent2: #7c5cfc;
-    --success: #2dd4a0;
-    --warn: #f7c14f;
-    --text: #e8eaf6;
-    --text2: #8890b0;
-    --danger: #f75f5f;
-  }
-
-  body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
-
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  header .logo {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 0.05em;
-    background: rgba(79,142,247,0.1);
-    padding: 4px 10px;
-    border-radius: 6px;
-    border: 1px solid rgba(79,142,247,0.3);
-  }
-
-  header .title {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text2);
-  }
-
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 28px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
-  }
-
-  .card-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .card-title::before {
-    content: '';
-    width: 3px;
-    height: 14px;
-    background: var(--accent);
-    border-radius: 2px;
-    display: inline-block;
-  }
-
-  .input-row {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-  }
-
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex: 1;
-  }
-
-  label {
-    font-size: 12px;
-    color: var(--text2);
-    font-weight: 500;
-  }
-
-  input[type="text"] {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-
-  input[type="text"]:focus { border-color: var(--accent); }
-
-  .upload-zone {
-    border: 2px dashed var(--border);
-    border-radius: 12px;
-    padding: 36px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    background: var(--bg);
-  }
-
-  .upload-zone:hover, .upload-zone.dragover {
-    border-color: var(--accent);
-    background: rgba(79,142,247,0.05);
-  }
-
-  .upload-zone input[type="file"] {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-    width: 100%;
-    height: 100%;
-  }
-
-  .upload-icon { font-size: 32px; margin-bottom: 10px; }
-  .upload-text { font-size: 14px; color: var(--text2); margin-bottom: 6px; }
-  .upload-hint { font-size: 12px; color: var(--border); }
-
-  .preview-img {
-    max-width: 100%;
-    max-height: 220px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    object-fit: contain;
-  }
-
-  .btn {
-    padding: 11px 22px;
-    border-radius: 9px;
-    border: none;
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    white-space: nowrap;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: white;
-    box-shadow: 0 4px 16px rgba(79,142,247,0.3);
-  }
-
-  .btn-primary:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(79,142,247,0.4);
-  }
-
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .btn-success {
-    background: linear-gradient(135deg, var(--success), #1aab7a);
-    color: white;
-    box-shadow: 0 4px 16px rgba(45,212,160,0.25);
-  }
-
-  .btn-success:hover:not(:disabled) { transform: translateY(-1px); }
-  .btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text2);
-  }
-
-  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
-
-  .status-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-radius: 9px;
-    font-size: 13px;
-  }
-
-  .status-loading { background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.2); color: var(--accent); }
-  .status-success { background: rgba(45,212,160,0.1); border: 1px solid rgba(45,212,160,0.2); color: var(--success); }
-  .status-error { background: rgba(247,95,95,0.1); border: 1px solid rgba(247,95,95,0.2); color: var(--danger); }
-
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(79,142,247,0.3);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    flex-shrink: 0;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-
-  th {
-    background: var(--bg);
-    color: var(--text2);
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 10px 12px;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
-  }
-
-  td {
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(46,51,80,0.5);
-    color: var(--text);
-    vertical-align: middle;
-  }
-
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(79,142,247,0.04); }
-
-  .code-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    background: rgba(79,142,247,0.12);
-    color: var(--accent);
-    padding: 3px 8px;
-    border-radius: 5px;
-    border: 1px solid rgba(79,142,247,0.2);
-  }
-
-  .method-badge {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    background: rgba(124,92,252,0.12);
-    color: var(--accent2);
-    padding: 3px 8px;
-    border-radius: 5px;
-    border: 1px solid rgba(124,92,252,0.2);
-  }
-
-  .chart-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--warn);
-    background: rgba(247,193,79,0.1);
-    padding: 2px 8px;
-    border-radius: 5px;
-    border: 1px solid rgba(247,193,79,0.2);
-  }
-
-  .actions-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-
-  .result-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .result-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text2); }
-  .result-meta span strong { color: var(--text); font-family: 'JetBrains Mono', monospace; }
-
-  .editable-td input {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 13px;
-    width: 60px;
-    min-width: 40px;
-    outline: none;
-    padding: 2px 4px;
-    text-align: center;
-  }
-  .editable-td input:focus {
-    border-bottom-color: var(--accent);
-    background: rgba(79,142,247,0.05);
-    border-radius: 3px;
-  }
-
-  .editable-td input:focus { border-bottom-color: var(--accent); }
-
-  .hidden { display: none !important; }
-
-  .icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text2);
-    padding: 4px 6px;
-    border-radius: 5px;
-    font-size: 14px;
-    transition: all 0.15s;
-  }
-  .icon-btn:hover { background: var(--surface2); color: var(--danger); }
-
-  .tabs {
-    display: flex;
-    gap: 4px;
-    background: var(--bg);
-    border-radius: 8px;
-    padding: 4px;
-    border: 1px solid var(--border);
-    margin-bottom: 16px;
-    width: fit-content;
-  }
-
-  .tab {
-    padding: 6px 16px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    color: var(--text2);
-    transition: all 0.15s;
-    border: none;
-    background: none;
-  }
-
-  .tab.active { background: var(--surface2); color: var(--text); }
-
-  .json-preview {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text2);
-    white-space: pre;
-    overflow-x: auto;
-    max-height: 200px;
-    overflow-y: auto;
-  }
-
-  .save-result {
-    margin-top: 12px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-  }
-
-  @media (max-width: 600px) {
-    .input-row { flex-direction: column; }
-    .actions-row { flex-direction: column; }
-    .result-meta { flex-direction: column; gap: 4px; }
-    .result-header { flex-direction: column; align-items: flex-start; }
-  }
-  .nav-tab {
-    background: none;
-    border: none;
-    border-bottom: 3px solid transparent;
-    color: var(--text2);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 14px 20px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .nav-tab:hover { color: var(--text); }
-  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
-  .info-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .info-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-  }
-  .info-label {
-    color: var(--text2);
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    min-width: 70px;
-  }
-  .info-value {
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-  }
-  .tag-new {
-    font-size: 10px;
-    background: rgba(45,212,160,0.15);
-    color: var(--success);
-    border: 1px solid rgba(45,212,160,0.3);
-    padding: 2px 7px;
-    border-radius: 4px;
-    font-weight: 700;
-  }
-  .tag-exist {
-    font-size: 10px;
-    background: rgba(79,142,247,0.12);
-    color: var(--accent);
-    border: 1px solid rgba(79,142,247,0.2);
-    padding: 2px 7px;
-    border-radius: 4px;
-    font-weight: 700;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3350;--accent:#4f8ef7;--accent2:#7c5cfc;--success:#2dd4a0;--warn:#f7c14f;--text:#e8eaf6;--text2:#8890b0;--danger:#f75f5f;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.logo{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--accent);background:rgba(79,142,247,0.1);padding:4px 10px;border-radius:6px;border:1px solid rgba(79,142,247,0.3);}
+#keyBanner{background:var(--surface);border-bottom:1px solid var(--border);padding:8px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#keyBanner input{flex:1;min-width:180px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 12px;color:var(--text);font-family:monospace;font-size:12px;outline:none;}
+.nav-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;}
+.nav-tab{background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:13px 18px;cursor:pointer;transition:all 0.15s;}
+.nav-tab:hover{color:var(--text);} .nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.container{max-width:900px;margin:0 auto;padding:24px 16px;display:flex;flex-direction:column;gap:18px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;}
+.card-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.card-title::before{content:'';width:3px;height:13px;background:var(--accent);border-radius:2px;display:inline-block;}
+.input-group{display:flex;flex-direction:column;gap:6px;flex:1;}
+label{font-size:12px;color:var(--text2);font-weight:500;}
+input[type=text],input[type=password]{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;transition:border-color 0.2s;width:100%;}
+input[type=text]:focus,input[type=password]:focus{border-color:var(--accent);}
+.input-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}
+.btn{padding:10px 20px;border-radius:9px;border:none;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 4px 14px rgba(79,142,247,0.3);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);} .btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-success{background:linear-gradient(135deg,var(--success),#1aab7a);color:white;box-shadow:0 4px 14px rgba(45,212,160,0.25);}
+.btn-success:hover:not(:disabled){transform:translateY(-1px);} .btn-success:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.btn-outline.active,.btn-outline:hover{border-color:var(--accent);color:var(--accent);}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--bg);}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(79,142,247,0.05);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.preview-img{max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);object-fit:contain;}
+.status-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;font-size:13px;}
+.status-loading{background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.2);color:var(--accent);}
+.status-success{background:rgba(45,212,160,0.1);border:1px solid rgba(45,212,160,0.2);color:var(--success);}
+.status-error{background:rgba(247,95,95,0.1);border:1px solid rgba(247,95,95,0.2);color:var(--danger);}
+.spinner{width:15px;height:15px;border:2px solid rgba(79,142,247,0.3);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--bg);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:8px 10px;border-bottom:1px solid rgba(46,51,80,0.5);color:var(--text);vertical-align:middle;}
+tr:last-child td{border-bottom:none;} tr:hover td{background:rgba(79,142,247,0.03);}
+.code-badge{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(79,142,247,0.12);color:var(--accent);padding:3px 8px;border-radius:5px;border:1px solid rgba(79,142,247,0.2);}
+.chart-tag{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--warn);background:rgba(247,193,79,0.1);padding:2px 8px;border-radius:5px;border:1px solid rgba(247,193,79,0.2);}
+.tag-new{font-size:10px;background:rgba(45,212,160,0.15);color:var(--success);border:1px solid rgba(45,212,160,0.3);padding:2px 7px;border-radius:4px;font-weight:700;}
+.tag-exist{font-size:10px;background:rgba(79,142,247,0.12);color:var(--accent);border:1px solid rgba(79,142,247,0.2);padding:2px 7px;border-radius:4px;font-weight:700;}
+.info-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:9px;}
+.info-row{display:flex;align-items:center;gap:10px;font-size:13px;}
+.info-label{color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;min-width:70px;}
+.info-value{color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;}
+.edit-input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none;padding:2px 4px;text-align:center;}
+.edit-input:focus{border-bottom-color:var(--accent);}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--text2);padding:3px 6px;border-radius:5px;font-size:13px;}
+.icon-btn:hover{background:var(--surface2);color:var(--danger);}
+.tabs{display:flex;gap:4px;background:var(--bg);border-radius:8px;padding:4px;border:1px solid var(--border);margin-bottom:14px;width:fit-content;}
+.tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);transition:all 0.15s;border:none;background:none;}
+.tab.active{background:var(--surface2);color:var(--text);}
+.json-preview{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);white-space:pre;overflow-x:auto;max-height:180px;overflow-y:auto;}
+.hidden{display:none!important;}
+.sms-group-btn{font-size:12px;padding:7px 12px;}
+#calendarPicker{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:8px;}
+.cal-day{border:none;border-radius:6px;padding:5px 2px;font-size:13px;cursor:pointer;width:100%;background:none;color:var(--text);}
+.cal-day:hover{background:var(--surface);}
+.cal-day.today{background:rgba(79,142,247,0.15);color:var(--accent);font-weight:600;}
+.cal-day.selected{background:var(--accent);color:white;font-weight:700;}
+.cal-day.sun{color:var(--danger);}
+@media(max-width:600px){.input-row{flex-direction:column;}.nav-tab{padding:10px 12px;font-size:12px;}}
 </style>
 </head>
 <body>
+<header><span class="logo">MED&#xB7;RX</span><span style="font-size:14px;color:var(--text2);">한강의원</span></header>
 
-<header>
-  <span class="logo">MED·RX</span>
-  <span class="title">EMR 복용약물 변환기</span>
-</header>
-
-<div id="keySetupBanner" style="background:#1a1d27;border-bottom:1px solid #2e3350;padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-  <span style="font-size:12px;color:#8890b0;white-space:nowrap;">🔑 Supabase Anon Key</span>
-  <input type="password" id="keyInput" placeholder="eyJhbGci..." style="flex:1;min-width:200px;background:#0f1117;border:1px solid #2e3350;border-radius:6px;padding:6px 12px;color:#e8eaf6;font-family:monospace;font-size:12px;outline:none;">
-  <button onclick="saveKey()" style="background:#4f8ef7;color:white;border:none;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;white-space:nowrap;">저장</button>
-  <span id="keyStatus" style="font-size:12px;color:#8890b0;"></span>
+<div id="keyBanner">
+  <span style="font-size:12px;color:var(--text2);white-space:nowrap;">&#128273; Supabase Key</span>
+  <input type="password" id="keyInput" placeholder="eyJhbGci...">
+  <button onclick="saveKey()" class="btn btn-primary" style="font-size:12px;padding:6px 14px;">저장</button>
+  <span id="keyStatus" style="font-size:12px;color:var(--text2);"></span>
 </div>
-<div id="tabNav" style="background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:0;">
-  <button class="nav-tab active" id="navDrug" onclick="switchMainTab('drug')">💊 약물 입력</button>
-  <button class="nav-tab" id="navPatient" onclick="switchMainTab('patient')">👤 환자 관리</button>
-  <button class="nav-tab" id="navSms" onclick="switchMainTab('sms')">📱 문자 발송</button>
-</div>
-<div class="container">
 
-  <!-- 약물입력 탭 -->
-  <div id="tabDrug">
-  <!-- STEP 1 -->
+<div class="nav-bar">
+  <button class="nav-tab active" id="navDrug" onclick="switchTab('drug')">&#128138; 약물 입력</button>
+  <button class="nav-tab" id="navPatient" onclick="switchTab('patient')">&#128100; 환자 관리</button>
+  <button class="nav-tab" id="navSms" onclick="switchTab('sms')">&#128241; 문자 발송</button>
+</div>
+
+<div id="tabDrug" class="container">
   <div class="card">
     <div class="card-title">STEP 1 &nbsp; 환자 정보 입력</div>
-    <div class="input-row" style="margin-bottom:18px;">
-      <div class="input-group" style="max-width:200px;">
-        <label>챠트번호</label>
-        <input type="text" id="chartNo" placeholder="예: 10587">
-      </div>
+    <div class="input-row" style="margin-bottom:16px;">
+      <div class="input-group" style="max-width:200px;"><label>챠트번호</label><input type="text" id="chartNo" placeholder="예: 10587"></div>
     </div>
-
-    <label style="margin-bottom:8px; display:block;">EMR 이미지 업로드</label>
+    <label style="display:block;margin-bottom:8px;">EMR 이미지 업로드</label>
     <div class="upload-zone" id="uploadZone">
       <input type="file" id="fileInput" accept="image/*">
       <div id="uploadPlaceholder">
-        <div class="upload-icon">📋</div>
-        <div class="upload-text">EMR 약물 처방 화면을 드래그하거나 클릭해서 업로드</div>
-        <div class="upload-hint">PNG · JPG · WEBP 지원</div>
+        <div style="font-size:28px;margin-bottom:8px;">&#128203;</div>
+        <div style="font-size:13px;color:var(--text2);">EMR 약물 처방 화면을 드래그하거나 클릭해서 업로드</div>
+        <div style="font-size:11px;color:var(--border);margin-top:4px;">PNG &middot; JPG &middot; WEBP</div>
       </div>
       <img id="previewImg" class="preview-img hidden">
     </div>
   </div>
-
-  <!-- STEP 2 -->
   <div class="card">
     <div class="card-title">STEP 2 &nbsp; AI 변환</div>
-    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-      <button class="btn btn-primary" id="convertBtn" onclick="convertImage()" disabled>
-        <span>✦</span> Claude로 변환하기
-      </button>
-      <div id="statusBar" class="hidden"></div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="convertBtn" onclick="convertImage()" disabled>&#10022; Claude로 변환하기</button>
+      <div id="convertStatus" class="hidden"></div>
     </div>
   </div>
-
-  <!-- STEP 3 -->
   <div class="card hidden" id="resultCard">
     <div class="card-title">STEP 3 &nbsp; 결과 확인 및 저장</div>
-
     <div class="tabs">
-      <button class="tab active" id="tabTable" onclick="switchTab('table')">테이블 뷰</button>
-      <button class="tab" id="tabJson" onclick="switchTab('json')">JSON 뷰</button>
+      <button class="tab active" id="tabTable" onclick="switchResultTab('table')">테이블 뷰</button>
+      <button class="tab" id="tabJson" onclick="switchResultTab('json')">JSON 뷰</button>
     </div>
-
     <div id="tableView">
-      <div class="result-header">
-        <div class="result-meta">
-          <span>챠트번호 <strong id="metaChart">—</strong></span>
-          <span>약물 수 <strong id="metaCount">—</strong></span>
-        </div>
-        <div class="actions-row">
-          <button class="btn btn-outline" onclick="addRow()" style="font-size:12px; padding:8px 14px;">+ 행 추가</button>
-          <button class="btn btn-success" id="saveBtn" onclick="saveToSheet()">
-            💾 구글시트에 저장
-          </button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:12px;color:var(--text2);">챠트번호 <strong id="metaChart" style="font-family:monospace;color:var(--text);"></strong> &nbsp; 약물 수 <strong id="metaCount" style="font-family:monospace;color:var(--text);"></strong></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="addDrugRow()" style="font-size:11px;padding:7px 12px;">+ 행 추가</button>
+          <button class="btn btn-success" onclick="saveDrugs()">&#128190; 구글시트에 저장</button>
         </div>
       </div>
-
       <div style="overflow-x:auto;">
-        <table id="resultTable">
-          <thead>
-            <tr>
-              <th>챠트번호</th>
-              <th>약물코드</th>
-              <th>약물명</th>
-              <th>용량</th>
-              <th>일투</th>
-              <th>일수</th>
-              <th>용법</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="resultBody"></tbody>
-        </table>
+        <table><thead><tr><th>챠트번호</th><th>약물코드</th><th>약물명</th><th>용량</th><th>일투</th><th>일수</th><th>용법</th><th></th></tr></thead><tbody id="drugTableBody"></tbody></table>
       </div>
-      <div id="saveResultBar" class="hidden save-result"></div>
+      <div id="drugSaveStatus" class="hidden" style="margin-top:10px;"></div>
     </div>
+    <div id="jsonView" class="hidden"><pre class="json-preview" id="jsonPreview"></pre></div>
+  </div>
+</div>
 
-    <div id="jsonView" class="hidden">
-      <pre class="json-preview" id="jsonPreview"></pre>
+<div id="tabPatient" class="container hidden">
+  <div class="card">
+    <div class="card-title">환자 검색</div>
+    <div class="input-row">
+      <div class="input-group" style="max-width:200px;"><label>챠트번호</label><input type="text" id="pChartNo" placeholder="예: 10587" oninput="clearPatient()"></div>
+      <button class="btn btn-primary" onclick="searchPatient()">&#128269; 조회</button>
     </div>
-  </div><!-- /resultCard -->
-  </div><!-- /tabDrug -->
-
-  <!-- 환자관리 탭 -->
-  <div id="tabPatient" class="hidden">
-
-    <!-- 환자 검색 -->
-    <div class="card">
-      <div class="card-title">환자 검색</div>
-      <div class="input-row" style="margin-bottom:0;">
-        <div class="input-group" style="max-width:200px;">
-          <label>챠트번호</label>
-          <input type="text" id="pChartNo" placeholder="예: 10587" oninput="clearPatientResult()">
-        </div>
-        <button class="btn btn-primary" onclick="searchPatient()" style="margin-bottom:1px;">🔍 조회</button>
-      </div>
-      <div id="searchStatus" class="hidden" style="margin-top:12px;"></div>
+    <div id="searchStatus" class="hidden" style="margin-top:12px;"></div>
+  </div>
+  <div class="card hidden" id="patientCard">
+    <div class="card-title">환자 정보</div>
+    <div class="info-box" style="margin-bottom:18px;">
+      <div class="info-row"><span class="info-label">챠트번호</span><span class="info-value" id="piChart"></span><span id="piTag" style="margin-left:8px;"></span></div>
+      <div class="info-row"><span class="info-label">전화번호</span><span class="info-value" id="piPhone"></span></div>
+      <div class="info-row"><span class="info-label">최근내원일</span><span class="info-value" id="piVisit"></span></div>
+      <div class="info-row"><span class="info-label">다음내원일</span><span class="info-value" id="piNextVisit"></span></div>
     </div>
-
-    <!-- 환자 정보 -->
-    <div class="card hidden" id="patientInfoCard">
-      <div class="card-title" id="patientInfoTitle">환자 정보</div>
-
-      <div class="info-box" style="margin-bottom:20px;">
-        <div class="info-row">
-          <span class="info-label">챠트번호</span>
-          <span class="info-value" id="piChart">—</span>
-          <span id="piTag"></span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">전화번호</span>
-          <span class="info-value" id="piPhone">—</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">최근내원일</span>
-          <span class="info-value" id="piVisit">—</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">다음내원일</span>
-          <span class="info-value" id="piNextVisit">—</span>
+    <div style="margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="card-title" style="margin-bottom:0;">현재 복용약물</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="piDrugCount" style="font-size:12px;color:var(--text2);"></span>
+          <button class="btn btn-outline" onclick="goUpdateDrug()" style="font-size:11px;padding:6px 12px;">&#10022; 약물 업데이트</button>
         </div>
       </div>
-
-      <!-- 현재 복용약물 -->
-      <div style="margin-bottom:20px;padding-top:16px;border-top:1px solid var(--border);">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-          <div class="card-title" style="margin-bottom:0;">현재 복용약물</div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <span id="drugCount" style="font-size:12px;color:var(--text2);"></span>
-            <button class="btn btn-outline" id="replaceDrugBtn" onclick="goToUpdateDrug()" style="font-size:11px;padding:6px 12px;">✦ 약물 업데이트</button>
-          </div>
-        </div>
-        <div id="piDrugList">
-          <span style="color:var(--text2);font-size:13px;">약물 정보 없음</span>
-        </div>
-      </div>
-
-      <!-- 전화번호 수정/등록 -->
-      <div style="margin-bottom:20px;padding-top:16px;border-top:1px solid var(--border);">
-        <div class="card-title" style="margin-bottom:12px;">전화번호 등록/수정</div>
-        <div class="input-row">
-          <div class="input-group">
-            <label>전화번호</label>
-            <input type="text" id="pPhone" placeholder="01012345678" maxlength="13">
-          </div>
-          <button class="btn btn-primary" onclick="savePhone()">저장</button>
-        </div>
-        <div id="phoneSaveStatus" class="hidden" style="margin-top:10px;font-size:13px;"></div>
-      </div>
-
-      <!-- 내원일 업데이트 -->
-      <div style="padding-top:16px;border-top:1px solid var(--border);">
-        <div class="card-title" style="margin-bottom:12px;">내원일 업데이트</div>
-        <div style="display:flex;flex-direction:column;gap:14px;">
-          <div class="input-group">
-            <label>내원일 (오늘)</label>
-            <input type="text" id="pVisitDate" maxlength="6" readonly
-              style="background:rgba(79,142,247,0.08);border-color:rgba(79,142,247,0.3);cursor:default;">
-          </div>
-          <div class="input-group">
-            <label>다음내원일 (선택)</label>
-            <div style="position:relative;">
-              <input type="text" id="pNextVisitDate" placeholder="미선택" maxlength="6" readonly
-                style="cursor:pointer;padding-right:40px;" onclick="toggleCalendar()">
-              <span onclick="toggleCalendar()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;">📅</span>
-              <button onclick="clearNextVisit()" id="clearNextBtn" class="hidden"
-                style="position:absolute;right:40px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text2);cursor:pointer;font-size:14px;padding:4px;">✕</button>
-            </div>
-            <!-- 달력 -->
-            <div id="calendarPicker" class="hidden" style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:8px;">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <button onclick="calNav(-1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:18px;padding:4px 8px;">‹</button>
-                <span id="calHeader" style="font-size:14px;font-weight:600;color:var(--text);"></span>
-                <button onclick="calNav(1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:18px;padding:4px 8px;">›</button>
-              </div>
-              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;">
-                <span style="font-size:11px;color:var(--danger);font-weight:700;">일</span>
-                <span style="font-size:11px;color:var(--text2);font-weight:700;">월</span>
-                <span style="font-size:11px;color:var(--text2);font-weight:700;">화</span>
-                <span style="font-size:11px;color:var(--text2);font-weight:700;">수</span>
-                <span style="font-size:11px;color:var(--text2);font-weight:700;">목</span>
-                <span style="font-size:11px;color:var(--text2);font-weight:700;">금</span>
-                <span style="font-size:11px;color:var(--text2);font-weight:700;">토</span>
-              </div>
-              <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:4px;"></div>
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="saveVisit()" style="align-self:flex-end;">저장</button>
-        </div>
-        <div id="visitSaveStatus" class="hidden" style="margin-top:10px;font-size:13px;"></div>
-      </div>
+      <div id="piDrugArea"></div>
+      <div id="piDrugSaveStatus" class="hidden" style="margin-top:8px;font-size:13px;"></div>
     </div>
-
-  </div><!-- /tabPatient -->
-
-  <!-- 문자발송 탭 -->
-  <div id="tabSms" class="hidden">
-
-    <!-- API 설정 -->
-    <div class="card" id="smsApiCard">
-      <div class="card-title">알리고 API 설정</div>
+    <div style="padding-top:16px;border-top:1px solid var(--border);margin-bottom:18px;">
+      <div class="card-title" style="margin-bottom:12px;">전화번호 등록/수정</div>
+      <div class="input-row">
+        <div class="input-group"><label>전화번호</label><input type="text" id="pPhone" placeholder="01012345678" maxlength="13"></div>
+        <button class="btn btn-primary" onclick="savePhone()">저장</button>
+      </div>
+      <div id="phoneSaveStatus" class="hidden" style="margin-top:8px;font-size:13px;"></div>
+    </div>
+    <div style="padding-top:16px;border-top:1px solid var(--border);">
+      <div class="card-title" style="margin-bottom:12px;">내원일 업데이트</div>
       <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="input-group"><label>내원일 (오늘)</label><input type="text" id="pVisitDate" readonly style="background:rgba(79,142,247,0.07);border-color:rgba(79,142,247,0.3);cursor:default;"></div>
         <div class="input-group">
-          <label>API Key</label>
-          <input type="password" id="aligoKey" placeholder="알리고 API Key">
-        </div>
-        <div class="input-row">
-          <div class="input-group">
-            <label>사용자 ID</label>
-            <input type="text" id="aligoId" placeholder="알리고 ID">
+          <label>다음내원일 (선택)</label>
+          <div style="position:relative;">
+            <input type="text" id="pNextVisitDate" placeholder="미선택" readonly style="cursor:pointer;padding-right:38px;" onclick="toggleCal()">
+            <span onclick="toggleCal()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;">&#128197;</span>
+            <button onclick="clearNext()" id="clearNextBtn" class="hidden" style="position:absolute;right:36px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;">&#10005;</button>
           </div>
-          <div class="input-group">
-            <label>발신번호</label>
-            <input type="text" id="aligoSender" placeholder="01012345678">
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <button class="btn btn-primary" onclick="saveAligoConfig()" style="font-size:12px;padding:8px 16px;">저장</button>
-          <span id="aligoConfigStatus" style="font-size:12px;color:var(--text2);"></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 발송 대상 조회 -->
-    <div class="card">
-      <div class="card-title">발송 대상 조회</div>
-      <div style="display:flex;flex-direction:column;gap:14px;">
-
-        <!-- 발송 그룹 버튼 -->
-        <div>
-          <label style="display:block;margin-bottom:8px;">발송 그룹 선택</label>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'mon')"   data-group="mon">일→월 (13:00)</button>
-            <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'tueWed')" data-group="tueWed">일→화·수 (13:10)</button>
-            <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'thu')"   data-group="thu">수→목 (09:00)</button>
-            <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'fri')"   data-group="fri">목→금 (09:00)</button>
-            <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'satSun')" data-group="satSun">금→토·일 (09:00)</button>
+          <div id="calendarPicker" class="hidden">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <button onclick="calNav(-1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:18px;padding:2px 8px;">&#8249;</button>
+              <span id="calHeader" style="font-size:14px;font-weight:600;"></span>
+              <button onclick="calNav(1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:18px;padding:2px 8px;">&#8250;</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;margin-bottom:4px;">
+              <span style="font-size:11px;color:var(--danger);font-weight:700;">일</span><span style="font-size:11px;color:var(--text2);font-weight:700;">월</span><span style="font-size:11px;color:var(--text2);font-weight:700;">화</span><span style="font-size:11px;color:var(--text2);font-weight:700;">수</span><span style="font-size:11px;color:var(--text2);font-weight:700;">목</span><span style="font-size:11px;color:var(--text2);font-weight:700;">금</span><span style="font-size:11px;color:var(--text2);font-weight:700;">토</span>
+            </div>
+            <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;"></div>
           </div>
         </div>
+        <button class="btn btn-primary" onclick="saveVisit()" style="align-self:flex-start;">저장</button>
+      </div>
+      <div id="visitSaveStatus" class="hidden" style="margin-top:8px;font-size:13px;"></div>
+    </div>
+  </div>
+</div>
 
-        <!-- 날짜 자동계산 표시 -->
-        <div id="smsDateInfo" class="hidden" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:13px;color:var(--text2);"></div>
-
-        <button class="btn btn-primary" id="smsSearchBtn" onclick="loadSmsList()" disabled style="align-self:flex-start;">
-          🔍 대상자 조회
-        </button>
+<div id="tabSms" class="container hidden">
+  <div class="card">
+    <div class="card-title">알리고 API 설정</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="input-row">
+        <div class="input-group"><label>API Key</label><input type="password" id="aligoKey" placeholder="알리고 API Key"></div>
+        <div class="input-group"><label>사용자 ID</label><input type="text" id="aligoId" placeholder="알리고 ID"></div>
+        <div class="input-group"><label>발신번호</label><input type="text" id="aligoSender" placeholder="0212345678"></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="btn btn-primary" onclick="saveAligo()" style="font-size:12px;padding:7px 14px;">저장</button>
+        <span id="aligoStatus" style="font-size:12px;color:var(--text2);"></span>
       </div>
     </div>
-
-    <!-- 발송 목록 -->
-    <div class="card hidden" id="smsListCard">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-        <div class="card-title" style="margin-bottom:0;">발송 대상 목록</div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <span id="smsListCount" style="font-size:12px;color:var(--text2);"></span>
-          <button class="btn btn-success" id="smsSendBtn" onclick="sendAllSms()">📱 전체 발송</button>
+  </div>
+  <div class="card">
+    <div class="card-title">발송 대상 조회</div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <label style="display:block;margin-bottom:8px;">발송 그룹</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'mon')">일&#8594;월 (13:00)</button>
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'tueWed')">일&#8594;화&#183;수 (13:10)</button>
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'thu')">수&#8594;목 (09:00)</button>
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'fri')">목&#8594;금 (09:00)</button>
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'satSun')">금&#8594;토&#183;일 (09:00)</button>
         </div>
       </div>
-      <div style="overflow-x:auto;">
-        <table id="smsTable">
-          <thead>
-            <tr>
-              <th><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
-              <th>챠트번호</th>
-              <th>전화번호</th>
-              <th>내원예정일</th>
-              <th>발송여부</th>
-              <th>상태</th>
-            </tr>
-          </thead>
-          <tbody id="smsTableBody"></tbody>
-        </table>
-      </div>
-      <div style="margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">발송 문자 내용</div>
-        <div id="smsMsgPreview" style="font-size:13px;color:var(--text);line-height:1.6;"></div>
-      </div>
-      <div id="smsSendStatus" class="hidden" style="margin-top:12px;font-size:13px;"></div>
+      <div id="smsGroupInfo" class="hidden" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:13px;color:var(--text2);"></div>
+      <button class="btn btn-primary" id="smsSearchBtn" onclick="loadSmsList()" disabled style="align-self:flex-start;">&#128269; 대상자 조회</button>
     </div>
-
-  </div><!-- /tabSms -->
-
+  </div>
+  <div class="card hidden" id="smsListCard">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div class="card-title" style="margin-bottom:0;">발송 목록</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span id="smsCount" style="font-size:12px;color:var(--text2);"></span>
+        <button class="btn btn-success" onclick="sendSms()">&#128241; 전체 발송</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;margin-bottom:14px;">
+      <table><thead><tr>
+        <th><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
+        <th>챠트번호</th><th>전화번호</th><th>내원예정일</th><th>발송</th><th>상태</th>
+      </tr></thead><tbody id="smsBody"></tbody></table>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">발송 문자</div>
+      <div id="smsMsgPreview" style="font-size:13px;color:var(--text);line-height:1.6;"></div>
+    </div>
+    <div id="smsSendStatus" class="hidden" style="margin-top:10px;"></div>
+  </div>
 </div>
 
 <script>
-  // ── 설정 ──────────────────────────────────────────────
-  const SUPABASE_PROXY = 'https://rurbfcocihvapbtdzbyt.supabase.co/functions/v1/claude-proxy';
-  let SUPABASE_ANON_KEY = localStorage.getItem('sb_anon_key') || '';
+const PROXY = 'https://rurbfcocihvapbtdzbyt.supabase.co/functions/v1/claude-proxy';
+const SHEET = 'https://script.google.com/macros/s/AKfycbx1qtGWka3_2Ue9XO4gy1hvYWn1yW-7YvPdrRBis96LOE_PDrf1dEq33ep5kHM0Ag/exec';
+let ANON_KEY = localStorage.getItem('sb_anon_key') || '';
 
-  // 구글시트 POST (Supabase 프록시 경유)
-  async function sheetPost(body) {
-    body._sheet_action = true;
-    const res = await fetch(SUPABASE_PROXY, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-      },
-      body: JSON.stringify(body)
-    });
-    return res.json();
-  }
+const DRUG_LIST = {"aaalp012":"자나팜정0.125mg","AAALP025":"자나팜정0.25mg","aaalp025":"자나팜정0.25mg","aaalp05":"자나팜정0.5mg","aaalp1":"자나팜정1mg","aaato18":"아토목신캡슐18mg","aaato25":"아토목신캡슐25mg","aaatv05":"스리반정0.5mg","aaatv1":"스리반정1mg","aabroma":"명인브로마제팜정3mg","aaclona":"환인클로나제팜정0.5mg","aadepa25":"데파스정0.25mg","aadz2":"명인디아제팜정2mg","aadz5":"명인디아제팜정5mg","aalp25환인":"알프람정0.25mg","aaluna":"루나팜정","aamedi10":"메디키넷리타드캡슐10mg","aamedi20":"메디키넷리타드캡슐20mg","aapen10":"페니드정10mg","aaribon":"리보트릴정(내복)","aasti10":"졸피신정10mg","aasti12":"스틸녹스CR정12.5mg","aasti5":"졸피신정5mg(내복)","aastiI62":"스틸녹스CR정6.25mg","aazol125":"졸민정0.125mg","aazol25":"졸민정0.25mg","abili_1":"레피졸정1mg(내복)","abili10":"레피졸정10mg","abili15":"레피졸정15mg","ABILI152":"아빌리파이정15mg","abili2":"아빌리파이정2mg","abili30_":"레피졸정30mg(내복)","abili5":"레피졸정5mg","ABILI5_":"레피졸정5mg","ablil_2":"레피졸정2mg(내복)","acam":"명인아캄프로세이트정333mg(내복)","alma-2":"알마겔정","almagate":"알마겐트정","ami10":"명인 아미트리프틸린염산염정10mg","amit25":"에트라빌25mg정","ap650":"타이리콜8시간이알서방정","ATV05":"아티반정0.5mg","ATV1":"아티반정1mg","benz1":"명인벤즈트로핀메실산염정1mg","benz2":"명인벤즈트로핀메실레이트정2mg","bona":"보나링에이정","BONA-2":"보나링에이정","brin10":"브린텔릭스정10mg","brin5":"브린텔릭스정5mg","busp5":"명인염산부스피론정5mg","cbzcr200":"카르마인씨알정","cbzn200":"테그레톨씨알정200mg","cibe":"씨베리움캡슐(내복)","CON18-2":"콘서타OROS서방정18mg(내복)","CON27-2":"콘서타OROS서방정27mg(내복)","CON36-2":"콘서타OROS서방정36mg(내복)","con54-2":"콘서타OROS서방정54mg(내복)","cpz200":"명인클로르프로마진염산염정200mg","cpz50":"명인클로르프로마진염산염정50mg","depa500":"데파킨크로노정500mg","desv100":"에스벤서방정100mg(내복)","desv25":"에스벤서방정25mg(내복)","desv50":"에스벤서방정50mg(내복)","doxe3":"명세핀정3mg(내복)","dull30":"드록틴캡슐30mg","dull60":"드록틴캡슐60mg","DZ2":"삼진디아제팜정2mg","DZ5":"삼진디아제팜정5mg","flu20m":"푸록틴캡슐","flu20n":"유로작캡슐20mg","fluo10":"푸록틴캅셀10mg","fluo20":"국제플루옥세틴캡슐","gasmo":"가스모틴정5mg","GRIA-j":"종근당글리아티린연질캡슐","gria-j":"종근당글리아티린연질캡슐","hal5":"명인할로페리돌정5mg","hip10":"하이페질정10mg","hip5":"하이페질정5mg","IMIGRAN5":"이미그란정50mg","imipra25":"명인이미프라민염산염정","inde10":"인데놀정10mg","inde40":"인데놀정40mg","kcap":"케이캡정50밀리그램(테고프라잔)_","kcap210":"펙수클루정10mg(내복)","kcap240":"펙수클루정40mg(내복)","kcap25":"케이캡정25mg(내복)","lamo100":"라모스탈정100mg","lamo50":"라모스탈정50mg","LEX5-22":"렉사프로정5mg","lexa10":"뉴프람정 10mg","lexa15":"뉴프람정15mg","lexa20":"뉴프람정20mg","lexa5":"뉴프람정5mg","lith300b":"리단정","lodo100":"로도핀정100mg","lodo50":"로도핀정50mg","MELA-2":"서카딘서방정2mg","meman":"뉴로케이정","MEMAN-2":"뉴로케이정","mgo2":"삼천당산화마그네슘정250mg","mgo3":"마그밀정","migad":"미가드정2.5mg","mirt15":"멀타핀정15mg","mirt30":"멀타핀정30mg","mirt75":"멀타핀정7.5mg","msero12":"큐로켈정12.5mg(내복)","nalt50":"트락손정50mg","nicer":"동화니세르골린정30mg(내복)","olaa10":"자이프렉사자이디스확산정10mg(내복)","paki25":"파키놀정0.25mg","par12":"파록스씨알정12.5mg","par25":"파록스씨알정25mg","PARO25-2":"에이자트씨알정25mg","peni":"페니라민정","peni100":"명인페니토인100mg정","PHENI100":"환인히단토인정","PIRI":"신일피리독신정","ppz4":"명인페르페나진정4mg","PROI":"프로이머정","ris1M":"리스펜정1mg","rism0.5":"리스펜정0.5mg","rism2":"리스펜정2mg","RONA4":"로나센정4mg","sero100":"큐로켈정100mg","sero100-2":"쎄로켈정100mg(내복)","sero12":"쿠에타핀정12.5mg(내복)","sero200":"큐로켈정200mg","sero25":"큐로켈정25mg","sero300":"동화쿠에티아핀정300mg(내복)","sero50":"큐로켈정50mg","SOL100":"솔리안정100mg","sol400":"솔리안정400mg","stablon":"스타브론정","STI10":"스틸녹스정10mg","STRA182":"스트라테라캡슐18mg","STRA252":"스트라테라캡슐25mg","TOPA100-2":"토파메이트정100mg","topa25":"토파메이트정25mg","tra325":"트라몰정325mg","Trarin":"명인트라린정50mg","trazo25":"명인트라조돈캅셀25mg","triti25":"트리티코정25mg","triti50":"트리티코정50mg","uturn16":"유턴정16mg(내복)","val300":"바렙톨서방정","VAL300-O":"오르필서방정300mg","val600":"오르필서방정600mg","venla375":"코팩사엑스알서방캡슐37.5mg","venla75":"코팩사엑스알서방캡슐75mg","zanax0.5":"자낙스정0.5mg(내복)","zeldox25":"젤독스캡슐20mg(내복)","ZOL25":"졸민정0.25mg","zoloft50":"졸로푸트정50mg(내복)","ZYP10":"자이프렉사자이디스확산정10mg","olanm10":"뉴로자핀정10mg"};
 
-  // 구글시트 GET (Supabase 프록시 경유)
-  async function sheetGet(params) {
-    const res = await fetch(SUPABASE_PROXY, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-      },
-      body: JSON.stringify({_sheet_get: params})
-    });
-    return res.json();
-  }
-  // 구글시트 Apps Script 웹앱 URL (다음 단계에서 입력)
-  const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbx1qtGWka3_2Ue9XO4gy1hvYWn1yW-7YvPdrRBis96LOE_PDrf1dEq33ep5kHM0Ag/exec';
-  // ─────────────────────────────────────────────────────
+const SMS_MSG = {
+  mon:    '수요일은 정규휴진 월요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
+  tueWed: '수요일은 정규휴진 화요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
+  thu:    '수요일은 정규휴진 목요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
+  fri:    '수요일은 정규휴진 금요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
+  satSun: '수요일은 정규휴진 토요일은 내원일 12시 10분까지 내원시 진료가능 한강의원'
+};
 
-  // 약물코드 목록
-  const DRUG_LIST = {
-"aaalp012":"자나팜정0.125mg","AAALP025":"자나팜정0.25mg","aaalp025":"자나팜정0.25mg","aaalp05":"자나팜정0.5mg","aaalp1":"자나팜정1mg","aaato18":"아토목신캡슐18mg","aaato25":"아토목신캡슐25mg","aaatv05":"스리반정0.5mg","aaatv1":"스리반정1mg","aabroma":"명인브로마제팜정3mg","aaclona":"환인클로나제팜정0.5mg","aadepa25":"데파스정0.25mg","aadz2":"명인디아제팜정2mg","aadz5":"명인디아제팜정5mg","aalp25환인":"알프람정0.25mg","aaluna":"루나팜정","aamedi10":"메디키넷리타드캡슐10mg","aamedi20":"메디키넷리타드캡슐20mg","aapen10":"페니드정10mg","aaribon":"리보트릴정(내복)","aasti10":"졸피신정10mg","aasti12":"스틸녹스CR정12.5mg","aasti5":"졸피신정5mg(내복)","aastiI62":"스틸녹스CR정6.25mg","aazol125":"졸민정0.125mg","aazol25":"졸민정0.25mg","abili_1":"레피졸정1mg(내복)","abili10":"레피졸정10mg","abili15":"레피졸정15mg","ABILI152":"아빌리파이정15mg","abili2":"아빌리파이정2mg","abili30_":"레피졸정30mg(내복)","abili5":"레피졸정5mg","ABILI5_":"레피졸정5mg","ablil_2":"레피졸정2mg(내복)","acam":"명인아캄프로세이트정333mg(내복)","alma-2":"알마겔정","almagate":"알마겐트정","ami10":"명인 아미트리프틸린염산염정10mg","amit25":"에트라빌25mg정","ap650":"타이리콜8시간이알서방정","ATV05":"아티반정0.5mg","ATV1":"아티반정1mg","benz1":"명인벤즈트로핀메실산염정1mg","benz2":"명인벤즈트로핀메실레이트정2mg","bona":"보나링에이정","BONA-2":"보나링에이정","brin10":"브린텔릭스정10mg","brin5":"브린텔릭스정5mg","busp5":"명인염산부스피론정5mg","cbzcr200":"카르마인씨알정","cbzn200":"테그레톨씨알정200mg","cibe":"씨베리움캡슐(내복)","CON18-2":"콘서타OROS서방정18mg(내복)","CON27-2":"콘서타OROS서방정27mg(내복)","CON36-2":"콘서타OROS서방정36mg(내복)","con54-2":"콘서타OROS서방정54mg(내복)","cpz200":"명인클로르프로마진염산염정200mg","cpz50":"명인클로르프로마진염산염정50mg","depa500":"데파킨크로노정500mg","desv100":"에스벤서방정100mg(내복)","desv25":"에스벤서방정25mg(내복)","desv50":"에스벤서방정50mg(내복)","doxe3":"명세핀정3mg(내복)","dull30":"드록틴캡슐30mg","dull60":"드록틴캡슐60mg","DZ2":"삼진디아제팜정2mg","DZ5":"삼진디아제팜정5mg","flu20m":"푸록틴캡슐","flu20n":"유로작캡슐20mg","fluo10":"푸록틴캅셀10mg","fluo20":"국제플루옥세틴캡슐","gasmo":"가스모틴정5mg","GRIA-j":"종근당글리아티린연질캡슐","gria-j":"종근당글리아티린연질캡슐","hal5":"명인할로페리돌정5mg","hip10":"하이페질정10mg","hip5":"하이페질정5mg","IMIGRAN5":"이미그란정50mg","imipra25":"명인이미프라민염산염정","inde10":"인데놀정10mg","inde40":"인데놀정40mg","kcap":"케이캡정50밀리그램(테고프라잔)_","kcap210":"펙수클루정10mg(내복)","kcap240":"펙수클루정40mg(내복)","kcap25":"케이캡정25mg(내복)","lamo100":"라모스탈정100mg","lamo50":"라모스탈정50mg","LEX5-22":"렉사프로정5mg","lexa10":"뉴프람정 10mg","lexa15":"뉴프람정15mg","lexa20":"뉴프람정20mg","lexa5":"뉴프람정5mg","lith300b":"리단정","lodo100":"로도핀정100mg","lodo50":"로도핀정50mg","MELA-2":"서카딘서방정2mg","meman":"뉴로케이정","MEMAN-2":"뉴로케이정","mgo2":"삼천당산화마그네슘정250mg","mgo3":"마그밀정","migad":"미가드정2.5mg","mirt15":"멀타핀정15mg","mirt30":"멀타핀정30mg","mirt75":"멀타핀정7.5mg","msero12":"큐로켈정12.5mg(내복)","nalt50":"트락손정50mg","nicer":"동화니세르골린정30mg(내복)","olaa10":"자이프렉사자이디스확산정10mg(내복)","paki25":"파키놀정0.25mg","par12":"파록스씨알정12.5mg","par25":"파록스씨알정25mg","PARO25-2":"에이자트씨알정25mg","peni":"페니라민정","peni100":"명인페니토인100mg정","PHENI100":"환인히단토인정","PIRI":"신일피리독신정","ppz4":"명인페르페나진정4mg","PROI":"프로이머정","ris1M":"리스펜정1mg","rism0.5":"리스펜정0.5mg","rism2":"리스펜정2mg","RONA4":"로나센정4mg","sero100":"큐로켈정100mg","sero100-2":"쎄로켈정100mg(내복)","sero12":"쿠에타핀정12.5mg(내복)","sero200":"큐로켈정200mg","sero25":"큐로켈정25mg","sero300":"동화쿠에티아핀정300mg(내복)","sero50":"큐로켈정50mg","SOL100":"솔리안정100mg","sol400":"솔리안정400mg","stablon":"스타브론정","STI10":"스틸녹스정10mg","STRA182":"스트라테라캡슐18mg","STRA252":"스트라테라캡슐25mg","TOPA100-2":"토파메이트정100mg","topa25":"토파메이트정25mg","tra325":"트라몰정325mg","Trarin":"명인트라린정50mg","trazo25":"명인트라조돈캅셀25mg","triti25":"트리티코정25mg","triti50":"트리티코정50mg","uturn16":"유턴정16mg(내복)","val300":"바렙톨서방정","VAL300-O":"오르필서방정300mg","val600":"오르필서방정600mg","venla375":"코팩사엑스알서방캡슐37.5mg","venla75":"코팩사엑스알서방캡슐75mg","zanax0.5":"자낙스정0.5mg(내복)","zeldox25":"젤독스캡슐20mg(내복)","ZOL25":"졸민정0.25mg","zoloft50":"졸로푸트정50mg(내복)","ZYP10":"자이프렉사자이디스확산정10mg","olanm10":"뉴로자핀정10mg"
-  };
+function saveKey() {
+  const v = document.getElementById('keyInput').value.trim();
+  if (!v.startsWith('eyJ')) { document.getElementById('keyStatus').textContent = '❌ 형식 오류'; return; }
+  localStorage.setItem('sb_anon_key', v); ANON_KEY = v;
+  document.getElementById('keyStatus').textContent = '✓ 저장됨';
+  document.getElementById('keyInput').value = '';
+}
+function checkKey() {
+  const k = localStorage.getItem('sb_anon_key');
+  if (k) { ANON_KEY = k; document.getElementById('keyStatus').textContent = '✓ 로드됨'; }
+}
 
-  let imageBase64 = null;
-  let imageMime = 'image/png';
-  let drugs = [];
+async function proxyCall(body) {
+  const r = await fetch(PROXY, { method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+ANON_KEY}, body:JSON.stringify(body) });
+  const raw = await r.text();
+  try { return JSON.parse(raw); } catch(e) { throw new Error('파싱실패: '+raw.slice(0,100)); }
+}
+async function sheetPost(body) { body._sheet_action = true; return proxyCall(body); }
+async function sheetGet(params) { return proxyCall({_sheet_get: params}); }
 
-  document.getElementById('fileInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) loadFile(file);
+function switchTab(tab) {
+  ['drug','patient','sms'].forEach(function(t) {
+    var T = t.charAt(0).toUpperCase()+t.slice(1);
+    document.getElementById('tab'+T).classList.toggle('hidden', tab!==t);
+    document.getElementById('nav'+T).classList.toggle('active', tab===t);
   });
+  if (tab==='sms') loadAligoConfig();
+}
 
-  const zone = document.getElementById('uploadZone');
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-  zone.addEventListener('drop', e => {
-    e.preventDefault();
-    zone.classList.remove('dragover');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) loadFile(file);
-  });
+// ── 약물 입력 ──────────────────────────────────────────
+var imageBase64 = null, imageMime = 'image/png', drugs = [];
+var _replaceMode = false, _replaceChart = null;
 
-  function loadFile(file) {
-    imageMime = file.type || 'image/png';
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      imageBase64 = e.target.result.split(',')[1];
-      document.getElementById('uploadPlaceholder').classList.add('hidden');
-      const img = document.getElementById('previewImg');
-      img.src = e.target.result;
-      img.classList.remove('hidden');
-      updateConvertBtn();
-    };
-    reader.readAsDataURL(file);
-  }
+document.getElementById('fileInput').addEventListener('change', function(e) { if(e.target.files[0]) loadImg(e.target.files[0]); });
+var zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+zone.addEventListener('drop', function(e) { e.preventDefault(); zone.classList.remove('dragover'); var f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) loadImg(f); });
 
-  document.getElementById('chartNo').addEventListener('input', updateConvertBtn);
-
-  function updateConvertBtn() {
-    const chartNo = document.getElementById('chartNo').value.trim();
-    document.getElementById('convertBtn').disabled = !(chartNo && imageBase64);
-  }
-
-  // 키 저장/로드
-  function saveKey() {
-    const val = document.getElementById('keyInput').value.trim();
-    if (!val.startsWith('eyJ')) {
-      document.getElementById('keyStatus').textContent = '❌ 형식이 올바르지 않습니다 (eyJ...로 시작해야 함)';
-      return;
-    }
-    localStorage.setItem('sb_anon_key', val);
-    SUPABASE_ANON_KEY = val;
-    document.getElementById('keyStatus').textContent = '✓ 저장됨';
-    document.getElementById('keyInput').value = '';
-    setTimeout(() => checkKeyBanner(), 300);
-  }
-
-  function checkKeyBanner() {
-    const key = localStorage.getItem('sb_anon_key');
-    const banner = document.getElementById('keySetupBanner');
-    const status = document.getElementById('keyStatus');
-    if (key) {
-      SUPABASE_ANON_KEY = key;
-      status.textContent = '✓ 키 로드됨';
-      banner.style.borderBottom = '1px solid rgba(45,212,160,0.3)';
-    } else {
-      status.textContent = '⚠️ 키를 입력해주세요';
-    }
-  }
-
-  // 페이지 로드 시 키 확인
-  window.addEventListener('DOMContentLoaded', checkKeyBanner);
-
-  async function convertImage() {
-    const chartNo = document.getElementById('chartNo').value.trim();
-    if (!chartNo || !imageBase64) return;
-
-    setStatus('loading', 'Claude가 이미지를 분석 중입니다...');
-    document.getElementById('convertBtn').disabled = true;
-    document.getElementById('resultCard').classList.add('hidden');
-    document.getElementById('saveResultBar').classList.add('hidden');
-
-    const drugListStr = Object.entries(DRUG_LIST).map(([k,v]) => k+'\t'+v).join('\n');
-    const prompt = `다음은 EMR(전자의무기록) 시스템의 약물 처방 화면 캡처입니다.
-이미지에서 약물 처방 테이블을 읽어 JSON 배열로 변환해주세요.
-
-아래는 병원 약물코드 목록입니다. 이미지에서 읽은 코드를 이 목록과 대조해 가장 유사한 코드로 매칭하세요(대소문자 무시, 오타 교정 포함):
-${drugListStr}
-
-반환 형식 (JSON만, 다른 텍스트 없이):
-[
-  {
-    "drug_code": "목록에서 매칭된 정확한 코드",
-    "drug_name": "목록에서 가져온 정확한 약물명",
-    "dose": "용량 숫자",
-    "daily_freq": "일투 숫자",
-    "days": "일수 숫자",
-    "method": "용법 코드 (b1, b2, b12, b4, prn 등 이미지에서 읽은 그대로)"
-  }
-]
-
-반드시 JSON 배열만 반환하세요. 목록에 없는 코드면 이미지에서 읽은 값 그대로 사용.`;
-
-    try {
-      const response = await fetch(SUPABASE_PROXY, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-5',
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: imageMime, data: imageBase64 } },
-              { type: 'text', text: prompt }
-            ]
-          }]
-        })
-      });
-
-      const raw = await response.text();
-      console.log('API raw response:', raw);
-      let data;
-      try { data = JSON.parse(raw); } catch(e) { throw new Error('응답 파싱 실패: ' + raw.slice(0,200)); }
-
-      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-      if (!data.content) throw new Error('응답에 content 없음: ' + JSON.stringify(data).slice(0,200));
-
-      const text = data.content.map(i => i.text || '').join('');
-      console.log('Claude text:', text);
-      const clean = text.replace(/```json[\s\S]*?```|```[\s\S]*?```/g, m => m.replace(/```json|```/g,'')).trim();
-      const jsonMatch = clean.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) throw new Error('JSON 배열을 찾을 수 없습니다: ' + clean.slice(0,200));
-      drugs = JSON.parse(jsonMatch[0]);
-
-      renderTable(chartNo, drugs);
-      setStatus('success', `${drugs.length}개 약물 추출 완료`);
-      document.getElementById('resultCard').classList.remove('hidden');
-
-    } catch (err) {
-      setStatus('error', '변환 실패: ' + err.message);
-    } finally {
-      document.getElementById('convertBtn').disabled = false;
-      updateConvertBtn();
-    }
-  }
-
-  function setStatus(type, msg) {
-    const bar = document.getElementById('statusBar');
-    bar.className = 'status-bar';
-    bar.classList.remove('hidden');
-    if (type === 'loading') {
-      bar.classList.add('status-loading');
-      bar.innerHTML = `<div class="spinner"></div><span>${msg}</span>`;
-    } else if (type === 'success') {
-      bar.classList.add('status-success');
-      bar.innerHTML = `<span>✓</span><span>${msg}</span>`;
-    } else {
-      bar.classList.add('status-error');
-      bar.innerHTML = `<span>✕</span><span>${msg}</span>`;
-    }
-  }
-
-  function renderTable(chartNo, drugsArr) {
-    document.getElementById('metaChart').textContent = chartNo;
-    document.getElementById('metaCount').textContent = drugsArr.length + '개';
-    const tbody = document.getElementById('resultBody');
-    tbody.innerHTML = '';
-    drugsArr.forEach((d, i) => addRowData(d, chartNo, i));
-    updateJson(chartNo);
-  }
-
-  function addRowData(d, chartNo, i) {
-    const tbody = document.getElementById('resultBody');
-    const cn = chartNo || document.getElementById('chartNo').value.trim();
-    const tr = document.createElement('tr');
-    tr.dataset.idx = i;
-    tr.innerHTML = `
-      <td><span class="chart-tag">${cn}</span></td>
-      <td class="editable-td"><input type="text" value="${d.drug_code || ''}" onchange="updateDrug(${i},'drug_code',this.value)" style="width:80px;font-family:monospace;font-size:12px;color:var(--accent);"></td>
-      <td class="editable-td"><input type="text" value="${d.drug_name || ''}" onchange="updateDrug(${i},'drug_name',this.value)" style="width:140px;"></td>
-      <td class="editable-td"><input type="text" value="${d.dose ?? ''}" onchange="updateDrug(${i},'dose',this.value)"></td>
-      <td class="editable-td"><input type="text" value="${d.daily_freq ?? ''}" onchange="updateDrug(${i},'daily_freq',this.value)"></td>
-      <td class="editable-td"><input type="text" value="${d.days ?? ''}" onchange="updateDrug(${i},'days',this.value)"></td>
-      <td class="editable-td"><input type="text" value="${d.method || ''}" onchange="updateDrug(${i},'method',this.value)" style="width:50px;font-family:monospace;font-size:12px;color:var(--accent2);"></td>
-      <td><button class="icon-btn" onclick="deleteRow(this)" title="삭제">✕</button></td>
-    `;
-    tbody.appendChild(tr);
-  }
-
-  function addRow() {
-    const cn = document.getElementById('chartNo').value.trim();
-    const i = drugs.length;
-    drugs.push({ drug_code: '', drug_name: '', dose: '', daily_freq: '', days: '', method: '' });
-    addRowData(drugs[i], cn, i);
-  }
-
-  function deleteRow(btn) {
-    const tr = btn.closest('tr');
-    const idx = parseInt(tr.dataset.idx);
-    drugs.splice(idx, 1);
-    renderTable(document.getElementById('chartNo').value.trim(), drugs);
-  }
-
-  function updateDrug(i, field, val) {
-    if (drugs[i]) drugs[i][field] = val;
-    updateJson(document.getElementById('chartNo').value.trim());
-  }
-
-  function updateJson(chartNo) {
-    const out = drugs.map(d => ({ chart_no: chartNo, ...d }));
-    document.getElementById('jsonPreview').textContent = JSON.stringify(out, null, 2);
-  }
-
-  function switchTab(tab) {
-    document.getElementById('tabTable').classList.toggle('active', tab === 'table');
-    document.getElementById('tabJson').classList.toggle('active', tab === 'json');
-    document.getElementById('tableView').classList.toggle('hidden', tab !== 'table');
-    document.getElementById('jsonView').classList.toggle('hidden', tab !== 'json');
-    if (tab === 'json') updateJson(document.getElementById('chartNo').value.trim());
-  }
-
-  async function saveToSheet() {
-    // 약물 업데이트 모드면 replace_drugs 사용
-    const isReplace = window._replaceDrugMode;
-    const chartNo = document.getElementById('chartNo').value.trim();
-
-    if (!SHEET_WEBHOOK) {
-      const bar = document.getElementById('saveResultBar');
-      bar.className = 'save-result status-error';
-      bar.classList.remove('hidden');
-      bar.textContent = '⚠️ 구글시트 연동 URL이 아직 설정되지 않았습니다. 다음 단계에서 설정합니다.';
-      return;
-    }
-    const payload = drugs.map(d => ({ chart_no: chartNo, ...d }));
-    const saveBtn = document.getElementById('saveBtn');
-    saveBtn.disabled = true;
-    saveBtn.textContent = '저장 중...';
-
-    try {
-      const action = isReplace ? 'replace_drugs' : 'save_drugs';
-      const saveResult = await sheetPost({action, chart_no: chartNo, drugs: payload});
-      if (!saveResult.success) throw new Error(JSON.stringify(saveResult));
-      // 업데이트 모드 해제
-      window._replaceDrugMode = false;
-      window._replaceDrugChart = null;
-      const bar = document.getElementById('saveResultBar');
-      bar.className = 'save-result status-success';
-      bar.classList.remove('hidden');
-      bar.textContent = (isReplace ? '✓ 약물 교체 완료 — ' : '✓ ') + payload.length + '개 약물 데이터가 구글시트에 저장되었습니다.';
-    } catch (err) {
-      const bar = document.getElementById('saveResultBar');
-      bar.className = 'save-result status-error';
-      bar.classList.remove('hidden');
-      bar.textContent = '저장 실패: ' + err.message;
-    } finally {
-      saveBtn.disabled = false;
-      saveBtn.innerHTML = '💾 구글시트에 저장';
-    }
-  }
-
-
-  // ── 문자발송 ─────────────────────────────────────────
-
-  const SMS_MESSAGES = {
-    mon:    '수요일은 정규휴진 월요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
-    tueWed: '수요일은 정규휴진 화요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
-    thu:    '수요일은 정규휴진 목요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
-    fri:    '수요일은 정규휴진 금요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
-    satSun: '수요일은 정규휴진 토요일은 내원일 12시 10분까지 내원시 진료가능 한강의원'
+function loadImg(file) {
+  imageMime = file.type||'image/png';
+  var r = new FileReader();
+  r.onload = function(e) {
+    imageBase64 = e.target.result.split(',')[1];
+    document.getElementById('uploadPlaceholder').classList.add('hidden');
+    var img = document.getElementById('previewImg');
+    img.src = e.target.result; img.classList.remove('hidden');
+    updateConvertBtn();
   };
+  r.readAsDataURL(file);
+}
+document.getElementById('chartNo').addEventListener('input', updateConvertBtn);
+function updateConvertBtn() {
+  document.getElementById('convertBtn').disabled = !(document.getElementById('chartNo').value.trim() && imageBase64);
+}
 
-  let currentGroup = null;
-  let smsTargetDates = [];
-
-  // 알리고 설정 저장/로드
-  function saveAligoConfig() {
-    const key    = document.getElementById('aligoKey').value.trim();
-    const id     = document.getElementById('aligoId').value.trim();
-    const sender = document.getElementById('aligoSender').value.trim();
-    if (!key || !id || !sender) { document.getElementById('aligoConfigStatus').textContent = '⚠️ 모두 입력해주세요'; return; }
-    localStorage.setItem('aligo_key', key);
-    localStorage.setItem('aligo_id', id);
-    localStorage.setItem('aligo_sender', sender);
-    document.getElementById('aligoConfigStatus').textContent = '✓ 저장됨';
-    document.getElementById('aligoKey').value = '';
+async function convertImage() {
+  var chartNo = document.getElementById('chartNo').value.trim();
+  if (!chartNo || !imageBase64) return;
+  setStatus('convertStatus','loading','Claude가 이미지를 분석 중입니다...');
+  document.getElementById('convertBtn').disabled = true;
+  document.getElementById('resultCard').classList.add('hidden');
+  var drugListStr = Object.entries(DRUG_LIST).map(function(e){return e[0]+'\t'+e[1];}).join('\n');
+  var prompt = '다음은 EMR 약물 처방 화면 캡처입니다. 아래 병원 약물코드 목록과 대조해 매칭하세요(대소문자 무시):\n'+drugListStr+'\n\n반환 형식(JSON 배열만):\n[{"drug_code":"코드","drug_name":"약물명","dose":"용량","daily_freq":"일투","days":"일수","method":"용법코드"}]';
+  try {
+    var data = await proxyCall({ model:'claude-sonnet-4-5', max_tokens:1000, messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMime,data:imageBase64}},{type:'text',text:prompt}]}] });
+    if (data.error) throw new Error(data.error.message||JSON.stringify(data.error));
+    if (!data.content) throw new Error('content 없음: '+JSON.stringify(data).slice(0,100));
+    var text = data.content.map(function(i){return i.text||'';}).join('');
+    var m = text.match(/\[[\s\S]*\]/);
+    if (!m) throw new Error('JSON 없음: '+text.slice(0,100));
+    drugs = JSON.parse(m[0]);
+    renderDrugTable(chartNo, drugs);
+    setStatus('convertStatus','success', drugs.length+'개 약물 추출 완료'+ (_replaceMode?' (교체 모드)':''));
+    document.getElementById('resultCard').classList.remove('hidden');
+  } catch(err) {
+    setStatus('convertStatus','error','변환 실패: '+err.message);
+  } finally {
+    document.getElementById('convertBtn').disabled = false;
+    updateConvertBtn();
   }
+}
 
-  function loadAligoConfig() {
-    const key    = localStorage.getItem('aligo_key');
-    const id     = localStorage.getItem('aligo_id');
-    const sender = localStorage.getItem('aligo_sender');
-    if (key && id && sender) {
-      document.getElementById('aligoConfigStatus').textContent = '✓ 설정 로드됨';
-    }
+function renderDrugTable(chartNo, arr) {
+  document.getElementById('metaChart').textContent = chartNo;
+  document.getElementById('metaCount').textContent = arr.length+'개';
+  var tbody = document.getElementById('drugTableBody');
+  tbody.innerHTML = '';
+  arr.forEach(function(d,i){ appendDrugRow(d, chartNo, i); });
+  updateJsonPreview(chartNo);
+}
+
+function appendDrugRow(d, chartNo, i) {
+  var cn = chartNo || document.getElementById('chartNo').value.trim();
+  var tr = document.createElement('tr');
+  tr.dataset.idx = i;
+  function ei(field, val, w) {
+    var v = (val||'').toString().replace(/"/g,'&quot;');
+    return '<input class="edit-input" style="width:'+w+';" value="'+v+'" data-idx="'+i+'" data-field="'+field+'" onchange="drugs[+this.dataset.idx][this.dataset.field]=this.value;updateJsonPreview(document.getElementById(\'chartNo\').value.trim())">';
   }
+  tr.innerHTML = '<td><span class="chart-tag">'+cn+'</span></td><td>'+ei('drug_code',d.drug_code,'75px')+'</td><td>'+ei('drug_name',d.drug_name,'130px')+'</td><td>'+ei('dose',d.dose,'38px')+'</td><td>'+ei('daily_freq',d.daily_freq,'33px')+'</td><td>'+ei('days',d.days,'33px')+'</td><td>'+ei('method',d.method,'43px')+'</td><td><button class="icon-btn" onclick="delDrugRow('+i+')">&#10005;</button></td>';
+  document.getElementById('drugTableBody').appendChild(tr);
+}
 
-  // 그룹 선택 → 날짜 자동 계산
-  function selectGroup(btn, group) {
-    document.querySelectorAll('.sms-group-btn').forEach(b => b.classList.remove('btn-primary'));
-    btn.classList.add('btn-primary');
-    btn.classList.remove('btn-outline');
-    currentGroup = group;
-    smsTargetDates = calcTargetDates(group);
-    const dateInfo = document.getElementById('smsDateInfo');
-    const dateStrs = smsTargetDates.map(d => formatDate6Display(d)).join(', ');
-    dateInfo.innerHTML = '📅 조회 대상 날짜: <strong style="color:var(--text);">' + dateStrs + '</strong><br><span style="margin-top:4px;display:block;">✉️ ' + SMS_MESSAGES[group] + '</span>';
-    dateInfo.classList.remove('hidden');
-    document.getElementById('smsSearchBtn').disabled = false;
-    document.getElementById('smsMsgPreview').textContent = SMS_MESSAGES[group];
-    document.getElementById('smsListCard').classList.add('hidden');
+function delDrugRow(i) { drugs.splice(i,1); renderDrugTable(document.getElementById('chartNo').value.trim(), drugs); }
+function addDrugRow() { var i=drugs.length; drugs.push({drug_code:'',drug_name:'',dose:'',daily_freq:'',days:'',method:''}); appendDrugRow(drugs[i], document.getElementById('chartNo').value.trim(), i); }
+function updateJsonPreview(chartNo) { document.getElementById('jsonPreview').textContent = JSON.stringify(drugs.map(function(d){return Object.assign({chart_no:chartNo},d);}), null, 2); }
+function switchResultTab(tab) {
+  document.getElementById('tabTable').classList.toggle('active', tab==='table');
+  document.getElementById('tabJson').classList.toggle('active', tab==='json');
+  document.getElementById('tableView').classList.toggle('hidden', tab!=='table');
+  document.getElementById('jsonView').classList.toggle('hidden', tab!=='json');
+}
+
+async function saveDrugs() {
+  var chartNo = document.getElementById('chartNo').value.trim();
+  var action = _replaceMode ? 'replace_drugs' : 'save_drugs';
+  var btn = document.querySelector('#resultCard .btn-success');
+  btn.disabled=true; btn.textContent='저장 중...';
+  try {
+    var r = await sheetPost({action:action, chart_no:chartNo, drugs:drugs});
+    if (!r.success) throw new Error(JSON.stringify(r));
+    _replaceMode=false; _replaceChart=null;
+    setStatus('drugSaveStatus','success',(action==='replace_drugs'?'✓ 약물 교체 완료 ':'✓ ')+drugs.length+'개 저장됨');
+  } catch(err) { setStatus('drugSaveStatus','error','저장 실패: '+err.message); }
+  finally { btn.disabled=false; btn.innerHTML='&#128190; 구글시트에 저장'; }
+}
+
+// ── 날짜 유틸 ──────────────────────────────────────────
+function today6() { var d=new Date(); return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0'); }
+function fmt6(val) {
+  if (!val) return '';
+  var s=String(val).trim();
+  if (/^\d{6}$/.test(s)) return s;
+  var d=new Date(val);
+  if (!isNaN(d.getTime())) return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  return s;
+}
+function displayDate(d6) {
+  if (!d6||d6.length!==6) return d6||'없음';
+  var days=['일','월','화','수','목','금','토'];
+  var y=2000+parseInt(d6.slice(0,2)), mo=parseInt(d6.slice(2,4)), d=parseInt(d6.slice(4,6));
+  return mo+'월 '+d+'일('+days[new Date(y,mo-1,d).getDay()]+')';
+}
+
+// ── 달력 ───────────────────────────────────────────────
+var calY, calM;
+function toggleCal() {
+  var el=document.getElementById('calendarPicker');
+  if (el.classList.contains('hidden')) { if(!calY){var n=new Date();calY=n.getFullYear();calM=n.getMonth();} renderCal(); el.classList.remove('hidden'); }
+  else el.classList.add('hidden');
+}
+function calNav(d) { calM+=d; if(calM>11){calM=0;calY++;} if(calM<0){calM=11;calY--;} renderCal(); }
+function renderCal() {
+  document.getElementById('calHeader').textContent = calY+'년 '+(calM+1)+'월';
+  var grid=document.getElementById('calGrid'); grid.innerHTML='';
+  var first=new Date(calY,calM,1).getDay(), last=new Date(calY,calM+1,0).getDate();
+  var sel=document.getElementById('pNextVisitDate').value, now=new Date();
+  for(var i=0;i<first;i++) grid.appendChild(document.createElement('div'));
+  for(var d=1;d<=last;d++) {
+    var yy=String(calY).slice(2), mm=String(calM+1).padStart(2,'0'), dd=String(d).padStart(2,'0'), val=yy+mm+dd;
+    var isToday=(calY===now.getFullYear()&&calM===now.getMonth()&&d===now.getDate());
+    var isSel=val===sel, isSun=new Date(calY,calM,d).getDay()===0;
+    var btn=document.createElement('button');
+    btn.className='cal-day'+(isSel?' selected':isToday?' today':isSun?' sun':'');
+    btn.textContent=d;
+    (function(v){ btn.onclick=function(){ document.getElementById('pNextVisitDate').value=v; document.getElementById('clearNextBtn').classList.remove('hidden'); document.getElementById('calendarPicker').classList.add('hidden'); }; })(val);
+    grid.appendChild(btn);
   }
+}
+function clearNext() { document.getElementById('pNextVisitDate').value=''; document.getElementById('clearNextBtn').classList.add('hidden'); }
 
-  function calcTargetDates(group) {
-    const today = new Date();
-    const dow   = today.getDay(); // 0=일,1=월,...,6=토
-    let targets = [];
+// ── 환자 관리 ──────────────────────────────────────────
+var _patientDrugs = [];
+function clearPatient() { document.getElementById('patientCard').classList.add('hidden'); document.getElementById('searchStatus').classList.add('hidden'); }
 
-    function addDays(d, n) {
-      const r = new Date(d);
-      r.setDate(r.getDate() + n);
-      return r;
-    }
-    function toDate6(d) {
-      return String(d.getFullYear()).slice(2) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
-    }
-
-    if (group === 'mon')    { const mon = addDays(today, (1 - dow + 7) % 7 || 7); targets = [toDate6(mon)]; }
-    if (group === 'tueWed') { const tue = addDays(today, (2 - dow + 7) % 7 || 7); const wed = addDays(tue, 1); targets = [toDate6(tue), toDate6(wed)]; }
-    if (group === 'thu')    { const thu = addDays(today, (4 - dow + 7) % 7 || 7); targets = [toDate6(thu)]; }
-    if (group === 'fri')    { const fri = addDays(today, (5 - dow + 7) % 7 || 7); targets = [toDate6(fri)]; }
-    if (group === 'satSun') { const sat = addDays(today, (6 - dow + 7) % 7 || 7); const sun = addDays(sat, 1); targets = [toDate6(sat), toDate6(sun)]; }
-    return targets;
-  }
-
-  function formatDate6Display(d6) {
-    if (!d6 || d6.length !== 6) return d6;
-    const days = ['일','월','화','수','목','금','토'];
-    const y = 2000 + parseInt(d6.slice(0,2));
-    const m = parseInt(d6.slice(2,4));
-    const d = parseInt(d6.slice(4,6));
-    const dow = new Date(y, m-1, d).getDay();
-    return m + '월 ' + d + '일(' + days[dow] + ')';
-  }
-
-  // 대상자 조회
-  async function loadSmsList() {
-    if (!currentGroup || smsTargetDates.length === 0) return;
-    const btn = document.getElementById('smsSearchBtn');
-    btn.disabled = true;
-    btn.textContent = '조회 중...';
-    try {
-      const data = await sheetGet({action: 'get_sms_list', date: smsTargetDates.join(',')});
-      if (!data.success) throw new Error(data.error);
-      renderSmsList(data.list || []);
-      document.getElementById('smsListCard').classList.remove('hidden');
-    } catch(err) {
-      alert('조회 실패: ' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '🔍 대상자 조회';
-    }
-  }
-
-  function renderSmsList(list) {
-    const tbody = document.getElementById('smsTableBody');
-    tbody.innerHTML = '';
-    const total  = list.length;
-    const active = list.filter(p => p.sms_yn !== 'N' && p.phone).length;
-    document.getElementById('smsListCount').textContent = '총 ' + total + '명 / 발송 대상 ' + active + '명';
-
-    list.forEach((p, i) => {
-      const hasSms = p.sms_yn !== 'N';
-      const hasPhone = !!p.phone;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input type="checkbox" class="sms-check" data-idx="${i}" ${hasSms && hasPhone ? 'checked' : ''} ${!hasPhone ? 'disabled' : ''}></td>
-        <td><span class="chart-tag">${p.chart_no}</span></td>
-        <td style="font-family:monospace;font-size:12px;">${p.phone || '<span style="color:var(--danger)">미등록</span>'}</td>
-        <td><span class="code-badge">${formatDate6Display(p.next_visit)}</span></td>
-        <td>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="checkbox" ${hasSms ? 'checked' : ''} onchange="toggleSmsFlag('${p.chart_no}', this.checked, ${i})">
-            <span style="font-size:12px;color:${hasSms ? 'var(--success)' : 'var(--danger)'};">${hasSms ? '발송' : '제외'}</span>
-          </label>
-        </td>
-        <td id="smsStatus_${i}" style="font-size:12px;color:var(--text2);">대기</td>
-      `;
-      tbody.appendChild(tr);
-    });
-    window._smsList = list;
-  }
-
-  async function toggleSmsFlag(chartNo, checked, idx) {
-    const smsYn = checked ? 'Y' : 'N';
-    window._smsList[idx].sms_yn = smsYn;
-    try {
-      await sheetPost({action: 'set_sms_flag', chart_no: chartNo, sms_yn: smsYn});
-    } catch(e) {}
-    // 체크박스 상태 업데이트
-    const row = document.querySelector('.sms-check[data-idx="' + idx + '"]');
-    if (row) row.checked = checked && !!window._smsList[idx].phone;
-  }
-
-  function toggleAll(master) {
-    document.querySelectorAll('.sms-check:not([disabled])').forEach(cb => cb.checked = master.checked);
-  }
-
-  // 전체 발송
-  async function sendAllSms() {
-    const key    = localStorage.getItem('aligo_key');
-    const id     = localStorage.getItem('aligo_id');
-    const sender = localStorage.getItem('aligo_sender');
-    if (!key || !id || !sender) { alert('먼저 알리고 API 설정을 저장해주세요.'); return; }
-
-    const checks  = document.querySelectorAll('.sms-check:checked');
-    const targets = [];
-    checks.forEach(cb => {
-      const idx = parseInt(cb.dataset.idx);
-      const p   = window._smsList[idx];
-      if (p && p.phone) {
-        targets.push({chart_no: p.chart_no, phone: p.phone, message: SMS_MESSAGES[currentGroup]});
-      }
-    });
-
-    if (targets.length === 0) { alert('발송 대상이 없습니다.'); return; }
-    if (!confirm(targets.length + '명에게 문자를 발송합니다.')) return;
-
-    const btn = document.getElementById('smsSendBtn');
-    btn.disabled = true;
-    btn.textContent = '발송 중...';
-
-    try {
-      const data = await sheetPost({action: 'send_sms', aligo_key: key, aligo_id: id, aligo_sender: sender, targets});
-      const ok   = data.results ? data.results.filter(r => r.success).length : 0;
-      const fail = targets.length - ok;
-
-      // 상태 업데이트
-      if (data.results) {
-        data.results.forEach((r, i) => {
-          const idx = Array.from(document.querySelectorAll('.sms-check:checked'))[i]?.dataset.idx;
-          if (idx !== undefined) {
-            document.getElementById('smsStatus_' + idx).innerHTML =
-              r.success ? '<span style="color:var(--success);">✓ 발송완료</span>' : '<span style="color:var(--danger);">✕ 실패</span>';
-          }
-        });
-      }
-
-      const bar = document.getElementById('smsSendStatus');
-      bar.className = 'status-bar ' + (fail === 0 ? 'status-success' : 'status-error');
-      bar.classList.remove('hidden');
-      bar.textContent = '✓ ' + ok + '명 발송 완료' + (fail > 0 ? ' / ' + fail + '명 실패' : '');
-    } catch(err) {
-      alert('발송 실패: ' + err.message);
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '📱 전체 발송';
-    }
-  }
-
-  // ── 달력 ────────────────────────────────────────────────
-  let calYear, calMonth;
-
-  function initCalendar() {
-    const now = new Date();
-    calYear = now.getFullYear();
-    calMonth = now.getMonth();
-    renderCalendar();
-  }
-
-  function toggleCalendar() {
-    const cal = document.getElementById('calendarPicker');
-    if (cal.classList.contains('hidden')) {
-      if (!calYear) initCalendar();
-      cal.classList.remove('hidden');
-    } else {
-      cal.classList.add('hidden');
-    }
-  }
-
-  function calNav(dir) {
-    calMonth += dir;
-    if (calMonth > 11) { calMonth = 0; calYear++; }
-    if (calMonth < 0)  { calMonth = 11; calYear--; }
-    renderCalendar();
-  }
-
-  function renderCalendar() {
-    const header = document.getElementById('calHeader');
-    const grid   = document.getElementById('calGrid');
-    header.textContent = calYear + '년 ' + (calMonth + 1) + '월';
-    grid.innerHTML = '';
-
-    const firstDay = new Date(calYear, calMonth, 1).getDay();
-    const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
-    const today    = new Date();
-    const selectedVal = document.getElementById('pNextVisitDate').value;
-
-    // 빈 칸
-    for (let i = 0; i < firstDay; i++) {
-      grid.appendChild(Object.assign(document.createElement('div'), {}));
-    }
-
-    for (let d = 1; d <= lastDate; d++) {
-      const yy = String(calYear).slice(2);
-      const mm = String(calMonth + 1).padStart(2, '0');
-      const dd = String(d).padStart(2, '0');
-      const val = yy + mm + dd;
-
-      const isToday = (calYear === today.getFullYear() && calMonth === today.getMonth() && d === today.getDate());
-      const isSelected = val === selectedVal;
-      const isSun = (new Date(calYear, calMonth, d).getDay() === 0);
-
-      const btn = document.createElement('button');
-      btn.textContent = d;
-      btn.onclick = () => selectDate(val);
-      btn.style.cssText = [
-        'border:none;border-radius:6px;padding:6px 2px;font-size:13px;cursor:pointer;width:100%;',
-        isSelected ? 'background:var(--accent);color:white;font-weight:700;' :
-        isToday    ? 'background:rgba(79,142,247,0.15);color:var(--accent);font-weight:600;' :
-                     'background:none;color:' + (isSun ? 'var(--danger)' : 'var(--text)') + ';',
-      ].join('');
-      grid.appendChild(btn);
-    }
-  }
-
-  function selectDate(val) {
-    document.getElementById('pNextVisitDate').value = val;
-    document.getElementById('clearNextBtn').classList.remove('hidden');
-    document.getElementById('calendarPicker').classList.add('hidden');
-  }
-
-  function clearNextVisit() {
-    document.getElementById('pNextVisitDate').value = '';
+async function searchPatient() {
+  var chartNo=document.getElementById('pChartNo').value.trim();
+  if (!chartNo) return;
+  setStatus('searchStatus','loading','조회 중...');
+  document.getElementById('patientCard').classList.add('hidden');
+  try {
+    var data=await sheetGet({action:'get_patient', chart_no:chartNo});
+    if (!data.success) throw new Error(data.error);
+    document.getElementById('piChart').textContent=chartNo;
+    document.getElementById('piPhone').textContent=data.phone||'미등록';
+    document.getElementById('piVisit').textContent=data.visit?displayDate(fmt6(data.visit.visit_date)):'없음';
+    document.getElementById('piNextVisit').textContent=(data.visit&&data.visit.next_visit_date)?displayDate(fmt6(data.visit.next_visit_date)):'없음';
+    var isNew=!data.phone&&!data.visit;
+    document.getElementById('piTag').innerHTML=isNew?'<span class="tag-new">신환</span>':'<span class="tag-exist">기존</span>';
+    document.getElementById('pPhone').value=data.phone||'';
+    document.getElementById('pVisitDate').value=today6();
+    document.getElementById('pNextVisitDate').value='';
     document.getElementById('clearNextBtn').classList.add('hidden');
-  }
+    calY=null;
+    _patientDrugs=(data.drugs||[]).filter(function(d){return d.drug_code||d.drug_name;});
+    renderPatientDrugs();
+    document.getElementById('patientCard').classList.remove('hidden');
+    setStatus('searchStatus','success',isNew?'신환입니다. 정보를 등록해주세요.':'환자 정보를 불러왔습니다.');
+  } catch(err) { setStatus('searchStatus','error','조회 실패: '+err.message); }
+}
 
-  // ── 날짜 유틸 ─────────────────────────────────────────
-  function todayDate6() {
-    const d = new Date();
-    const yy = String(d.getFullYear()).slice(2);
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const dd = String(d.getDate()).padStart(2,'0');
-    return yy + mm + dd;
-  }
-
-  function formatDate6(val) {
-    if (!val) return '';
-    const s = String(val).trim();
-    // 이미 6자리 숫자면 그대로
-    if (/^\d{6}$/.test(s)) return s;
-    // Date 객체처럼 변환된 경우 (숫자 또는 날짜 문자열)
-    const d = new Date(val);
-    if (!isNaN(d.getTime())) {
-      const yy = String(d.getFullYear()).slice(2);
-      const mm = String(d.getMonth()+1).padStart(2,'0');
-      const dd = String(d.getDate()).padStart(2,'0');
-      return yy + mm + dd;
-    }
-    return s;
-  }
-
-  // ── 복용약물 렌더링 ───────────────────────────────────
-  function renderDrugList(drugs) {
-    const el = document.getElementById('piDrugList');
-    const countEl = document.getElementById('drugCount');
-    if (!drugs || drugs.length === 0) {
-      el.innerHTML = '<span style="color:var(--text2);font-size:13px;">약물 정보 없음</span>';
-      countEl.textContent = '';
-      return;
-    }
-    countEl.textContent = drugs.length + '개';
-    // 편집 가능한 약물 목록 저장
-    window._patientDrugs = JSON.parse(JSON.stringify(drugs));
-
-    let html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
-    html += '<thead><tr>';
-    ['약물코드','약물명','용량','일투','일수','용법',''].forEach(h => {
-      html += '<th style="background:var(--bg);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);">' + h + '</th>';
+function renderPatientDrugs() {
+  var el=document.getElementById('piDrugArea'), cnt=document.getElementById('piDrugCount');
+  if (!_patientDrugs.length) { el.innerHTML='<span style="color:var(--text2);font-size:13px;">약물 정보 없음</span>'; cnt.textContent=''; return; }
+  cnt.textContent=_patientDrugs.length+'개';
+  var ts='padding:6px 8px;border-bottom:1px solid rgba(46,51,80,0.4);';
+  var is='background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:12px;outline:none;padding:2px 3px;';
+  var fields=['drug_code','drug_name','dose','daily_freq','days','method'];
+  var widths=['70px','120px','36px','30px','30px','36px'];
+  var html='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';
+  ['약물코드','약물명','용량','일투','일수','용법',''].forEach(function(h){html+='<th style="background:var(--bg);color:var(--text2);font-size:10px;font-weight:700;text-transform:uppercase;padding:7px 8px;text-align:left;border-bottom:1px solid var(--border);">'+h+'</th>';});
+  html+='</tr></thead><tbody>';
+  _patientDrugs.forEach(function(d,i){
+    html+='<tr>';
+    fields.forEach(function(f,fi){
+      var val=((d[f]!==undefined?d[f]:'')).toString().replace(/"/g,'&quot;');
+      html+='<td style="'+ts+'"><input style="'+is+'width:'+widths[fi]+';" value="'+val+'" data-pidx="'+i+'" data-pfield="'+f+'" onchange="_patientDrugs[+this.dataset.pidx][this.dataset.pfield]=this.value"></td>';
     });
-    html += '</tr></thead><tbody>';
-    const tdStyle = 'padding:4px 6px;border-bottom:1px solid rgba(46,51,80,0.4);';
-    const inputStyle = 'background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:Noto Sans KR,sans-serif;font-size:13px;outline:none;padding:2px 4px;width:100%;';
-    drugs.forEach((d, i) => {
-      html += '<tr>';
-      const pdFields = ['drug_code','drug_name','dose','daily_freq','days','method'];
-      const pdWidths  = ['75px','130px','40px','35px','35px','40px'];
-      const pdExtras  = ['font-family:monospace;color:var(--accent);font-size:12px;','','text-align:center;','text-align:center;','text-align:center;','font-family:monospace;color:var(--accent2);font-size:12px;'];
-      pdFields.forEach(function(f, fi) {
-        var val = ((d[f] !== undefined ? d[f] : '') + '').replace(/"/g, '&quot;');
-        html += '<td style="' + tdStyle + '"><input style="' + inputStyle + 'width:' + pdWidths[fi] + ';' + pdExtras[fi] + '" value="' + val + '" data-idx="' + i + '" data-field="' + f + '" onchange="updatePatientDrug(+this.dataset.idx, this.dataset.field, this.value)"></td>';
-      });
-            const pdFields = ['drug_code','drug_name','dose','daily_freq','days','method'];
-      const pdWidths  = ['75px','130px','40px','35px','35px','40px'];
-      const pdExtras  = ['font-family:monospace;color:var(--accent);font-size:12px;','','text-align:center;','text-align:center;','text-align:center;','font-family:monospace;color:var(--accent2);font-size:12px;'];
-      pdFields.forEach(function(f, fi) {
-        var val = ((d[f] !== undefined ? d[f] : '') + '').replace(/"/g, '&quot;');
-        html += '<td style="' + tdStyle + '"><input style="' + inputStyle + 'width:' + pdWidths[fi] + ';' + pdExtras[fi] + '" value="' + val + '" data-idx="' + i + '" data-field="' + f + '" onchange="updatePatientDrug(+this.dataset.idx, this.dataset.field, this.value)"></td>';
-      });
-      
+    html+='<td style="'+ts+'"><button onclick="delPatientDrug('+i+')" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;">&#10005;</button></td>';
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  html+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;"><button onclick="addPatientDrug()" class="btn btn-outline" style="font-size:11px;padding:6px 10px;">+ 행 추가</button><button onclick="savePatientDrugs()" class="btn btn-success" style="font-size:12px;padding:7px 14px;">&#128190; 약물 저장</button></div>';
+  el.innerHTML=html;
+}
+
+function delPatientDrug(i){_patientDrugs.splice(i,1);renderPatientDrugs();}
+function addPatientDrug(){_patientDrugs.push({drug_code:'',drug_name:'',dose:'',daily_freq:'',days:'',method:''});renderPatientDrugs();}
+
+async function savePatientDrugs() {
+  var chartNo=document.getElementById('pChartNo').value.trim();
+  try {
+    var r=await sheetPost({action:'replace_drugs',chart_no:chartNo,drugs:_patientDrugs});
+    if(!r.success) throw new Error(JSON.stringify(r));
+    setStatus('piDrugSaveStatus','success','✓ 약물 정보 저장됨');
+    setTimeout(function(){document.getElementById('piDrugSaveStatus').classList.add('hidden');},3000);
+  } catch(err){setStatus('piDrugSaveStatus','error','저장 실패: '+err.message);}
+}
+
+function goUpdateDrug() {
+  var chartNo=document.getElementById('pChartNo').value.trim();
+  _replaceMode=true; _replaceChart=chartNo;
+  switchTab('drug');
+  document.getElementById('chartNo').value=chartNo;
+  setStatus('convertStatus','loading','⚠️ 약물 교체 모드 ('+chartNo+') — 이미지 업로드 후 변환·저장하면 기존 약물이 교체됩니다');
+}
+
+async function savePhone() {
+  var chartNo=document.getElementById('pChartNo').value.trim(), phone=document.getElementById('pPhone').value.trim();
+  if(!chartNo||!phone) return;
+  try { await sheetPost({action:'save_phone',chart_no:chartNo,phone:phone}); setStatus('phoneSaveStatus','success','✓ 전화번호 저장됨'); searchPatient(); }
+  catch(err){setStatus('phoneSaveStatus','error','실패: '+err.message);}
+}
+
+async function saveVisit() {
+  var chartNo=document.getElementById('pChartNo').value.trim();
+  var vd=document.getElementById('pVisitDate').value.trim(), nd=document.getElementById('pNextVisitDate').value.trim();
+  if(!chartNo||!vd) return;
+  try { await sheetPost({action:'save_visit',chart_no:chartNo,visit_date:vd,next_visit_date:nd}); setStatus('visitSaveStatus','success','✓ 내원일 저장됨'); searchPatient(); }
+  catch(err){setStatus('visitSaveStatus','error','실패: '+err.message);}
+}
+
+// ── 문자 발송 ──────────────────────────────────────────
+var _smsGroup=null, _smsDates=[], _smsList=[];
+
+function saveAligo(){
+  var k=document.getElementById('aligoKey').value.trim(), id=document.getElementById('aligoId').value.trim(), s=document.getElementById('aligoSender').value.trim();
+  if(!k||!id||!s){document.getElementById('aligoStatus').textContent='⚠️ 모두 입력해주세요';return;}
+  localStorage.setItem('aligo_key',k);localStorage.setItem('aligo_id',id);localStorage.setItem('aligo_sender',s);
+  document.getElementById('aligoStatus').textContent='✓ 저장됨'; document.getElementById('aligoKey').value='';
+}
+function loadAligoConfig(){if(localStorage.getItem('aligo_key'))document.getElementById('aligoStatus').textContent='✓ 설정 로드됨';}
+
+function addDays(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function toD6(d){return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
+
+function selectGroup(btn, group){
+  document.querySelectorAll('.sms-group-btn').forEach(function(b){b.classList.remove('btn-primary');b.classList.add('btn-outline');});
+  btn.classList.add('btn-primary');btn.classList.remove('btn-outline');
+  _smsGroup=group;
+  var t=new Date(), dow=t.getDay();
+  if(group==='mon')    _smsDates=[toD6(addDays(t,(1-dow+7)%7||7))];
+  if(group==='tueWed'){var tue=addDays(t,(2-dow+7)%7||7);_smsDates=[toD6(tue),toD6(addDays(tue,1))];}
+  if(group==='thu')    _smsDates=[toD6(addDays(t,(4-dow+7)%7||7))];
+  if(group==='fri')    _smsDates=[toD6(addDays(t,(5-dow+7)%7||7))];
+  if(group==='satSun'){var sat=addDays(t,(6-dow+7)%7||7);_smsDates=[toD6(sat),toD6(addDays(sat,1))];}
+  var info=document.getElementById('smsGroupInfo');
+  info.innerHTML='📅 조회 날짜: <strong style="color:var(--text);">'+_smsDates.map(displayDate).join(', ')+'</strong><br><span style="margin-top:4px;display:block;">✉️ '+SMS_MSG[group]+'</span>';
+  info.classList.remove('hidden');
+  document.getElementById('smsSearchBtn').disabled=false;
+  document.getElementById('smsMsgPreview').textContent=SMS_MSG[group];
+  document.getElementById('smsListCard').classList.add('hidden');
+}
+
+async function loadSmsList(){
+  var btn=document.getElementById('smsSearchBtn');
+  btn.disabled=true;btn.textContent='조회 중...';
+  try {
+    var data=await sheetGet({action:'get_sms_list',date:_smsDates.join(',')});
+    if(!data.success) throw new Error(data.error);
+    _smsList=data.list||[];
+    renderSmsList();
+    document.getElementById('smsListCard').classList.remove('hidden');
+  } catch(err){alert('조회 실패: '+err.message);}
+  finally{btn.disabled=false;btn.textContent='🔍 대상자 조회';}
+}
+
+function renderSmsList(){
+  var tbody=document.getElementById('smsBody');tbody.innerHTML='';
+  var active=_smsList.filter(function(p){return p.sms_yn!=='N'&&p.phone;}).length;
+  document.getElementById('smsCount').textContent='총 '+_smsList.length+'명 / 발송 '+active+'명';
+  _smsList.forEach(function(p,i){
+    var hasSms=p.sms_yn!=='N', hasPhone=!!p.phone;
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><input type="checkbox" class="sms-check" data-idx="'+i+'" '+(hasSms&&hasPhone?'checked':'')+((!hasPhone)?' disabled':'')+'></td>'
+      +'<td><span class="chart-tag">'+p.chart_no+'</span></td>'
+      +'<td style="font-family:monospace;font-size:12px;">'+(p.phone||'<span style="color:var(--danger)">미등록</span>')+'</td>'
+      +'<td><span class="code-badge">'+displayDate(p.next_visit)+'</span></td>'
+      +'<td><label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" '+(hasSms?'checked':'')+' onchange="toggleSmsFlag(\''+p.chart_no+'\',this.checked,'+i+')"><span style="font-size:11px;color:'+(hasSms?'var(--success)':'var(--danger)')+';">'+(hasSms?'발송':'제외')+'</span></label></td>'
+      +'<td id="smsSt_'+i+'" style="font-size:12px;color:var(--text2);">대기</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleAll(m){document.querySelectorAll('.sms-check:not([disabled])').forEach(function(c){c.checked=m.checked;});}
+
+async function toggleSmsFlag(chartNo,checked,idx){
+  _smsList[idx].sms_yn=checked?'Y':'N';
+  var cb=document.querySelector('.sms-check[data-idx="'+idx+'"]');
+  if(cb) cb.checked=checked&&!!_smsList[idx].phone;
+  try{await sheetPost({action:'set_sms_flag',chart_no:chartNo,sms_yn:checked?'Y':'N'});}catch(e){}
+}
+
+async function sendSms(){
+  var key=localStorage.getItem('aligo_key'),id=localStorage.getItem('aligo_id'),sender=localStorage.getItem('aligo_sender');
+  if(!key||!id||!sender){alert('먼저 알리고 API 설정을 저장해주세요.');return;}
+  var checks=document.querySelectorAll('.sms-check:checked'), targets=[];
+  checks.forEach(function(cb){var p=_smsList[+cb.dataset.idx];if(p&&p.phone)targets.push({chart_no:p.chart_no,phone:p.phone,message:SMS_MSG[_smsGroup]});});
+  if(!targets.length){alert('발송 대상이 없습니다.');return;}
+  if(!confirm(targets.length+'명에게 문자를 발송합니다.')) return;
+  var btn=document.querySelector('#smsListCard .btn-success');
+  btn.disabled=true;btn.textContent='발송 중...';
+  try {
+    var data=await sheetPost({action:'send_sms',aligo_key:key,aligo_id:id,aligo_sender:sender,targets:targets});
+    var ok=0;
+    (data.results||[]).forEach(function(r,i){
+      var cb=document.querySelectorAll('.sms-check:checked')[i];
+      if(cb){var idx=+cb.dataset.idx;document.getElementById('smsSt_'+idx).innerHTML=r.success?'<span style="color:var(--success);">✓발송</span>':'<span style="color:var(--danger);">✕실패</span>';}
+      if(r.success) ok++;
+    });
+    setStatus('smsSendStatus',ok===targets.length?'success':'error',ok+'명 발송 완료'+(targets.length-ok>0?' / '+(targets.length-ok)+'명 실패':''));
+  } catch(err){alert('발송 실패: '+err.message);}
+  finally{btn.disabled=false;btn.innerHTML='&#128241; 전체 발송';}
+}
+
+// ── 공통 유틸 ──────────────────────────────────────────
+function setStatus(id,type,msg){
+  var el=document.getElementById(id);
+  el.className='status-bar status-'+type;
+  el.classList.remove('hidden');
+  if(type==='loading') el.innerHTML='<div class="spinner"></div><span>'+msg+'</span>';
+  else el.textContent=msg;
+}
+
+window.addEventListener('DOMContentLoaded', function(){
+  checkKey();
+  document.getElementById('pVisitDate').value=today6();
+});
+
+</script>
+</body>
+</html>
