@@ -1149,19 +1149,19 @@ ${drugListStr}
       const hasSms = p.sms_yn !== 'N';
       const hasPhone = !!p.phone;
       const tr = document.createElement('tr');
-      tr.innerHTML = \`
-        <td><input type="checkbox" class="sms-check" data-idx="\${i}" \${hasSms && hasPhone ? 'checked' : ''} \${!hasPhone ? 'disabled' : ''}></td>
-        <td><span class="chart-tag">\${p.chart_no}</span></td>
-        <td style="font-family:monospace;font-size:12px;">\${p.phone || '<span style="color:var(--danger)">미등록</span>'}</td>
-        <td><span class="code-badge">\${formatDate6Display(p.next_visit)}</span></td>
+      tr.innerHTML = `
+        <td><input type="checkbox" class="sms-check" data-idx="${i}" ${hasSms && hasPhone ? 'checked' : ''} ${!hasPhone ? 'disabled' : ''}></td>
+        <td><span class="chart-tag">${p.chart_no}</span></td>
+        <td style="font-family:monospace;font-size:12px;">${p.phone || '<span style="color:var(--danger)">미등록</span>'}</td>
+        <td><span class="code-badge">${formatDate6Display(p.next_visit)}</span></td>
         <td>
           <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-            <input type="checkbox" \${hasSms ? 'checked' : ''} onchange="toggleSmsFlag('\${p.chart_no}', this.checked, \${i})">
-            <span style="font-size:12px;color:\${hasSms ? 'var(--success)' : 'var(--danger)'};">\${hasSms ? '발송' : '제외'}</span>
+            <input type="checkbox" ${hasSms ? 'checked' : ''} onchange="toggleSmsFlag('${p.chart_no}', this.checked, ${i})">
+            <span style="font-size:12px;color:${hasSms ? 'var(--success)' : 'var(--danger)'};">${hasSms ? '발송' : '제외'}</span>
           </label>
         </td>
-        <td id="smsStatus_\${i}" style="font-size:12px;color:var(--text2);">대기</td>
-      \`;
+        <td id="smsStatus_${i}" style="font-size:12px;color:var(--text2);">대기</td>
+      `;
       tbody.appendChild(tr);
     });
     window._smsList = list;
@@ -1178,7 +1178,7 @@ ${drugListStr}
       });
     } catch(e) {}
     // 체크박스 상태 업데이트
-    const row = document.querySelector(\`.sms-check[data-idx="\${idx}"]\`);
+    const row = document.querySelector('.sms-check[data-idx="' + idx + '"]');
     if (row) row.checked = checked && !!window._smsList[idx].phone;
   }
 
