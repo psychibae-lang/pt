@@ -314,9 +314,15 @@
     font-family: 'Noto Sans KR', sans-serif;
     font-size: 13px;
     width: 60px;
+    min-width: 40px;
     outline: none;
     padding: 2px 4px;
     text-align: center;
+  }
+  .editable-td input:focus {
+    border-bottom-color: var(--accent);
+    background: rgba(79,142,247,0.05);
+    border-radius: 3px;
   }
 
   .editable-td input:focus { border-bottom-color: var(--accent); }
@@ -974,12 +980,12 @@ ${drugListStr}
     tr.dataset.idx = i;
     tr.innerHTML = `
       <td><span class="chart-tag">${cn}</span></td>
-      <td><span class="code-badge">${d.drug_code || ''}</span></td>
-      <td>${d.drug_name || ''}</td>
+      <td class="editable-td"><input type="text" value="${d.drug_code || ''}" onchange="updateDrug(${i},'drug_code',this.value)" style="width:80px;font-family:monospace;font-size:12px;color:var(--accent);"></td>
+      <td class="editable-td"><input type="text" value="${d.drug_name || ''}" onchange="updateDrug(${i},'drug_name',this.value)" style="width:140px;"></td>
       <td class="editable-td"><input type="text" value="${d.dose ?? ''}" onchange="updateDrug(${i},'dose',this.value)"></td>
       <td class="editable-td"><input type="text" value="${d.daily_freq ?? ''}" onchange="updateDrug(${i},'daily_freq',this.value)"></td>
       <td class="editable-td"><input type="text" value="${d.days ?? ''}" onchange="updateDrug(${i},'days',this.value)"></td>
-      <td><span class="method-badge">${d.method || ''}</span></td>
+      <td class="editable-td"><input type="text" value="${d.method || ''}" onchange="updateDrug(${i},'method',this.value)" style="width:50px;font-family:monospace;font-size:12px;color:var(--accent2);"></td>
       <td><button class="icon-btn" onclick="deleteRow(this)" title="삭제">✕</button></td>
     `;
     tbody.appendChild(tr);
