@@ -759,6 +759,33 @@
   // ── 설정 ──────────────────────────────────────────────
   const SUPABASE_PROXY = 'https://rurbfcocihvapbtdzbyt.supabase.co/functions/v1/claude-proxy';
   let SUPABASE_ANON_KEY = localStorage.getItem('sb_anon_key') || '';
+
+  // 구글시트 POST (Supabase 프록시 경유)
+  async function sheetPost(body) {
+    body._sheet_action = true;
+    const res = await fetch(SUPABASE_PROXY, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify(body)
+    });
+    return res.json();
+  }
+
+  // 구글시트 GET (Supabase 프록시 경유)
+  async function sheetGet(params) {
+    const res = await fetch(SUPABASE_PROXY, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({_sheet_get: params})
+    });
+    return res.json();
+  }
   // 구글시트 Apps Script 웹앱 URL (다음 단계에서 입력)
   const SHEET_WEBHOOK = 'https://script.google.com/macros/s/AKfycbx1qtGWka3_2Ue9XO4gy1hvYWn1yW-7YvPdrRBis96LOE_PDrf1dEq33ep5kHM0Ag/exec';
   // ─────────────────────────────────────────────────────
@@ -1009,12 +1036,8 @@ ${drugListStr}
 
     try {
       const action = isReplace ? 'replace_drugs' : 'save_drugs';
-      await fetch(SHEET_WEBHOOK, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({action, chart_no: chartNo, drugs: payload})
-      });
+      const saveResult = await sheetPost({action, chart_no: chartNo, drugs: payload});
+      if (!saveResult.success) throw new Error(JSON.stringify(saveResult));
       // 업데이트 모드 해제
       window._replaceDrugMode = false;
       window._replaceDrugChart = null;
@@ -1124,9 +1147,7 @@ ${drugListStr}
     btn.disabled = true;
     btn.textContent = '조회 중...';
     try {
-      const url = SHEET_WEBHOOK + '?action=get_sms_list&date=' + smsTargetDates.join(',');
-      const res  = await fetch(url);
-      const data = await res.json();
+      const data = await sheetGet({action: 'get_sms_list', date: smsTargetDates.join(',')});
       if (!data.success) throw new Error(data.error);
       renderSmsList(data.list || []);
       document.getElementById('smsListCard').classList.remove('hidden');
@@ -1171,11 +1192,7 @@ ${drugListStr}
     const smsYn = checked ? 'Y' : 'N';
     window._smsList[idx].sms_yn = smsYn;
     try {
-      await fetch(SHEET_WEBHOOK, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'set_sms_flag', chart_no: chartNo, sms_yn: smsYn})
-      });
+      await sheetPost({action: 'set_sms_flag', chart_no: chartNo, sms_yn: smsYn});
     } catch(e) {}
     // 체크박스 상태 업데이트
     const row = document.querySelector('.sms-check[data-idx="' + idx + '"]');
@@ -1211,12 +1228,7 @@ ${drugListStr}
     btn.textContent = '발송 중...';
 
     try {
-      const res  = await fetch(SHEET_WEBHOOK, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'send_sms', aligo_key: key, aligo_id: id, aligo_sender: sender, targets})
-      });
-      const data = await res.json();
+      const data = await sheetPost({action: 'send_sms', aligo_key: key, aligo_id: id, aligo_sender: sender, targets});
       const ok   = data.results ? data.results.filter(r => r.success).length : 0;
       const fail = targets.length - ok;
 
@@ -1413,9 +1425,7 @@ ${drugListStr}
     document.getElementById('patientInfoCard').classList.add('hidden');
 
     try {
-      const url = SHEET_WEBHOOK + '?action=get_patient&chart_no=' + encodeURIComponent(chartNo);
-      const res = await fetch(url);
-      const data = await res.json();
+      const data = await sheetGet({action: 'get_patient', chart_no: chartNo});
 
       if (!data.success) throw new Error(data.error);
 
@@ -1464,11 +1474,7 @@ ${drugListStr}
     if (!chartNo || !phone) return;
 
     try {
-      await fetch(SHEET_WEBHOOK, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'save_phone', chart_no: chartNo, phone})
-      });
+      await sheetPost({action: 'save_phone', chart_no: chartNo, phone});
       const el = document.getElementById('phoneSaveStatus');
       el.className = 'status-bar status-success';
       el.classList.remove('hidden');
@@ -1490,11 +1496,7 @@ ${drugListStr}
     if (!chartNo || !visitDate) return;
 
     try {
-      await fetch(SHEET_WEBHOOK, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'save_visit', chart_no: chartNo, visit_date: visitDate, next_visit_date: nextVisitDate})
-      });
+      await sheetPost({action: 'save_visit', chart_no: chartNo, visit_date: visitDate, next_visit_date: nextVisitDate});
       const el = document.getElementById('visitSaveStatus');
       el.className = 'status-bar status-success';
       el.classList.remove('hidden');
