@@ -1373,149 +1373,31 @@ ${drugListStr}
       return;
     }
     countEl.textContent = drugs.length + '개';
+    // 편집 가능한 약물 목록 저장
+    window._patientDrugs = JSON.parse(JSON.stringify(drugs));
+
     let html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
     html += '<thead><tr>';
-    ['약물코드','약물명','용량','일투','일수','용법'].forEach(h => {
+    ['약물코드','약물명','용량','일투','일수','용법',''].forEach(h => {
       html += '<th style="background:var(--bg);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);">' + h + '</th>';
     });
     html += '</tr></thead><tbody>';
-    drugs.forEach(d => {
+    const tdStyle = 'padding:4px 6px;border-bottom:1px solid rgba(46,51,80,0.4);';
+    const inputStyle = 'background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:Noto Sans KR,sans-serif;font-size:13px;outline:none;padding:2px 4px;width:100%;';
+    drugs.forEach((d, i) => {
       html += '<tr>';
-      html += '<td style="padding:8px 10px;border-bottom:1px solid rgba(46,51,80,0.4);"><span class="code-badge">' + (d.drug_code||'') + '</span></td>';
-      html += '<td style="padding:8px 10px;border-bottom:1px solid rgba(46,51,80,0.4);">' + (d.drug_name||'') + '</td>';
-      html += '<td style="padding:8px 10px;border-bottom:1px solid rgba(46,51,80,0.4);text-align:center;">' + (d.dose||'') + '</td>';
-      html += '<td style="padding:8px 10px;border-bottom:1px solid rgba(46,51,80,0.4);text-align:center;">' + (d.daily_freq||'') + '</td>';
-      html += '<td style="padding:8px 10px;border-bottom:1px solid rgba(46,51,80,0.4);text-align:center;">' + (d.days||'') + '</td>';
-      html += '<td style="padding:8px 10px;border-bottom:1px solid rgba(46,51,80,0.4);"><span class="method-badge">' + (d.method||'') + '</span></td>';
-      html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-    el.innerHTML = html;
-  }
-
-  // 약물 업데이트 → 약물입력 탭으로 이동하고 챠트번호 자동 입력
-  function goToUpdateDrug() {
-    const chartNo = document.getElementById('pChartNo').value.trim();
-    switchMainTab('drug');
-    document.getElementById('chartNo').value = chartNo;
-    // 약물 저장 시 replace_drugs action 사용하도록 플래그
-    window._replaceDrugMode = true;
-    window._replaceDrugChart = chartNo;
-    // 안내 표시
-    const statusBar = document.getElementById('statusBar');
-    statusBar.className = 'status-bar status-loading';
-    statusBar.classList.remove('hidden');
-    statusBar.innerHTML = '⚠️ 약물 업데이트 모드 — 저장 시 기존 약물이 교체됩니다. 챠트번호: ' + chartNo;
-  }
-
-  // ── 메인 탭 전환 ───────────────────────────────────
-  function switchMainTab(tab) {
-    ['drug','patient','sms'].forEach(t => {
-      document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('hidden', tab !== t);
-      document.getElementById('nav'  + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle('active', tab === t);
-    });
-    if (tab === 'sms') loadAligoConfig();
-  }
-
-  // ── 환자 검색 ──────────────────────────────────────
-  function clearPatientResult() {
-    document.getElementById('patientInfoCard').classList.add('hidden');
-    document.getElementById('searchStatus').classList.add('hidden');
-  }
-
-  async function searchPatient() {
-    const chartNo = document.getElementById('pChartNo').value.trim();
-    if (!chartNo) return;
-
-    setSearchStatus('loading', '조회 중...');
-    document.getElementById('patientInfoCard').classList.add('hidden');
-
-    try {
-      const data = await sheetGet({action: 'get_patient', chart_no: chartNo});
-
-      if (!data.success) throw new Error(data.error);
-
-      // 정보 표시
-      document.getElementById('piChart').textContent = chartNo;
-      document.getElementById('piPhone').textContent = data.phone || '미등록';
-      document.getElementById('piVisit').textContent = data.visit ? formatDate6(data.visit.visit_date) : '없음';
-      document.getElementById('piNextVisit').textContent = (data.visit && data.visit.next_visit_date) ? formatDate6(data.visit.next_visit_date) : '없음';
-
-      const isNew = !data.phone && !data.visit;
-      document.getElementById('piTag').innerHTML = isNew
-        ? '<span class="tag-new">신환</span>'
-        : '<span class="tag-exist">기존</span>';
-
-      // 기존 값 입력창에 채우기
-      document.getElementById('pPhone').value = data.phone || '';
-      document.getElementById('pVisitDate').value = todayDate6();
-      document.getElementById('pNextVisitDate').value = '';
-      document.getElementById('clearNextBtn').classList.add('hidden');
-      initCalendar();
-
-      // 복용약물 렌더링
-      renderDrugList(data.drugs || []);
-
-      document.getElementById('patientInfoCard').classList.remove('hidden');
-      setSearchStatus('success', isNew ? '신환입니다. 정보를 등록해주세요.' : '환자 정보를 불러왔습니다.');
-
-    } catch(err) {
-      setSearchStatus('error', '조회 실패: ' + err.message);
-    }
-  }
-
-  function setSearchStatus(type, msg) {
-    const el = document.getElementById('searchStatus');
-    el.className = 'status-bar';
-    el.classList.remove('hidden');
-    if (type === 'loading') { el.classList.add('status-loading'); el.innerHTML = '<div class="spinner"></div><span>' + msg + '</span>'; }
-    else if (type === 'success') { el.classList.add('status-success'); el.innerHTML = '✓ ' + msg; }
-    else { el.classList.add('status-error'); el.innerHTML = '✕ ' + msg; }
-  }
-
-  // ── 전화번호 저장 ───────────────────────────────────
-  async function savePhone() {
-    const chartNo = document.getElementById('pChartNo').value.trim();
-    const phone = document.getElementById('pPhone').value.trim();
-    if (!chartNo || !phone) return;
-
-    try {
-      await sheetPost({action: 'save_phone', chart_no: chartNo, phone});
-      const el = document.getElementById('phoneSaveStatus');
-      el.className = 'status-bar status-success';
-      el.classList.remove('hidden');
-      el.textContent = '✓ 전화번호 저장됨';
-      searchPatient(); // 갱신
-    } catch(err) {
-      const el = document.getElementById('phoneSaveStatus');
-      el.className = 'status-bar status-error';
-      el.classList.remove('hidden');
-      el.textContent = '✕ 저장 실패: ' + err.message;
-    }
-  }
-
-  // ── 내원일 저장 ─────────────────────────────────────
-  async function saveVisit() {
-    const chartNo = document.getElementById('pChartNo').value.trim();
-    const visitDate = document.getElementById('pVisitDate').value.trim();
-    const nextVisitDate = document.getElementById('pNextVisitDate').value.trim();
-    if (!chartNo || !visitDate) return;
-
-    try {
-      await sheetPost({action: 'save_visit', chart_no: chartNo, visit_date: visitDate, next_visit_date: nextVisitDate});
-      const el = document.getElementById('visitSaveStatus');
-      el.className = 'status-bar status-success';
-      el.classList.remove('hidden');
-      el.textContent = '✓ 내원일 저장됨';
-      searchPatient(); // 갱신
-    } catch(err) {
-      const el = document.getElementById('visitSaveStatus');
-      el.className = 'status-bar status-error';
-      el.classList.remove('hidden');
-      el.textContent = '✕ 저장 실패: ' + err.message;
-    }
-  }
-
-</script>
-</body>
-</html>
+      const pdFields = ['drug_code','drug_name','dose','daily_freq','days','method'];
+      const pdWidths  = ['75px','130px','40px','35px','35px','40px'];
+      const pdExtras  = ['font-family:monospace;color:var(--accent);font-size:12px;','','text-align:center;','text-align:center;','text-align:center;','font-family:monospace;color:var(--accent2);font-size:12px;'];
+      pdFields.forEach(function(f, fi) {
+        var val = ((d[f] !== undefined ? d[f] : '') + '').replace(/"/g, '&quot;');
+        html += '<td style="' + tdStyle + '"><input style="' + inputStyle + 'width:' + pdWidths[fi] + ';' + pdExtras[fi] + '" value="' + val + '" data-idx="' + i + '" data-field="' + f + '" onchange="updatePatientDrug(+this.dataset.idx, this.dataset.field, this.value)"></td>';
+      });
+            const pdFields = ['drug_code','drug_name','dose','daily_freq','days','method'];
+      const pdWidths  = ['75px','130px','40px','35px','35px','40px'];
+      const pdExtras  = ['font-family:monospace;color:var(--accent);font-size:12px;','','text-align:center;','text-align:center;','text-align:center;','font-family:monospace;color:var(--accent2);font-size:12px;'];
+      pdFields.forEach(function(f, fi) {
+        var val = ((d[f] !== undefined ? d[f] : '') + '').replace(/"/g, '&quot;');
+        html += '<td style="' + tdStyle + '"><input style="' + inputStyle + 'width:' + pdWidths[fi] + ';' + pdExtras[fi] + '" value="' + val + '" data-idx="' + i + '" data-field="' + f + '" onchange="updatePatientDrug(+this.dataset.idx, this.dataset.field, this.value)"></td>';
+      });
+      
