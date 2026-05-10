@@ -7,124 +7,120 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3350;--accent:#4f8ef7;--accent2:#7c5cfc;--success:#2dd4a0;--warn:#f7c14f;--text:#e8eaf6;--text2:#8890b0;--danger:#f75f5f;}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
-.logo{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--accent);background:rgba(79,142,247,0.1);padding:4px 10px;border-radius:6px;border:1px solid rgba(79,142,247,0.3);}
-#keyBanner{background:var(--surface);border-bottom:1px solid var(--border);padding:6px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-#keyBanner input{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text);font-family:monospace;font-size:12px;outline:none;}
-.nav-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;}
-.nav-tab{background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:12px 16px;cursor:pointer;transition:all 0.15s;}
+:root{--bg:#f7f8fc;--surface:#fff;--surface2:#f0f2f8;--border:#e0e4ef;--accent:#4f8ef7;--accent2:#7c5cfc;--success:#18a97a;--warn:#e6a817;--text:#1a1d2e;--text2:#6b7280;--danger:#e53e3e;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+header{background:#fff;border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.logo{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);background:#eef3fe;padding:3px 10px;border-radius:6px;border:1px solid #c7d9fb;}
+#keyBanner{background:#fff;border-bottom:1px solid var(--border);padding:6px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+#keyBanner input{flex:1;min-width:160px;background:#f7f8fc;border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text);font-family:monospace;font-size:12px;outline:none;}
+.nav-bar{background:#fff;border-bottom:2px solid var(--border);padding:0 20px;display:flex;overflow-x:auto;}
+.nav-tab{background:none;border:none;border-bottom:3px solid transparent;color:var(--text2);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;padding:11px 14px;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
 .nav-tab:hover{color:var(--text);}.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-.container{max-width:860px;margin:0 auto;padding:20px 14px;display:flex;flex-direction:column;gap:16px;}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;}
-.card-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.card-title::before{content:'';width:3px;height:13px;background:var(--accent);border-radius:2px;display:inline-block;}
-.input-group{display:flex;flex-direction:column;gap:5px;flex:1;}
+.container{max-width:680px;margin:0 auto;padding:16px 12px;display:flex;flex-direction:column;gap:14px;}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.card-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.card-title::before{content:'';width:3px;height:12px;background:var(--accent);border-radius:2px;display:inline-block;}
+.input-group{display:flex;flex-direction:column;gap:4px;flex:1;}
 label{font-size:12px;color:var(--text2);font-weight:500;}
-input[type=text],input[type=password]{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;outline:none;transition:border-color 0.2s;width:100%;}
-input[type=text]:focus,input[type=password]:focus{border-color:var(--accent);}
-.input-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
-.btn{padding:10px 18px;border-radius:9px;border:none;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;box-shadow:0 4px 14px rgba(79,142,247,0.3);}
-.btn-primary:hover:not(:disabled){transform:translateY(-1px);}.btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
-.btn-success{background:linear-gradient(135deg,var(--success),#1aab7a);color:white;box-shadow:0 4px 14px rgba(45,212,160,0.25);}
-.btn-success:hover:not(:disabled){transform:translateY(-1px);}.btn-success:disabled{opacity:0.5;cursor:not-allowed;}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2);}
+input[type=text],input[type=password]{background:#f7f8fc;border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-size:14px;outline:none;transition:border-color 0.2s;width:100%;}
+input[type=text]:focus,input[type=password]:focus{border-color:var(--accent);background:#fff;}
+.input-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;}
+.btn{padding:9px 16px;border-radius:8px;border:none;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(79,142,247,0.25);}
+.btn-primary:hover:not(:disabled){background:#3a7ef0;}.btn-primary:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-success{background:var(--success);color:#fff;box-shadow:0 2px 8px rgba(24,169,122,0.2);}
+.btn-success:hover:not(:disabled){background:#148f68;}.btn-success:disabled{opacity:0.5;cursor:not-allowed;}
+.btn-outline{background:#fff;border:1px solid var(--border);color:var(--text2);}
 .btn-outline:hover,.btn-outline.active{border-color:var(--accent);color:var(--accent);}
-.btn-lg{padding:14px 24px;font-size:15px;border-radius:10px;width:100%;justify-content:center;}
-.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--bg);}
-.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(79,142,247,0.05);}
+.btn-lg{padding:13px 20px;font-size:14px;border-radius:9px;width:100%;justify-content:center;}
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:24px 16px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:#f7f8fc;}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:#eef3fe;}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 .preview-img{max-width:100%;max-height:180px;border-radius:8px;border:1px solid var(--border);object-fit:contain;}
-.status-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;font-size:13px;}
-.status-loading{background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.2);color:var(--accent);}
-.status-success{background:rgba(45,212,160,0.1);border:1px solid rgba(45,212,160,0.2);color:var(--success);}
-.status-error{background:rgba(247,95,95,0.1);border:1px solid rgba(247,95,95,0.2);color:var(--danger);}
-.spinner{width:15px;height:15px;border:2px solid rgba(79,142,247,0.3);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+.status-bar{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;font-size:13px;}
+.status-loading{background:#eef3fe;border:1px solid #c7d9fb;color:var(--accent);}
+.status-success{background:#e6f7f1;border:1px solid #a7dfca;color:var(--success);}
+.status-error{background:#fef0f0;border:1px solid #fbb;color:var(--danger);}
+.spinner{width:14px;height:14px;border:2px solid #c7d9fb;border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
 @keyframes spin{to{transform:rotate(360deg);}}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-th{background:var(--bg);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);}
-td{padding:8px 10px;border-bottom:1px solid rgba(46,51,80,0.5);color:var(--text);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(79,142,247,0.03);}
-.code-badge{font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(79,142,247,0.12);color:var(--accent);padding:3px 8px;border-radius:5px;border:1px solid rgba(79,142,247,0.2);}
-.chart-tag{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--warn);background:rgba(247,193,79,0.1);padding:2px 8px;border-radius:5px;border:1px solid rgba(247,193,79,0.2);}
-.tag-new{font-size:11px;background:rgba(45,212,160,0.15);color:var(--success);border:1px solid rgba(45,212,160,0.3);padding:3px 9px;border-radius:5px;font-weight:700;}
-.tag-exist{font-size:11px;background:rgba(79,142,247,0.12);color:var(--accent);border:1px solid rgba(79,142,247,0.2);padding:3px 9px;border-radius:5px;font-weight:700;}
-.edit-input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none;padding:2px 4px;text-align:center;}
+th{background:#f7f8fc;color:var(--text2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;padding:8px 10px;text-align:left;border-bottom:2px solid var(--border);}
+td{padding:8px 10px;border-bottom:1px solid #f0f2f8;color:var(--text);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
+.code-badge{font-family:'JetBrains Mono',monospace;font-size:11px;background:#eef3fe;color:var(--accent);padding:2px 7px;border-radius:4px;border:1px solid #c7d9fb;}
+.chart-tag{font-family:'JetBrains Mono',monospace;font-size:13px;color:#b45309;background:#fef3c7;padding:2px 7px;border-radius:4px;border:1px solid #fde68a;}
+.tag-new{font-size:11px;background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;padding:2px 8px;border-radius:4px;font-weight:700;}
+.tag-exist{font-size:11px;background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;padding:2px 8px;border-radius:4px;font-weight:700;}
+.edit-input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:12px;outline:none;padding:2px 3px;text-align:center;}
 .edit-input:focus{border-bottom-color:var(--accent);}
-.icon-btn{background:none;border:none;cursor:pointer;color:var(--text2);padding:3px 6px;border-radius:5px;font-size:13px;}
-.icon-btn:hover{background:var(--surface2);color:var(--danger);}
-.tabs{display:flex;gap:4px;background:var(--bg);border-radius:8px;padding:4px;border:1px solid var(--border);margin-bottom:14px;width:fit-content;}
-.tab{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);transition:all 0.15s;border:none;background:none;}
-.tab.active{background:var(--surface2);color:var(--text);}
-.json-preview{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);white-space:pre;overflow-x:auto;max-height:180px;overflow-y:auto;}
+.icon-btn{background:none;border:none;cursor:pointer;color:#bbb;padding:3px 5px;border-radius:4px;font-size:12px;}
+.icon-btn:hover{background:#fef0f0;color:var(--danger);}
+.tabs{display:flex;gap:3px;background:#f7f8fc;border-radius:7px;padding:3px;border:1px solid var(--border);margin-bottom:12px;width:fit-content;}
+.tab{padding:4px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text2);transition:all 0.15s;border:none;background:none;}
+.tab.active{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+.json-preview{background:#f7f8fc;border:1px solid var(--border);border-radius:7px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);white-space:pre;overflow-x:auto;max-height:160px;overflow-y:auto;}
 .hidden{display:none!important;}
-.sms-group-btn{font-size:12px;padding:7px 10px;}
 /* 환자 카드 */
-.pt-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.pt-card-row{display:flex;flex-direction:column;gap:3px;}
-.pt-card-label{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;}
-.pt-card-val{font-size:14px;color:var(--text);font-family:'JetBrains Mono',monospace;}
-/* 토글 버튼 */
-.toggle-group{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);}
-.toggle-btn{flex:1;padding:10px;border:none;font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:600;cursor:pointer;background:var(--bg);color:var(--text2);transition:all 0.15s;}
-.toggle-btn.active.toggle-y{background:var(--success);color:white;}
-.toggle-btn.active.toggle-n{background:var(--surface2);color:var(--text);}
+.pt-card{background:#f7f8fc;border:1px solid var(--border);border-radius:10px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pt-card-row{display:flex;flex-direction:column;gap:2px;}
+.pt-card-label{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;}
+.pt-card-val{font-size:13px;color:var(--text);font-weight:500;}
+/* 토글 */
+.toggle-group{display:flex;border-radius:7px;overflow:hidden;border:1px solid var(--border);}
+.toggle-btn{flex:1;padding:9px;border:none;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:600;cursor:pointer;background:#f7f8fc;color:var(--text2);transition:all 0.15s;}
+.toggle-btn.active.toggle-y{background:var(--success);color:#fff;}
+.toggle-btn.active.toggle-n{background:#e5e7eb;color:var(--text);}
+/* SMS 그룹 */
+.sms-group-btn{font-size:12px;padding:6px 10px;}
+.sms-group-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
 /* 달력 오버레이 */
-#calWrap{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);}
-#calBox{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;min-width:280px;}
-.cal-day{border:none;border-radius:6px;padding:7px 2px;font-size:14px;cursor:pointer;width:100%;background:none;color:var(--text);}
-.cal-day:hover{background:var(--surface2);}
-.cal-day.today{background:rgba(79,142,247,0.15);color:var(--accent);font-weight:600;}
-.cal-day.selected{background:var(--accent);color:white;font-weight:700;}
+#calWrap{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.3);}
+#calBox{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;min-width:270px;box-shadow:0 8px 32px rgba(0,0,0,0.12);}
+.cal-day{border:none;border-radius:5px;padding:6px 2px;font-size:13px;cursor:pointer;width:100%;background:none;color:var(--text);}
+.cal-day:hover{background:#f0f4ff;}
+.cal-day.today{background:#eef3fe;color:var(--accent);font-weight:600;}
+.cal-day.selected{background:var(--accent);color:#fff;font-weight:700;}
 .cal-day.sun{color:var(--danger);}
-@media(max-width:600px){.nav-tab{padding:10px 10px;font-size:12px;}.pt-card{grid-template-columns:1fr;}}
+@media(max-width:600px){.nav-tab{padding:9px 10px;font-size:12px;}.pt-card{grid-template-columns:1fr;}.container{padding:10px 8px;}}
 </style>
 </head>
 <body>
 <header>
-  <span class="logo">MED&#xB7;RX</span>
-  <span style="font-size:14px;color:var(--text2);">한강의원</span>
+  <span class="logo">MED·RX</span>
+  <span style="font-size:14px;color:var(--text2);font-weight:500;">한강의원</span>
 </header>
-
 <div id="keyBanner">
-  <span style="font-size:12px;color:var(--text2);white-space:nowrap;">&#128273; Supabase Key</span>
+  <span style="font-size:11px;color:var(--text2);">🔑 Supabase Key</span>
   <input type="password" id="keyInput" placeholder="eyJhbGci...">
-  <button onclick="saveKey()" class="btn btn-primary" style="font-size:12px;padding:5px 12px;">저장</button>
-  <span id="keyStatus" style="font-size:12px;color:var(--text2);"></span>
+  <button onclick="saveKey()" class="btn btn-primary" style="font-size:11px;padding:5px 10px;">저장</button>
+  <span id="keyStatus" style="font-size:11px;color:var(--text2);"></span>
 </div>
-
 <div class="nav-bar">
-  <button class="nav-tab active" id="navPatient" onclick="switchTab('patient')">&#128100; 진료</button>
-  <button class="nav-tab" id="navDrug" onclick="switchTab('drug')">&#128138; 약물 입력</button>
-  <button class="nav-tab" id="navSms" onclick="switchTab('sms')">&#128241; 문자 발송</button>
+  <button class="nav-tab active" id="navPatient" onclick="switchTab('patient')">👤 진료</button>
+  <button class="nav-tab" id="navDrug" onclick="switchTab('drug')">💊 약물입력</button>
+  <button class="nav-tab" id="navProxy" onclick="switchTab('proxy')">📋 대리처방</button>
+  <button class="nav-tab" id="navSelcare" onclick="switchTab('selcare')">⭐ 선택의료</button>
+  <button class="nav-tab" id="navSms" onclick="switchTab('sms')">📱 문자발송</button>
 </div>
 
-<!-- ══ 진료 탭 ══════════════════════════════════════ -->
+<!-- ══ 진료 탭 ══ -->
 <div id="tabPatient" class="container">
-
-  <!-- 검색 -->
   <div class="card">
     <div class="card-title">환자 조회</div>
     <div class="input-row">
-      <div class="input-group" style="max-width:180px;">
-        <label>챠트번호</label>
-        <input type="text" id="pChartNo" placeholder="예: 26" oninput="clearPatient()">
-      </div>
-      <button class="btn btn-primary" onclick="searchPatient()">&#128269; 조회</button>
+      <div class="input-group" style="max-width:160px;"><label>챠트번호</label><input type="text" id="pChartNo" placeholder="예: 26" oninput="clearPatient()"></div>
+      <button class="btn btn-primary" onclick="searchPatient()">🔍 조회</button>
     </div>
-    <div id="searchStatus" class="hidden" style="margin-top:12px;"></div>
+    <div id="searchStatus" class="hidden" style="margin-top:10px;"></div>
   </div>
 
-  <!-- 환자 카드 -->
   <div class="card hidden" id="patientCard">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-family:monospace;font-size:20px;font-weight:700;color:var(--text);" id="pcChart"></span>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:monospace;font-size:18px;font-weight:700;" id="pcChart"></span>
         <span id="pcTag"></span>
       </div>
-      <button class="btn btn-primary btn-lg" onclick="openVisitForm()" style="width:auto;padding:10px 20px;">&#9998; 진료 입력</button>
+      <button class="btn btn-primary" onclick="openVisitForm()" style="padding:9px 16px;">✏️ 진료 입력</button>
     </div>
     <div class="pt-card">
       <div class="pt-card-row"><span class="pt-card-label">전화번호</span><span class="pt-card-val" id="pcPhone"></span></div>
@@ -136,302 +132,288 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:rgba(79,142,247,0.03
     </div>
   </div>
 
-  <!-- 진료 입력 폼 -->
   <div class="card hidden" id="visitForm">
     <div class="card-title">진료 입력</div>
-
-    <!-- 진료일 (오늘 자동) -->
-    <div style="margin-bottom:16px;background:rgba(79,142,247,0.07);border:1px solid rgba(79,142,247,0.2);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
-      <span style="font-size:12px;color:var(--text2);">진료일</span>
-      <span style="font-size:15px;font-weight:600;color:var(--accent);" id="pVisitDateDisp"></span>
+    <div style="background:#eef3fe;border:1px solid #c7d9fb;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:11px;color:var(--text2);">진료일</span>
+      <span style="font-size:15px;font-weight:700;color:var(--accent);" id="pVisitDateDisp"></span>
     </div>
-
-    <!-- 다음내원일 -->
-    <div style="margin-bottom:16px;">
+    <div style="margin-bottom:14px;">
       <label style="display:block;margin-bottom:6px;">다음내원일</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="pNextVisitDate" placeholder="미선택" readonly style="cursor:pointer;max-width:160px;" onclick="openCal('pNextVisitDate')">
-        <button onclick="openCal('pNextVisitDate')" class="btn btn-outline" style="padding:10px 14px;">&#128197; 선택</button>
-        <button onclick="document.getElementById('pNextVisitDate').value=''" class="btn btn-outline" style="padding:10px 14px;color:var(--danger);">&#10005;</button>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="text" id="pNextVisitDate" placeholder="미선택" readonly style="cursor:pointer;max-width:140px;background:#fff;" onclick="openCal('pNextVisitDate')">
+        <button onclick="openCal('pNextVisitDate')" class="btn btn-outline" style="padding:9px 12px;">📅</button>
+        <button onclick="document.getElementById('pNextVisitDate').value=''" class="btn btn-outline" style="padding:9px 12px;color:var(--danger);">✕</button>
       </div>
     </div>
-
-    <!-- 복용약물 -->
-    <div style="margin-bottom:16px;padding-top:14px;border-top:1px solid var(--border);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+    <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <div class="card-title" style="margin-bottom:0;">복용약물</div>
-        <span id="piDrugCount" style="font-size:12px;color:var(--text2);"></span>
+        <span id="piDrugCount" style="font-size:11px;color:var(--text2);"></span>
       </div>
       <div id="piDrugArea"></div>
     </div>
-
-    <!-- 대리처방 -->
-    <div style="margin-bottom:14px;padding-top:14px;border-top:1px solid var(--border);">
-      <label style="display:block;margin-bottom:8px;">대리처방</label>
+    <div style="margin-bottom:12px;padding-top:12px;border-top:1px solid var(--border);">
+      <label style="display:block;margin-bottom:6px;">대리처방</label>
       <div class="toggle-group" id="pProxyRx" data-val="N">
         <button class="toggle-btn toggle-y" onclick="toggleBtn('pProxyRx','Y')">예</button>
         <button class="toggle-btn toggle-n active" onclick="toggleBtn('pProxyRx','N')">아니오</button>
       </div>
     </div>
-
-    <!-- 선택의료 -->
-    <div style="margin-bottom:14px;">
-      <label style="display:block;margin-bottom:8px;">선택의료</label>
+    <div style="margin-bottom:12px;">
+      <label style="display:block;margin-bottom:6px;">선택의료</label>
       <div class="toggle-group" id="pSelCare" data-val="N">
         <button class="toggle-btn toggle-y" onclick="toggleBtn('pSelCare','Y')">예</button>
         <button class="toggle-btn toggle-n active" onclick="toggleBtn('pSelCare','N')">아니오</button>
       </div>
     </div>
-
-    <!-- 전화번호 -->
-    <div style="margin-bottom:14px;padding-top:14px;border-top:1px solid var(--border);">
+    <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border);">
       <div class="input-row">
-        <div class="input-group">
-          <label>전화번호</label>
-          <input type="text" id="pPhone" placeholder="01012345678" maxlength="13">
-        </div>
-        <div class="input-group" style="max-width:100px;">
-          <label>문자 발송</label>
-          <label style="display:flex;align-items:center;gap:6px;padding:10px 0;cursor:pointer;">
-            <input type="checkbox" id="pSmsYn" checked style="width:16px;height:16px;">
+        <div class="input-group"><label>전화번호</label><input type="text" id="pPhone" placeholder="01012345678" maxlength="13"></div>
+        <div class="input-group" style="max-width:90px;">
+          <label>문자발송</label>
+          <label style="display:flex;align-items:center;gap:5px;padding:9px 0;cursor:pointer;">
+            <input type="checkbox" id="pSmsYn" checked style="width:15px;height:15px;">
             <span style="font-size:13px;">허용</span>
           </label>
         </div>
       </div>
     </div>
-
-    <!-- 저장 버튼 -->
-    <button class="btn btn-success btn-lg" id="saveAllBtn" onclick="saveVisitAll()">&#128190; 저장</button>
-    <div id="visitSaveStatus" class="hidden" style="margin-top:10px;"></div>
+    <button class="btn btn-success btn-lg" id="saveAllBtn" onclick="saveVisitAll()">💾 저장</button>
+    <div id="visitSaveStatus" class="hidden" style="margin-top:8px;"></div>
   </div>
-
 </div>
 
-<!-- ══ 약물 입력 탭 ════════════════════════════════ -->
+<!-- ══ 약물입력 탭 ══ -->
 <div id="tabDrug" class="container hidden">
   <div class="card">
-    <div class="card-title">STEP 1 &nbsp; 환자 정보 입력</div>
-    <div class="input-row" style="margin-bottom:16px;">
-      <div class="input-group" style="max-width:200px;"><label>챠트번호</label><input type="text" id="chartNo" placeholder="예: 10587"></div>
+    <div class="card-title">STEP 1 · 환자 정보</div>
+    <div class="input-row" style="margin-bottom:14px;">
+      <div class="input-group" style="max-width:180px;"><label>챠트번호</label><input type="text" id="chartNo" placeholder="예: 10587"></div>
     </div>
-    <label style="display:block;margin-bottom:8px;">EMR 이미지 업로드</label>
+    <label style="display:block;margin-bottom:6px;">EMR 이미지 업로드</label>
     <div class="upload-zone" id="uploadZone">
       <input type="file" id="fileInput" accept="image/*">
       <div id="uploadPlaceholder">
-        <div style="font-size:28px;margin-bottom:8px;">&#128203;</div>
+        <div style="font-size:26px;margin-bottom:6px;">📋</div>
         <div style="font-size:13px;color:var(--text2);">EMR 약물 처방 화면을 드래그하거나 클릭</div>
-        <div style="font-size:11px;color:var(--border);margin-top:4px;">PNG &middot; JPG &middot; WEBP</div>
+        <div style="font-size:11px;color:#aaa;margin-top:3px;">PNG · JPG · WEBP</div>
       </div>
       <img id="previewImg" class="preview-img hidden">
     </div>
   </div>
   <div class="card">
-    <div class="card-title">STEP 2 &nbsp; AI 변환</div>
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-primary" id="convertBtn" onclick="convertImage()" disabled>&#10022; Claude로 변환하기</button>
+    <div class="card-title">STEP 2 · AI 변환</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" id="convertBtn" onclick="convertImage()" disabled>✦ Claude로 변환</button>
       <div id="convertStatus" class="hidden"></div>
     </div>
   </div>
   <div class="card hidden" id="resultCard">
-    <div class="card-title">STEP 3 &nbsp; 결과 확인 및 저장</div>
+    <div class="card-title">STEP 3 · 결과 확인 및 저장</div>
     <div class="tabs">
-      <button class="tab active" id="tabTable" onclick="switchResultTab('table')">테이블 뷰</button>
-      <button class="tab" id="tabJson" onclick="switchResultTab('json')">JSON 뷰</button>
+      <button class="tab active" id="tabTable" onclick="switchResultTab('table')">테이블</button>
+      <button class="tab" id="tabJson" onclick="switchResultTab('json')">JSON</button>
     </div>
     <div id="tableView">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-        <div style="font-size:12px;color:var(--text2);">챠트번호 <strong id="metaChart" style="font-family:monospace;color:var(--text);"></strong> &nbsp; 약물 수 <strong id="metaCount" style="font-family:monospace;color:var(--text);"></strong></div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-outline" onclick="addDrugRow()" style="font-size:11px;padding:7px 12px;">+ 행 추가</button>
-          <button class="btn btn-success" onclick="saveDrugs()">&#128190; 저장</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;">
+        <div style="font-size:12px;color:var(--text2);">챠트 <strong id="metaChart" style="color:var(--text);"></strong> · <strong id="metaCount" style="color:var(--text);"></strong></div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-outline" onclick="addDrugRow()" style="font-size:11px;padding:6px 10px;">+ 행 추가</button>
+          <button class="btn btn-success" onclick="saveDrugs()">💾 저장</button>
         </div>
       </div>
       <div style="overflow-x:auto;">
-        <table><thead><tr><th>챠트번호</th><th>약물코드</th><th>약물명</th><th>용량</th><th>일투</th><th>일수</th><th>용법</th><th></th></tr></thead><tbody id="drugTableBody"></tbody></table>
+        <table><thead><tr><th>챠트</th><th>코드</th><th>약물명</th><th>용량</th><th>일투</th><th>일수</th><th>용법</th><th></th></tr></thead><tbody id="drugTableBody"></tbody></table>
       </div>
-      <div id="drugSaveStatus" class="hidden" style="margin-top:10px;"></div>
+      <div id="drugSaveStatus" class="hidden" style="margin-top:8px;"></div>
     </div>
     <div id="jsonView" class="hidden"><pre class="json-preview" id="jsonPreview"></pre></div>
   </div>
 </div>
 
-<!-- ══ 문자 발송 탭 ══════════════════════════════════ -->
+<!-- ══ 대리처방 탭 ══ -->
+<div id="tabProxy" class="container hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="card-title" style="margin-bottom:0;">대리처방 환자 명단</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="proxyCount" style="font-size:12px;color:var(--text2);"></span>
+        <button class="btn btn-primary" onclick="loadSpecialList('proxy')" style="font-size:11px;padding:6px 10px;">🔄 새로고침</button>
+      </div>
+    </div>
+    <div id="proxyStatus" class="hidden" style="margin-bottom:10px;"></div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>챠트번호</th><th>최근내원일</th><th>다음내원일</th><th>전화번호</th></tr></thead>
+        <tbody id="proxyBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 선택의료 탭 ══ -->
+<div id="tabSelcare" class="container hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div class="card-title" style="margin-bottom:0;">선택의료 환자 명단</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="selcareCount" style="font-size:12px;color:var(--text2);"></span>
+        <button class="btn btn-primary" onclick="loadSpecialList('selcare')" style="font-size:11px;padding:6px 10px;">🔄 새로고침</button>
+      </div>
+    </div>
+    <div id="selcareStatus" class="hidden" style="margin-bottom:10px;"></div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>챠트번호</th><th>최근내원일</th><th>다음내원일</th><th>전화번호</th></tr></thead>
+        <tbody id="selcareBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 문자발송 탭 ══ -->
 <div id="tabSms" class="container hidden">
   <div class="card">
     <div class="card-title">알리고 API 설정</div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
+    <div style="display:flex;flex-direction:column;gap:8px;">
       <div class="input-row">
         <div class="input-group"><label>API Key</label><input type="password" id="aligoKey" placeholder="알리고 API Key"></div>
-        <div class="input-group"><label>사용자 ID</label><input type="text" id="aligoId" placeholder="알리고 ID"></div>
+        <div class="input-group"><label>사용자 ID</label><input type="text" id="aligoId" placeholder="ID"></div>
         <div class="input-group"><label>발신번호</label><input type="text" id="aligoSender" placeholder="0212345678"></div>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <button class="btn btn-primary" onclick="saveAligo()" style="font-size:12px;padding:7px 14px;">저장</button>
-        <span id="aligoStatus" style="font-size:12px;color:var(--text2);"></span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary" onclick="saveAligo()" style="font-size:11px;padding:6px 12px;">저장</button>
+        <span id="aligoStatus" style="font-size:11px;color:var(--text2);"></span>
       </div>
     </div>
   </div>
+
   <div class="card">
     <div class="card-title">발송 대상 조회</div>
-    <div style="display:flex;flex-direction:column;gap:14px;">
+    <div style="display:flex;flex-direction:column;gap:12px;">
       <div>
-        <label style="display:block;margin-bottom:8px;">발송 그룹</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'mon')">일&#8594;월 (13:00)</button>
-          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'tueWed')">일&#8594;화&#183;수 (13:10)</button>
-          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'thu')">수&#8594;목 (09:00)</button>
-          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'fri')">목&#8594;금 (09:00)</button>
-          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'satSun')">금&#8594;토&#183;일 (09:00)</button>
+        <label style="display:block;margin-bottom:6px;">발송 그룹 선택</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'mon')">일→월</button>
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'tueWed')">일→화·수</button>
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'thu')">수→목</button>
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'fri')">목→금</button>
+          <button class="btn btn-outline sms-group-btn" onclick="selectGroup(this,'satSun')">금→토·일</button>
         </div>
       </div>
-      <div id="smsGroupInfo" class="hidden" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:13px;color:var(--text2);"></div>
-      <button class="btn btn-primary" id="smsSearchBtn" onclick="loadSmsList()" disabled style="align-self:flex-start;">&#128269; 대상자 조회</button>
+      <div id="smsGroupInfo" class="hidden" style="background:#f7f8fc;border:1px solid var(--border);border-radius:7px;padding:10px;font-size:12px;color:var(--text2);"></div>
+      <div>
+        <label style="display:block;margin-bottom:6px;">또는 기간으로 조회</label>
+        <div class="input-row">
+          <div class="input-group"><label>시작일 (6자리)</label><input type="text" id="smsStartDate" placeholder="260510" maxlength="6"></div>
+          <div class="input-group"><label>종료일 (6자리)</label><input type="text" id="smsEndDate" placeholder="260516" maxlength="6"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="smsSearchBtn" onclick="loadSmsList()" disabled style="align-self:flex-start;">🔍 조회</button>
     </div>
   </div>
+
   <div class="card hidden" id="smsListCard">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;">
       <div class="card-title" style="margin-bottom:0;">발송 목록</div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <span id="smsCount" style="font-size:12px;color:var(--text2);"></span>
-        <button class="btn btn-success" onclick="sendSms()">&#128241; 전체 발송</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="smsCount" style="font-size:11px;color:var(--text2);"></span>
+        <button class="btn btn-success" onclick="sendSms()">📱 전체 발송</button>
       </div>
     </div>
-    <div style="overflow-x:auto;margin-bottom:14px;">
+    <div style="overflow-x:auto;margin-bottom:12px;">
       <table><thead><tr>
         <th><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
-        <th>챠트번호</th><th>전화번호</th><th>내원예정일</th><th>발송</th><th>상태</th>
+        <th>챠트</th><th>내원예정</th><th>전화번호</th><th>발송</th><th>상태</th>
       </tr></thead><tbody id="smsBody"></tbody></table>
     </div>
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;">
-      <div style="font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">발송 문자</div>
-      <div id="smsMsgPreview" style="font-size:13px;color:var(--text);line-height:1.6;"></div>
+    <div style="background:#f7f8fc;border:1px solid var(--border);border-radius:7px;padding:10px;margin-bottom:10px;">
+      <div style="font-size:10px;color:var(--text2);margin-bottom:4px;font-weight:700;text-transform:uppercase;">발송 문자</div>
+      <div id="smsMsgPreview" style="font-size:13px;color:var(--text);line-height:1.5;"></div>
     </div>
-    <div id="smsSendStatus" class="hidden" style="margin-top:10px;"></div>
+    <div id="smsSendStatus" class="hidden"></div>
   </div>
 </div>
 
 <!-- 달력 오버레이 -->
 <div id="calWrap" class="hidden" onclick="if(event.target===this)closeCal()">
   <div id="calBox">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <button onclick="calNav(-1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:20px;padding:4px 10px;">&#8249;</button>
-      <span id="calHeader" style="font-size:15px;font-weight:700;"></span>
-      <button onclick="calNav(1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:20px;padding:4px 10px;">&#8250;</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <button onclick="calNav(-1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:20px;padding:2px 8px;">‹</button>
+      <span id="calHeader" style="font-size:14px;font-weight:700;"></span>
+      <button onclick="calNav(1)" style="background:none;border:none;color:var(--text);cursor:pointer;font-size:20px;padding:2px 8px;">›</button>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;margin-bottom:6px;">
-      <span style="font-size:11px;color:var(--danger);font-weight:700;">일</span><span style="font-size:11px;color:var(--text2);font-weight:700;">월</span><span style="font-size:11px;color:var(--text2);font-weight:700;">화</span><span style="font-size:11px;color:var(--text2);font-weight:700;">수</span><span style="font-size:11px;color:var(--text2);font-weight:700;">목</span><span style="font-size:11px;color:var(--text2);font-weight:700;">금</span><span style="font-size:11px;color:var(--text2);font-weight:700;">토</span>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;margin-bottom:4px;">
+      <span style="font-size:10px;color:var(--danger);font-weight:700;">일</span><span style="font-size:10px;color:var(--text2);font-weight:700;">월</span><span style="font-size:10px;color:var(--text2);font-weight:700;">화</span><span style="font-size:10px;color:var(--text2);font-weight:700;">수</span><span style="font-size:10px;color:var(--text2);font-weight:700;">목</span><span style="font-size:10px;color:var(--text2);font-weight:700;">금</span><span style="font-size:10px;color:var(--text2);font-weight:700;">토</span>
     </div>
-    <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;"></div>
-    <button onclick="closeCal()" class="btn btn-outline" style="width:100%;margin-top:12px;justify-content:center;">닫기</button>
+    <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;"></div>
+    <button onclick="closeCal()" class="btn btn-outline" style="width:100%;margin-top:10px;justify-content:center;font-size:12px;">닫기</button>
   </div>
 </div>
 
 <script>
+// smsSearchBtn 기간 입력시에도 활성화
+document.addEventListener('DOMContentLoaded', function(){
+  ['smsStartDate','smsEndDate'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', function(){
+      var s=document.getElementById('smsStartDate').value.trim();
+      var e=document.getElementById('smsEndDate').value.trim();
+      if(s.length===6&&e.length===6) document.getElementById('smsSearchBtn').disabled=false;
+    });
+  });
+});
 const PROXY = 'https://rurbfcocihvapbtdzbyt.supabase.co/functions/v1/claude-proxy';
 const SUPA_URL = 'https://rurbfcocihvapbtdzbyt.supabase.co';
 let ANON_KEY = localStorage.getItem('sb_anon_key') || '';
 
 const DRUG_LIST = {"aaalp012":"자나팜정0.125mg","AAALP025":"자나팜정0.25mg","aaalp025":"자나팜정0.25mg","aaalp05":"자나팜정0.5mg","aaalp1":"자나팜정1mg","aaato18":"아토목신캡슐18mg","aaato25":"아토목신캡슐25mg","aaatv05":"스리반정0.5mg","aaatv1":"스리반정1mg","aabroma":"명인브로마제팜정3mg","aaclona":"환인클로나제팜정0.5mg","aadepa25":"데파스정0.25mg","aadz2":"명인디아제팜정2mg","aadz5":"명인디아제팜정5mg","aalp25환인":"알프람정0.25mg","aaluna":"루나팜정","aamedi10":"메디키넷리타드캡슐10mg","aamedi20":"메디키넷리타드캡슐20mg","aapen10":"페니드정10mg","aaribon":"리보트릴정(내복)","aasti10":"졸피신정10mg","aasti12":"스틸녹스CR정12.5mg","aasti5":"졸피신정5mg(내복)","aastiI62":"스틸녹스CR정6.25mg","aazol125":"졸민정0.125mg","aazol25":"졸민정0.25mg","abili_1":"레피졸정1mg(내복)","abili10":"레피졸정10mg","abili15":"레피졸정15mg","ABILI152":"아빌리파이정15mg","abili2":"아빌리파이정2mg","abili30_":"레피졸정30mg(내복)","abili5":"레피졸정5mg","ABILI5_":"레피졸정5mg","ablil_2":"레피졸정2mg(내복)","acam":"명인아캄프로세이트정333mg(내복)","alma-2":"알마겔정","almagate":"알마겐트정","ami10":"명인 아미트리프틸린염산염정10mg","amit25":"에트라빌25mg정","ap650":"타이리콜8시간이알서방정","ATV05":"아티반정0.5mg","ATV1":"아티반정1mg","benz1":"명인벤즈트로핀메실산염정1mg","benz2":"명인벤즈트로핀메실레이트정2mg","bona":"보나링에이정","BONA-2":"보나링에이정","brin10":"브린텔릭스정10mg","brin5":"브린텔릭스정5mg","busp5":"명인염산부스피론정5mg","cbzcr200":"카르마인씨알정","cbzn200":"테그레톨씨알정200mg","cibe":"씨베리움캡슐(내복)","CON18-2":"콘서타OROS서방정18mg(내복)","CON27-2":"콘서타OROS서방정27mg(내복)","CON36-2":"콘서타OROS서방정36mg(내복)","con54-2":"콘서타OROS서방정54mg(내복)","cpz200":"명인클로르프로마진염산염정200mg","cpz50":"명인클로르프로마진염산염정50mg","depa500":"데파킨크로노정500mg","desv100":"에스벤서방정100mg(내복)","desv25":"에스벤서방정25mg(내복)","desv50":"에스벤서방정50mg(내복)","doxe3":"명세핀정3mg(내복)","dull30":"드록틴캡슐30mg","dull60":"드록틴캡슐60mg","DZ2":"삼진디아제팜정2mg","DZ5":"삼진디아제팜정5mg","flu20m":"푸록틴캡슐","flu20n":"유로작캡슐20mg","fluo10":"푸록틴캅셀10mg","fluo20":"국제플루옥세틴캡슐","gasmo":"가스모틴정5mg","GRIA-j":"종근당글리아티린연질캡슐","gria-j":"종근당글리아티린연질캡슐","hal5":"명인할로페리돌정5mg","hip10":"하이페질정10mg","hip5":"하이페질정5mg","IMIGRAN5":"이미그란정50mg","imipra25":"명인이미프라민염산염정","inde10":"인데놀정10mg","inde40":"인데놀정40mg","kcap":"케이캡정50밀리그램(테고프라잔)_","kcap210":"펙수클루정10mg(내복)","kcap240":"펙수클루정40mg(내복)","kcap25":"케이캡정25mg(내복)","lamo100":"라모스탈정100mg","lamo50":"라모스탈정50mg","LEX5-22":"렉사프로정5mg","lexa10":"뉴프람정 10mg","lexa15":"뉴프람정15mg","lexa20":"뉴프람정20mg","lexa5":"뉴프람정5mg","lith300b":"리단정","lodo100":"로도핀정100mg","lodo50":"로도핀정50mg","MELA-2":"서카딘서방정2mg","meman":"뉴로케이정","MEMAN-2":"뉴로케이정","mgo2":"삼천당산화마그네슘정250mg","mgo3":"마그밀정","migad":"미가드정2.5mg","mirt15":"멀타핀정15mg","mirt30":"멀타핀정30mg","mirt75":"멀타핀정7.5mg","msero12":"큐로켈정12.5mg(내복)","nalt50":"트락손정50mg","nicer":"동화니세르골린정30mg(내복)","olaa10":"자이프렉사자이디스확산정10mg(내복)","paki25":"파키놀정0.25mg","par12":"파록스씨알정12.5mg","par25":"파록스씨알정25mg","PARO25-2":"에이자트씨알정25mg","peni":"페니라민정","peni100":"명인페니토인100mg정","PHENI100":"환인히단토인정","PIRI":"신일피리독신정","ppz4":"명인페르페나진정4mg","PROI":"프로이머정","ris1M":"리스펜정1mg","rism0.5":"리스펜정0.5mg","rism2":"리스펜정2mg","RONA4":"로나센정4mg","sero100":"큐로켈정100mg","sero100-2":"쎄로켈정100mg(내복)","sero12":"쿠에타핀정12.5mg(내복)","sero200":"큐로켈정200mg","sero25":"큐로켈정25mg","sero300":"동화쿠에티아핀정300mg(내복)","sero50":"큐로켈정50mg","SOL100":"솔리안정100mg","sol400":"솔리안정400mg","stablon":"스타브론정","STI10":"스틸녹스정10mg","STRA182":"스트라테라캡슐18mg","STRA252":"스트라테라캡슐25mg","TOPA100-2":"토파메이트정100mg","topa25":"토파메이트정25mg","tra325":"트라몰정325mg","Trarin":"명인트라린정50mg","trazo25":"명인트라조돈캅셀25mg","triti25":"트리티코정25mg","triti50":"트리티코정50mg","uturn16":"유턴정16mg(내복)","val300":"바렙톨서방정","VAL300-O":"오르필서방정300mg","val600":"오르필서방정600mg","venla375":"코팩사엑스알서방캡슐37.5mg","venla75":"코팩사엑스알서방캡슐75mg","zanax0.5":"자낙스정0.5mg(내복)","zeldox25":"젤독스캡슐20mg(내복)","ZOL25":"졸민정0.25mg","zoloft50":"졸로푸트정50mg(내복)","ZYP10":"자이프렉사자이디스확산정10mg","olanm10":"뉴로자핀정10mg"};
 
-const SMS_MSG = {
-  mon:'수요일은 정규휴진 월요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
-  tueWed:'수요일은 정규휴진 화요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
-  thu:'수요일은 정규휴진 목요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
-  fri:'수요일은 정규휴진 금요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',
-  satSun:'수요일은 정규휴진 토요일은 내원일 12시 10분까지 내원시 진료가능 한강의원'
-};
+const SMS_MSG={mon:'수요일은 정규휴진 월요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',tueWed:'수요일은 정규휴진 화요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',thu:'수요일은 정규휴진 목요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',fri:'수요일은 정규휴진 금요일은 내원일 5시 20분까지 내원시 진료가능 한강의원',satSun:'수요일은 정규휴진 토요일은 내원일 12시 10분까지 내원시 진료가능 한강의원'};
 
-// ── 키 관리 ──────────────────────────────────────────
-function saveKey() {
-  var v = document.getElementById('keyInput').value.trim();
-  if (!v.startsWith('eyJ')) { document.getElementById('keyStatus').textContent='❌ 형식 오류'; return; }
-  localStorage.setItem('sb_anon_key', v); ANON_KEY = v;
-  document.getElementById('keyStatus').textContent='✓ 저장됨';
-  document.getElementById('keyInput').value='';
-}
-function checkKey() {
-  var k = localStorage.getItem('sb_anon_key');
-  if (k) { ANON_KEY=k; document.getElementById('keyStatus').textContent='✓ 로드됨'; }
-}
+// ── 키 ───────────────────────────────────────────────
+function saveKey(){var v=document.getElementById('keyInput').value.trim();if(!v.startsWith('eyJ')){document.getElementById('keyStatus').textContent='❌';return;}localStorage.setItem('sb_anon_key',v);ANON_KEY=v;document.getElementById('keyStatus').textContent='✓';document.getElementById('keyInput').value='';}
+function checkKey(){var k=localStorage.getItem('sb_anon_key');if(k){ANON_KEY=k;document.getElementById('keyStatus').textContent='✓ 로드됨';}}
 
-// ── Supabase REST ─────────────────────────────────────
-function sbH() { return {'Content-Type':'application/json','apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY}; }
-async function sbGet(table, params) {
-  var qs=Object.entries(params).map(function(e){return e[0]+'='+encodeURIComponent(e[1]);}).join('&');
-  var r=await fetch(SUPA_URL+'/rest/v1/'+table+'?'+qs,{headers:sbH()});
-  return r.json();
-}
-async function sbUpsert(table, data) {
-  var r=await fetch(SUPA_URL+'/rest/v1/'+table,{method:'POST',headers:Object.assign({},sbH(),{'Prefer':'resolution=merge-duplicates'}),body:JSON.stringify(data)});
-  return r.status<300;
-}
-async function sbInsert(table, data) {
-  var r=await fetch(SUPA_URL+'/rest/v1/'+table,{method:'POST',headers:sbH(),body:JSON.stringify(data)});
-  return r.status<300;
-}
-async function sbUpdate(table, match, data) {
-  var qs=Object.entries(match).map(function(e){return e[0]+'=eq.'+encodeURIComponent(e[1]);}).join('&');
-  var r=await fetch(SUPA_URL+'/rest/v1/'+table+'?'+qs,{method:'PATCH',headers:sbH(),body:JSON.stringify(data)});
-  return r.status<300;
-}
-async function sbDelete(table, match) {
-  var qs=Object.entries(match).map(function(e){return e[0]+'=eq.'+encodeURIComponent(e[1]);}).join('&');
-  var r=await fetch(SUPA_URL+'/rest/v1/'+table+'?'+qs,{method:'DELETE',headers:sbH()});
-  return r.status<300;
-}
-async function claudeCall(body) {
-  var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ANON_KEY},body:JSON.stringify(body)});
-  var raw=await r.text();
-  try{return JSON.parse(raw);}catch(e){throw new Error('파싱실패: '+raw.slice(0,100));}
-}
-async function sheetPost(body) {
-  body._sheet_action=true;
-  var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ANON_KEY},body:JSON.stringify(body)});
-  return r.json();
-}
+// ── Supabase ─────────────────────────────────────────
+function sbH(){return{'Content-Type':'application/json','apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY};}
+async function sbGet(t,p){var qs=Object.entries(p).map(function(e){return e[0]+'='+encodeURIComponent(e[1]);}).join('&');var r=await fetch(SUPA_URL+'/rest/v1/'+t+'?'+qs,{headers:sbH()});return r.json();}
+async function sbUpsert(t,d){var r=await fetch(SUPA_URL+'/rest/v1/'+t,{method:'POST',headers:Object.assign({},sbH(),{'Prefer':'resolution=merge-duplicates'}),body:JSON.stringify(d)});return r.status<300;}
+async function sbInsert(t,d){var r=await fetch(SUPA_URL+'/rest/v1/'+t,{method:'POST',headers:sbH(),body:JSON.stringify(d)});return r.status<300;}
+async function sbUpdate(t,m,d){var qs=Object.entries(m).map(function(e){return e[0]+'=eq.'+encodeURIComponent(e[1]);}).join('&');var r=await fetch(SUPA_URL+'/rest/v1/'+t+'?'+qs,{method:'PATCH',headers:sbH(),body:JSON.stringify(d)});return r.status<300;}
+async function sbDelete(t,m){var qs=Object.entries(m).map(function(e){return e[0]+'=eq.'+encodeURIComponent(e[1]);}).join('&');var r=await fetch(SUPA_URL+'/rest/v1/'+t+'?'+qs,{method:'DELETE',headers:sbH()});return r.status<300;}
+async function claudeCall(body){var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ANON_KEY},body:JSON.stringify(body)});var raw=await r.text();try{return JSON.parse(raw);}catch(e){throw new Error('파싱실패: '+raw.slice(0,100));}}
+async function sheetPost(body){body._sheet_action=true;var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ANON_KEY},body:JSON.stringify(body)});return r.json();}
 
-// ── 탭 전환 ──────────────────────────────────────────
-function switchTab(tab) {
-  ['drug','patient','sms'].forEach(function(t){
+// ── 탭 ───────────────────────────────────────────────
+var TABS=['patient','drug','proxy','selcare','sms'];
+function switchTab(tab){
+  TABS.forEach(function(t){
     var T=t.charAt(0).toUpperCase()+t.slice(1);
     document.getElementById('tab'+T).classList.toggle('hidden',tab!==t);
     document.getElementById('nav'+T).classList.toggle('active',tab===t);
   });
   if(tab==='sms') loadAligoConfig();
+  if(tab==='proxy') loadSpecialList('proxy');
+  if(tab==='selcare') loadSpecialList('selcare');
 }
 
-// ── 날짜 유틸 ─────────────────────────────────────────
+// ── 날짜 ─────────────────────────────────────────────
 function today6(){var d=new Date();return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
-function fmt6(val){
-  if(!val) return '';
-  var s=String(val).trim();
-  if(/^\d{6}$/.test(s)) return s;
-  var d=new Date(val);
-  if(!isNaN(d.getTime())) return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
-  return s;
-}
-function displayDate(d6){
-  if(!d6||d6.length!==6) return d6||'없음';
-  var days=['일','월','화','수','목','금','토'];
-  var y=2000+parseInt(d6.slice(0,2)),mo=parseInt(d6.slice(2,4)),d=parseInt(d6.slice(4,6));
-  return mo+'월 '+d+'일('+days[new Date(y,mo-1,d).getDay()]+')';
-}
+function fmt6(val){if(!val)return '';var s=String(val).trim();if(/^\d{6}$/.test(s))return s;var d=new Date(val);if(!isNaN(d.getTime()))return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');return s;}
+function displayDate(d6){if(!d6||d6.length!==6)return d6||'없음';var days=['일','월','화','수','목','금','토'];var y=2000+parseInt(d6.slice(0,2)),mo=parseInt(d6.slice(2,4)),d=parseInt(d6.slice(4,6));return mo+'/'+d+'('+days[new Date(y,mo-1,d).getDay()]+')';}
 
-// ── 달력 ─────────────────────────────────────────────
+// ── 달력 오버레이 ─────────────────────────────────────
 var calY,calM,calTarget=null;
-function openCal(targetId){
-  calTarget=targetId;
-  var n=new Date(); calY=n.getFullYear(); calM=n.getMonth();
-  renderCal(); document.getElementById('calWrap').classList.remove('hidden');
-}
+function openCal(targetId){calTarget=targetId;var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderCal();document.getElementById('calWrap').classList.remove('hidden');}
 function closeCal(){document.getElementById('calWrap').classList.add('hidden');}
 function calNav(d){calM+=d;if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;}renderCal();}
 function renderCal(){
   document.getElementById('calHeader').textContent=calY+'년 '+(calM+1)+'월';
-  var grid=document.getElementById('calGrid'); grid.innerHTML='';
+  var grid=document.getElementById('calGrid');grid.innerHTML='';
   var first=new Date(calY,calM,1).getDay(),last=new Date(calY,calM+1,0).getDate();
-  var sel=calTarget?document.getElementById(calTarget).value:'', now=new Date();
-  for(var i=0;i<first;i++) grid.appendChild(document.createElement('div'));
+  var sel=calTarget?document.getElementById(calTarget).value:'',now=new Date();
+  for(var i=0;i<first;i++)grid.appendChild(document.createElement('div'));
   for(var d=1;d<=last;d++){
     var yy=String(calY).slice(2),mm=String(calM+1).padStart(2,'0'),dd=String(d).padStart(2,'0'),val=yy+mm+dd;
     var isToday=(calY===now.getFullYear()&&calM===now.getMonth()&&d===now.getDate());
@@ -444,8 +426,20 @@ function renderCal(){
   }
 }
 
-// ══ 환자 관리 (진료 워크플로우) ══════════════════════
-var _currentChart=null, _patientDrugs=[], _isNewPatient=false;
+// ══ 진료 탭 ══════════════════════════════════════════
+var _currentChart=null,_patientDrugs=[],_drugsChanged=false;
+
+window.addEventListener('DOMContentLoaded',function(){
+  checkKey();
+  document.getElementById('pVisitDateDisp').textContent=displayDate(today6());
+  document.getElementById('pChartNo').addEventListener('keydown',function(e){if(e.key==='Enter')searchPatient();});
+  document.getElementById('chartNo').addEventListener('input',updateConvertBtn);
+  document.getElementById('fileInput').addEventListener('change',function(e){if(e.target.files[0])loadImg(e.target.files[0]);});
+  var zone=document.getElementById('uploadZone');
+  zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('dragover');});
+  zone.addEventListener('dragleave',function(){zone.classList.remove('dragover');});
+  zone.addEventListener('drop',function(e){e.preventDefault();zone.classList.remove('dragover');var f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadImg(f);});
+});
 
 function clearPatient(){
   document.getElementById('patientCard').classList.add('hidden');
@@ -454,121 +448,81 @@ function clearPatient(){
   _currentChart=null;
 }
 
-// 엔터키로도 조회
-document.addEventListener('DOMContentLoaded',function(){
-  checkKey();
-  document.getElementById('pVisitDateDisp').textContent=displayDate(today6());
-  document.getElementById('pChartNo').addEventListener('keydown',function(e){if(e.key==='Enter')searchPatient();});
-});
-
 async function searchPatient(){
-  var input=document.getElementById('pChartNo').value.trim();
-  if(!input) return;
-  // 26 입력시 26으로 조회 (0 없이)
-  var chartNo=input;
+  var chartNo=document.getElementById('pChartNo').value.trim();
+  if(!chartNo)return;
   setStatus('searchStatus','loading','조회 중...');
   document.getElementById('patientCard').classList.add('hidden');
   document.getElementById('visitForm').classList.add('hidden');
   try{
-    var results=await Promise.all([
+    var res=await Promise.all([
       sbGet('patients',{'chart_no':'eq.'+chartNo,'select':'*'}),
       sbGet('visits',{'chart_no':'eq.'+chartNo,'select':'*','order':'id.desc','limit':'1'}),
       sbGet('drugs',{'chart_no':'eq.'+chartNo,'select':'*','order':'id.asc'})
     ]);
-    var patient=results[0][0]||null;
-    var visit=results[1][0]||null;
-    var drugList=results[2]||[];
+    var patient=res[0][0]||null,visit=res[1][0]||null,drugList=res[2]||[];
     _currentChart=chartNo;
-    _isNewPatient=!patient&&!visit;
     _patientDrugs=drugList.filter(function(d){return d.drug_code||d.drug_name;});
+    _drugsChanged=false;
 
-    // 환자 카드 표시
     document.getElementById('pcChart').textContent=chartNo;
-    document.getElementById('pcTag').innerHTML=_isNewPatient?'<span class="tag-new">신환</span>':'<span class="tag-exist">기존</span>';
+    var isNew=!patient&&!visit;
+    document.getElementById('pcTag').innerHTML=isNew?'<span class="tag-new">신환</span>':'<span class="tag-exist">기존</span>';
     document.getElementById('pcPhone').textContent=patient?(patient.phone||'미등록'):'미등록';
-    document.getElementById('pcSmsYn').textContent=patient?(patient.sms_yn==='N'?'문자제외':'문자발송'):'문자발송';
+    document.getElementById('pcSmsYn').textContent=patient?(patient.sms_yn==='N'?'제외':'발송'):'발송';
     document.getElementById('pcVisit').textContent=visit?displayDate(fmt6(visit.visit_date)):'없음';
     document.getElementById('pcNext').textContent=(visit&&visit.next_visit_date)?displayDate(fmt6(visit.next_visit_date)):'없음';
-    document.getElementById('pcProxyRx').textContent=(visit&&visit.proxy_rx==='Y')?'대리처방':'-';
-    document.getElementById('pcSelCare').textContent=(visit&&visit.selective_care==='Y')?'선택의료':'-';
+    document.getElementById('pcProxyRx').textContent=(visit&&visit.proxy_rx==='Y')?'예':'-';
+    document.getElementById('pcSelCare').textContent=(visit&&visit.selective_care==='Y')?'예':'-';
     document.getElementById('patientCard').classList.remove('hidden');
 
-    // 폼 초기화
     document.getElementById('pPhone').value=patient?(patient.phone||''):'';
     document.getElementById('pSmsYn').checked=patient?patient.sms_yn!=='N':true;
     document.getElementById('pNextVisitDate').value='';
-    document.getElementById('pProxyRx').dataset.val='N';
-    document.getElementById('pSelCare').dataset.val='N';
-    setToggleBtn('pProxyRx','N');
-    setToggleBtn('pSelCare','N');
-
-    setStatus('searchStatus','success',_isNewPatient?'신환입니다.':'환자 정보를 불러왔습니다.');
+    setToggleBtn('pProxyRx','N');setToggleBtn('pSelCare','N');
+    setStatus('searchStatus','success',isNew?'신환입니다.':'조회 완료');
   }catch(err){setStatus('searchStatus','error','조회 실패: '+err.message);}
 }
 
 function openVisitForm(){
   document.getElementById('visitForm').classList.remove('hidden');
   document.getElementById('pVisitDateDisp').textContent=displayDate(today6());
+  _drugsChanged=false;
   renderPatientDrugs();
-  // 스크롤
   setTimeout(function(){document.getElementById('visitForm').scrollIntoView({behavior:'smooth'});},100);
 }
 
-// 토글 버튼
-function setToggleBtn(id, val){
-  var el=document.getElementById(id);
-  el.dataset.val=val;
-  var yBtn=el.querySelector('.toggle-y');
-  var nBtn=el.querySelector('.toggle-n');
-  if(val==='Y'){yBtn.classList.add('active');nBtn.classList.remove('active');}
-  else{nBtn.classList.add('active');yBtn.classList.remove('active');}
+function setToggleBtn(id,val){
+  var el=document.getElementById(id);el.dataset.val=val;
+  el.querySelector('.toggle-y').classList.toggle('active',val==='Y');
+  el.querySelector('.toggle-n').classList.toggle('active',val==='N');
 }
-function toggleBtn(id, val){setToggleBtn(id,val);}
+function toggleBtn(id,val){setToggleBtn(id,val);}
 
-// 저장
 async function saveVisitAll(){
-  if(!_currentChart) return;
-  var btn=document.getElementById('saveAllBtn');
-  btn.disabled=true; btn.textContent='저장 중...';
+  if(!_currentChart)return;
+  var btn=document.getElementById('saveAllBtn');btn.disabled=true;btn.textContent='저장 중...';
   try{
-    var vd=today6();
-    var nd=document.getElementById('pNextVisitDate').value.trim();
+    var vd=today6(),nd=document.getElementById('pNextVisitDate').value.trim();
     var phone=document.getElementById('pPhone').value.trim();
     var smsYn=document.getElementById('pSmsYn').checked?'Y':'N';
     var proxyRx=document.getElementById('pProxyRx').dataset.val||'N';
     var selCare=document.getElementById('pSelCare').dataset.val||'N';
-
-    // 병렬 저장
     var saves=[];
-
-    // 환자 정보
-    if(phone){
-      saves.push(sbUpsert('patients',{chart_no:_currentChart,phone:phone,sms_yn:smsYn,updated_at:new Date().toISOString()}));
-    }
-
-    // 내원일
+    if(phone) saves.push(sbUpsert('patients',{chart_no:_currentChart,phone:phone,sms_yn:smsYn,updated_at:new Date().toISOString()}));
     var visitData={chart_no:_currentChart,visit_date:vd,next_visit_date:nd,proxy_rx:proxyRx,selective_care:selCare,updated_at:new Date().toISOString()};
     var existing=await sbGet('visits',{chart_no:'eq.'+_currentChart,select:'id',limit:'1'});
-    if(existing&&existing.length>0){
-      saves.push(sbUpdate('visits',{chart_no:_currentChart},visitData));
-    }else{
-      saves.push(sbInsert('visits',visitData));
-    }
-
-    // 약물 (변경됐으면)
+    if(existing&&existing.length>0){saves.push(sbUpdate('visits',{chart_no:_currentChart},visitData));}
+    else{saves.push(sbInsert('visits',visitData));}
     if(_drugsChanged){
       await sbDelete('drugs',{chart_no:_currentChart});
       if(_patientDrugs.length>0){
-        var rows=_patientDrugs.map(function(d){
-          return {chart_no:_currentChart,drug_code:d.drug_code||'',drug_name:d.drug_name||'',dose:d.dose||'',daily_freq:d.daily_freq||'',days:d.days||'',method:d.method||''};
-        });
+        var rows=_patientDrugs.map(function(d){return{chart_no:_currentChart,drug_code:d.drug_code||'',drug_name:d.drug_name||'',dose:d.dose||'',daily_freq:d.daily_freq||'',days:d.days||'',method:d.method||''};});
         saves.push(sbInsert('drugs',rows));
       }
     }
-
     await Promise.all(saves);
     setStatus('visitSaveStatus','success','✓ 저장 완료');
-    // 카드 갱신
     searchPatient();
     document.getElementById('visitForm').classList.add('hidden');
     window.scrollTo({top:0,behavior:'smooth'});
@@ -576,126 +530,107 @@ async function saveVisitAll(){
   finally{btn.disabled=false;btn.innerHTML='&#128190; 저장';}
 }
 
-// 약물 변경 추적
-var _drugsChanged=false;
-
 function renderPatientDrugs(){
   var el=document.getElementById('piDrugArea'),cnt=document.getElementById('piDrugCount');
-  if(!_patientDrugs.length){el.innerHTML='<span style="color:var(--text2);font-size:13px;">약물 정보 없음</span>';cnt.textContent='';return;}
-  cnt.textContent=_patientDrugs.length+'개';
-  var ts='padding:6px 8px;border-bottom:1px solid rgba(46,51,80,0.4);';
-  var is='background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:12px;outline:none;padding:2px 3px;';
+  cnt.textContent=_patientDrugs.length?_patientDrugs.length+'개':'';
+  var ts='padding:5px 6px;border-bottom:1px solid #eee;';
+  var is='background:transparent;border:none;border-bottom:1px solid #ddd;color:#222;font-size:12px;outline:none;padding:2px 3px;';
   var fields=['drug_code','drug_name','dose','daily_freq','days','method'];
   var widths=['70px','120px','36px','30px','30px','36px'];
   var html='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';
-  ['약물코드','약물명','용량','일투','일수','용법',''].forEach(function(h){html+='<th style="background:var(--bg);color:var(--text2);font-size:10px;font-weight:700;text-transform:uppercase;padding:7px 8px;text-align:left;border-bottom:1px solid var(--border);">'+h+'</th>';});
+  ['약물코드','약물명','용량','일투','일수','용법',''].forEach(function(h){html+='<th style="background:#f5f7fa;color:#666;font-size:10px;font-weight:700;text-transform:uppercase;padding:6px 8px;text-align:left;border-bottom:2px solid #e0e4ef;">'+h+'</th>';});
   html+='</tr></thead><tbody>';
-  _patientDrugs.forEach(function(d,i){
-    html+='<tr>';
-    // 약물코드 자동완성
-    var codeVal=((d.drug_code!==undefined?d.drug_code:'')).toString().replace(/"/g,'&quot;');
-    html+='<td style="'+ts+';position:relative;">'
-      +'<input style="'+is+'width:70px;" value="'+codeVal+'" data-pidx="'+i+'" data-pfield="drug_code"'
-      +' oninput="showDrugSuggest(this,'+i+')" onchange="onDrugChange(+this.dataset.pidx,\'drug_code\',this.value)"'
-      +' onblur="hideSuggest('+i+')" autocomplete="off">'
-      +'<div id="suggest_'+i+'" style="display:none;position:absolute;top:100%;left:0;z-index:999;background:var(--surface2);border:1px solid var(--border);border-radius:8px;max-height:160px;overflow-y:auto;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.4);"></div>'
-      +'</td>';
-    // 약물명
-    var nameVal=((d.drug_name!==undefined?d.drug_name:'')).toString().replace(/"/g,'&quot;');
-    html+='<td style="'+ts+'"><input id="drugname_'+i+'" style="'+is+'width:120px;" value="'+nameVal+'" onchange="onDrugChange('+i+',\'drug_name\',this.value)"></td>';
-    // 나머지
-    ['dose','daily_freq','days','method'].forEach(function(f,fi){
-      var fw=['36px','30px','30px','36px'][fi];
-      var val=((d[f]!==undefined?d[f]:'')).toString().replace(/"/g,'&quot;');
-      html+='<td style="'+ts+'"><input style="'+is+'width:'+fw+';" value="'+val+'" onchange="onDrugChange('+i+',\''+f+'\',this.value)"></td>';
+  if(!_patientDrugs.length){
+    html+='<tr><td colspan="7" style="padding:12px;color:#aaa;text-align:center;">약물 정보 없음 — 아래 + 버튼으로 추가하세요</td></tr>';
+  } else {
+    _patientDrugs.forEach(function(d,i){
+      html+='<tr>';
+      var codeVal=((d.drug_code||'')).toString().replace(/"/g,'&quot;');
+      html+='<td style="'+ts+';position:relative;">'
+        +'<input style="'+is+'width:70px;" value="'+codeVal+'" oninput="showDrugSuggest(this,'+i+')" onchange="onDrugChange('+i+',\'drug_code\',this.value)" onblur="hideSuggest('+i+')" autocomplete="off">'
+        +'<div id="suggest_'+i+'" style="display:none;position:absolute;top:100%;left:0;z-index:999;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:160px;overflow-y:auto;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.15);"></div>'
+        +'</td>';
+      var nameVal=((d.drug_name||'')).toString().replace(/"/g,'&quot;');
+      html+='<td style="'+ts+'"><input id="drugname_'+i+'" style="'+is+'width:120px;" value="'+nameVal+'" onchange="onDrugChange('+i+',\'drug_name\',this.value)"></td>';
+      ['dose','daily_freq','days','method'].forEach(function(f,fi){
+        var fw=['36px','30px','30px','36px'][fi];
+        var val=((d[f]||'')).toString().replace(/"/g,'&quot;');
+        html+='<td style="'+ts+'"><input style="'+is+'width:'+fw+';" value="'+val+'" onchange="onDrugChange('+i+',\''+f+'\',this.value)"></td>';
+      });
+      html+='<td style="'+ts+'"><button onclick="delPatientDrug('+i+')" style="background:none;border:none;color:#bbb;cursor:pointer;font-size:12px;">✕</button></td>';
+      html+='</tr>';
     });
-    html+='<td style="'+ts+'"><button onclick="delPatientDrug('+i+')" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;">&#10005;</button></td>';
-    html+='</tr>';
-  });
+  }
   html+='</tbody></table></div>';
-  html+='<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px;"><button onclick="addPatientDrug()" class="btn btn-outline" style="font-size:11px;padding:6px 10px;">+ 행 추가</button></div>';
+  html+='<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">'
+    +'<button onclick="addPatientDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">+ 행 추가</button>'
+    +'<button onclick="goUpdateDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">&#10022; 이미지로 업데이트</button>'
+    +'</div>';
   el.innerHTML=html;
 }
 
-function onDrugChange(i,field,val){_patientDrugs[i][field]=val;_drugsChanged=true;}
+function onDrugChange(i,f,v){_patientDrugs[i][f]=v;_drugsChanged=true;}
 function delPatientDrug(i){_patientDrugs.splice(i,1);_drugsChanged=true;renderPatientDrugs();}
 function addPatientDrug(){_patientDrugs.push({drug_code:'',drug_name:'',dose:'1',daily_freq:'1',days:'28',method:'b4'});_drugsChanged=true;renderPatientDrugs();}
 
+function goUpdateDrug(){
+  if(!_currentChart)return;
+  _replaceMode=true;_replaceChart=_currentChart;
+  switchTab('drug');
+  document.getElementById('chartNo').value=_currentChart;
+  setStatus('convertStatus','loading','⚠️ 약물 교체 모드 ('+_currentChart+') — 이미지 업로드 후 저장하면 기존 약물 교체');
+}
+
 // 자동완성
 function showDrugSuggest(input,idx){
-  var query=input.value.toLowerCase().trim();
-  var box=document.getElementById('suggest_'+idx);
+  var query=input.value.toLowerCase().trim(),box=document.getElementById('suggest_'+idx);
   if(!query){box.style.display='none';return;}
   var matches=[];
-  Object.keys(DRUG_LIST).forEach(function(code){
-    var name=DRUG_LIST[code];
-    if(code.toLowerCase().indexOf(query)!==-1||name.indexOf(query)!==-1) matches.push({code:code,name:name});
-  });
+  Object.keys(DRUG_LIST).forEach(function(code){var name=DRUG_LIST[code];if(code.toLowerCase().indexOf(query)!==-1||name.indexOf(query)!==-1)matches.push({code:code,name:name});});
   matches=matches.slice(0,10);
   if(!matches.length){box.style.display='none';return;}
   box.innerHTML=matches.map(function(m){
-    var safeCode=m.code.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    var safeName=m.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    var hl=m.code.replace(new RegExp('('+query+')','gi'),'<strong style="color:var(--accent);">$1</strong>');
-    return '<div onmousedown="selectDrug('+idx+',\''+safeCode+'\',\''+safeName+'\',this)" style="padding:7px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;">'
-      +'<span style="font-family:monospace;color:var(--accent);min-width:70px;">'+hl+'</span>'
-      +'<span style="color:var(--text2);">'+m.name+'</span></div>';
+    var sc=m.code.replace(/\\/g,'\\\\').replace(/'/g,"\\'"),sn=m.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var hl=m.code.replace(new RegExp('('+query+')','gi'),'<strong style="color:#4f8ef7;">$1</strong>');
+    return '<div onmousedown="selectDrug('+idx+',\''+sc+'\',\''+sn+'\',this)" style="padding:7px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #eee;display:flex;gap:8px;align-items:center;"><span style="font-family:monospace;color:#4f8ef7;min-width:70px;">'+hl+'</span><span style="color:#666;">'+m.name+'</span></div>';
   }).join('');
   box.style.display='block';
 }
 function selectDrug(idx,code,name,el){
-  _patientDrugs[idx].drug_code=code; _patientDrugs[idx].drug_name=name; _drugsChanged=true;
-  var codeInput=el.closest('td').querySelector('input'); if(codeInput) codeInput.value=code;
-  var nameInput=document.getElementById('drugname_'+idx); if(nameInput) nameInput.value=name;
+  _patientDrugs[idx].drug_code=code;_patientDrugs[idx].drug_name=name;_drugsChanged=true;
+  var ci=el.closest('td').querySelector('input');if(ci)ci.value=code;
+  var ni=document.getElementById('drugname_'+idx);if(ni)ni.value=name;
   document.getElementById('suggest_'+idx).style.display='none';
 }
 function hideSuggest(idx){setTimeout(function(){var b=document.getElementById('suggest_'+idx);if(b)b.style.display='none';},150);}
 
-// ══ 약물 입력 탭 ═════════════════════════════════════
-var imageBase64=null,imageMime='image/png',drugs=[];
-var _replaceMode=false,_replaceChart=null;
-
-document.addEventListener('DOMContentLoaded',function(){
-  document.getElementById('fileInput').addEventListener('change',function(e){if(e.target.files[0])loadImg(e.target.files[0]);});
-  var zone=document.getElementById('uploadZone');
-  zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('dragover');});
-  zone.addEventListener('dragleave',function(){zone.classList.remove('dragover');});
-  zone.addEventListener('drop',function(e){e.preventDefault();zone.classList.remove('dragover');var f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadImg(f);});
-  document.getElementById('chartNo').addEventListener('input',updateConvertBtn);
-});
-
+// ══ 약물 입력 탭 ══════════════════════════════════════
+var imageBase64=null,imageMime='image/png',drugs=[],_replaceMode=false,_replaceChart=null;
 function loadImg(file){
   imageMime=file.type||'image/png';
   var r=new FileReader();
-  r.onload=function(e){
-    imageBase64=e.target.result.split(',')[1];
-    document.getElementById('uploadPlaceholder').classList.add('hidden');
-    var img=document.getElementById('previewImg');
-    img.src=e.target.result;img.classList.remove('hidden');
-    updateConvertBtn();
-  };
+  r.onload=function(e){imageBase64=e.target.result.split(',')[1];document.getElementById('uploadPlaceholder').classList.add('hidden');var img=document.getElementById('previewImg');img.src=e.target.result;img.classList.remove('hidden');updateConvertBtn();};
   r.readAsDataURL(file);
 }
 function updateConvertBtn(){document.getElementById('convertBtn').disabled=!(document.getElementById('chartNo').value.trim()&&imageBase64);}
 
 async function convertImage(){
   var chartNo=document.getElementById('chartNo').value.trim();
-  if(!chartNo||!imageBase64) return;
+  if(!chartNo||!imageBase64)return;
   setStatus('convertStatus','loading','Claude가 이미지를 분석 중입니다...');
   document.getElementById('convertBtn').disabled=true;
   document.getElementById('resultCard').classList.add('hidden');
-  var drugListStr=Object.entries(DRUG_LIST).map(function(e){return e[0]+'\t'+e[1];}).join('\n');
-  var prompt='다음은 EMR 약물 처방 화면 캡처입니다. 아래 병원 약물코드 목록과 대조해 매칭하세요(대소문자 무시):\n'+drugListStr+'\n\n반환 형식(JSON 배열만):\n[{"drug_code":"코드","drug_name":"약물명","dose":"용량","daily_freq":"일투","days":"일수","method":"용법코드"}]';
+  var dls=Object.entries(DRUG_LIST).map(function(e){return e[0]+'\t'+e[1];}).join('\n');
+  var prompt='다음은 EMR 약물 처방 화면 캡처입니다. 아래 약물코드 목록과 대조해 매칭하세요(대소문자 무시):\n'+dls+'\n\n반환 형식(JSON 배열만):\n[{"drug_code":"코드","drug_name":"약물명","dose":"용량","daily_freq":"일투","days":"일수","method":"용법코드"}]';
   try{
     var data=await claudeCall({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMime,data:imageBase64}},{type:'text',text:prompt}]}]});
-    if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
-    if(!data.content) throw new Error('content 없음');
+    if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
+    if(!data.content)throw new Error('content 없음');
     var text=data.content.map(function(i){return i.text||'';}).join('');
-    var m=text.match(/\[[\s\S]*\]/);
-    if(!m) throw new Error('JSON 없음');
+    var m=text.match(/\[[\s\S]*\]/);if(!m)throw new Error('JSON 없음');
     drugs=JSON.parse(m[0]);
     renderDrugTable(chartNo,drugs);
-    setStatus('convertStatus','success',drugs.length+'개 약물 추출 완료'+(_replaceMode?' (교체 모드)':''));
+    setStatus('convertStatus','success',drugs.length+'개 추출 완료'+(_replaceMode?' (교체모드)':''));
     document.getElementById('resultCard').classList.remove('hidden');
   }catch(err){setStatus('convertStatus','error','변환 실패: '+err.message);}
   finally{document.getElementById('convertBtn').disabled=false;updateConvertBtn();}
@@ -711,13 +646,13 @@ function renderDrugTable(chartNo,arr){
 function appendDrugRow(d,chartNo,i){
   var cn=chartNo||document.getElementById('chartNo').value.trim();
   var tr=document.createElement('tr');
-  function ei(field,val,w){var v=(val||'').toString().replace(/"/g,'&quot;');return '<input class="edit-input" style="width:'+w+';" value="'+v+'" data-idx="'+i+'" data-field="'+field+'" onchange="drugs[+this.dataset.idx][this.dataset.field]=this.value;updateJsonPreview(document.getElementById(\'chartNo\').value.trim())">';}
-  tr.innerHTML='<td><span class="chart-tag">'+cn+'</span></td><td>'+ei('drug_code',d.drug_code,'75px')+'</td><td>'+ei('drug_name',d.drug_name,'130px')+'</td><td>'+ei('dose',d.dose,'38px')+'</td><td>'+ei('daily_freq',d.daily_freq,'33px')+'</td><td>'+ei('days',d.days,'33px')+'</td><td>'+ei('method',d.method,'43px')+'</td><td><button class="icon-btn" onclick="delDrugRow('+i+')">&#10005;</button></td>';
+  function ei(f,v,w){var val=(v||'').toString().replace(/"/g,'&quot;');return '<input class="edit-input" style="width:'+w+';" value="'+val+'" data-idx="'+i+'" data-field="'+f+'" onchange="drugs[+this.dataset.idx][this.dataset.field]=this.value;updateJsonPreview(document.getElementById(\'chartNo\').value.trim())">';}
+  tr.innerHTML='<td><span class="chart-tag">'+cn+'</span></td><td>'+ei('drug_code',d.drug_code,'75px')+'</td><td>'+ei('drug_name',d.drug_name,'130px')+'</td><td>'+ei('dose',d.dose,'38px')+'</td><td>'+ei('daily_freq',d.daily_freq,'33px')+'</td><td>'+ei('days',d.days,'33px')+'</td><td>'+ei('method',d.method,'43px')+'</td><td><button class="icon-btn" onclick="delDrugRow('+i+')">✕</button></td>';
   document.getElementById('drugTableBody').appendChild(tr);
 }
 function delDrugRow(i){drugs.splice(i,1);renderDrugTable(document.getElementById('chartNo').value.trim(),drugs);}
 function addDrugRow(){var i=drugs.length;drugs.push({drug_code:'',drug_name:'',dose:'',daily_freq:'',days:'',method:''});appendDrugRow(drugs[i],document.getElementById('chartNo').value.trim(),i);}
-function updateJsonPreview(chartNo){document.getElementById('jsonPreview').textContent=JSON.stringify(drugs.map(function(d){return Object.assign({chart_no:chartNo},d);}),null,2);}
+function updateJsonPreview(cn){document.getElementById('jsonPreview').textContent=JSON.stringify(drugs.map(function(d){return Object.assign({chart_no:cn},d);}),null,2);}
 function switchResultTab(tab){
   document.getElementById('tabTable').classList.toggle('active',tab==='table');
   document.getElementById('tabJson').classList.toggle('active',tab==='json');
@@ -725,34 +660,54 @@ function switchResultTab(tab){
   document.getElementById('jsonView').classList.toggle('hidden',tab!=='json');
 }
 async function saveDrugs(){
-  var chartNo=document.getElementById('chartNo').value.trim();
-  var action=_replaceMode?'replace':'save';
-  var btn=document.querySelector('#resultCard .btn-success');
-  btn.disabled=true;btn.textContent='저장 중...';
+  var cn=document.getElementById('chartNo').value.trim();
+  var btn=document.querySelector('#resultCard .btn-success');btn.disabled=true;btn.textContent='저장 중...';
   try{
-    if(_replaceMode) await sbDelete('drugs',{chart_no:chartNo});
-    var rows=drugs.map(function(d){return {chart_no:chartNo,drug_code:d.drug_code,drug_name:d.drug_name,dose:d.dose,daily_freq:d.daily_freq,days:d.days,method:d.method};});
+    if(_replaceMode)await sbDelete('drugs',{chart_no:cn});
+    var rows=drugs.map(function(d){return{chart_no:cn,drug_code:d.drug_code,drug_name:d.drug_name,dose:d.dose,daily_freq:d.daily_freq,days:d.days,method:d.method};});
     await sbInsert('drugs',rows);
     _replaceMode=false;_replaceChart=null;
     setStatus('drugSaveStatus','success','✓ '+drugs.length+'개 저장됨');
-  }catch(err){setStatus('drugSaveStatus','error','저장 실패: '+err.message);}
+  }catch(err){setStatus('drugSaveStatus','error','실패: '+err.message);}
   finally{btn.disabled=false;btn.innerHTML='&#128190; 저장';}
 }
 
-// ══ 문자 발송 ════════════════════════════════════════
-var _smsGroup=null,_smsDates=[],_smsList=[];
-function saveAligo(){
-  var k=document.getElementById('aligoKey').value.trim(),id=document.getElementById('aligoId').value.trim(),s=document.getElementById('aligoSender').value.trim();
-  if(!k||!id||!s){document.getElementById('aligoStatus').textContent='⚠️ 모두 입력해주세요';return;}
-  localStorage.setItem('aligo_key',k);localStorage.setItem('aligo_id',id);localStorage.setItem('aligo_sender',s);
-  document.getElementById('aligoStatus').textContent='✓ 저장됨';document.getElementById('aligoKey').value='';
+// ══ 대리처방 / 선택의료 탭 ═══════════════════════════
+async function loadSpecialList(type){
+  var col=type==='proxy'?'proxy_rx':'selective_care';
+  var statusId=type==='proxy'?'proxyStatus':'selcareStatus';
+  var bodyId=type==='proxy'?'proxyBody':'selcareBody';
+  var countId=type==='proxy'?'proxyCount':'selcareCount';
+  setStatus(statusId,'loading','조회 중...');
+  try{
+    var rows=await sbGet('visits',{[col]:'eq.Y',select:'chart_no,visit_date,next_visit_date,proxy_rx,selective_care',order:'next_visit_date.desc',limit:'500'});
+    var chartNos=rows.map(function(r){return r.chart_no;});
+    var patients=chartNos.length>0?await sbGet('patients',{chart_no:'in.('+chartNos.join(',')+')',select:'chart_no,phone'}):[];
+    var pMap={};patients.forEach(function(p){pMap[p.chart_no]=p.phone||'';});
+    document.getElementById(countId).textContent=rows.length+'명';
+    var tbody=document.getElementById(bodyId);tbody.innerHTML='';
+    rows.forEach(function(r){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><span class="chart-tag">'+r.chart_no+'</span></td>'
+        +'<td style="font-size:12px;">'+displayDate(fmt6(r.visit_date))+'</td>'
+        +'<td style="font-size:12px;">'+(r.next_visit_date?displayDate(fmt6(r.next_visit_date)):'-')+'</td>'
+        +'<td style="font-family:monospace;font-size:12px;">'+(pMap[r.chart_no]||'-')+'</td>';
+      tbody.appendChild(tr);
+    });
+    setStatus(statusId,'success','조회 완료');
+  }catch(err){setStatus(statusId,'error','실패: '+err.message);}
 }
-function loadAligoConfig(){if(localStorage.getItem('aligo_key'))document.getElementById('aligoStatus').textContent='✓ 설정 로드됨';}
+
+// ══ 문자 발송 탭 ══════════════════════════════════════
+var _smsGroup=null,_smsDates=[],_smsList=[];
+function saveAligo(){var k=document.getElementById('aligoKey').value.trim(),id=document.getElementById('aligoId').value.trim(),s=document.getElementById('aligoSender').value.trim();if(!k||!id||!s){document.getElementById('aligoStatus').textContent='⚠️';return;}localStorage.setItem('aligo_key',k);localStorage.setItem('aligo_id',id);localStorage.setItem('aligo_sender',s);document.getElementById('aligoStatus').textContent='✓';document.getElementById('aligoKey').value='';}
+function loadAligoConfig(){if(localStorage.getItem('aligo_key'))document.getElementById('aligoStatus').textContent='✓ 로드됨';}
 function addDays(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function toD6(d){return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
+
 function selectGroup(btn,group){
-  document.querySelectorAll('.sms-group-btn').forEach(function(b){b.classList.remove('btn-primary');b.classList.add('btn-outline');});
-  btn.classList.add('btn-primary');btn.classList.remove('btn-outline');
+  document.querySelectorAll('.sms-group-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
   _smsGroup=group;
   var t=new Date(),dow=t.getDay();
   if(group==='mon')    _smsDates=[toD6(addDays(t,(1-dow+7)%7||7))];
@@ -760,18 +715,28 @@ function selectGroup(btn,group){
   if(group==='thu')    _smsDates=[toD6(addDays(t,(4-dow+7)%7||7))];
   if(group==='fri')    _smsDates=[toD6(addDays(t,(5-dow+7)%7||7))];
   if(group==='satSun'){var sat=addDays(t,(6-dow+7)%7||7);_smsDates=[toD6(sat),toD6(addDays(sat,1))];}
-  var info=document.getElementById('smsGroupInfo');
-  info.innerHTML='📅 조회 날짜: <strong style="color:var(--text);">'+_smsDates.map(displayDate).join(', ')+'</strong><br><span style="margin-top:4px;display:block;">✉️ '+SMS_MSG[group]+'</span>';
-  info.classList.remove('hidden');
+  document.getElementById('smsGroupInfo').innerHTML='📅 '+_smsDates.map(displayDate).join(', ')+'<br><small>'+SMS_MSG[group]+'</small>';
+  document.getElementById('smsGroupInfo').classList.remove('hidden');
   document.getElementById('smsSearchBtn').disabled=false;
   document.getElementById('smsMsgPreview').textContent=SMS_MSG[group];
   document.getElementById('smsListCard').classList.add('hidden');
 }
+
 async function loadSmsList(){
   var btn=document.getElementById('smsSearchBtn');btn.disabled=true;btn.textContent='조회 중...';
   try{
-    var inFilter=_smsDates.join(',');
-    var visitRows=await sbGet('visits',{next_visit_date:'in.('+inFilter+')',select:'chart_no,next_visit_date',order:'id.desc'});
+    // 기간 조회 모드
+    var startD=document.getElementById('smsStartDate').value.trim();
+    var endD=document.getElementById('smsEndDate').value.trim();
+    var visitRows;
+    if(startD&&endD){
+      visitRows=await sbGet('visits',{next_visit_date:'gte.'+startD,select:'chart_no,next_visit_date',order:'next_visit_date.asc,chart_no.asc',limit:'1000'});
+      visitRows=visitRows.filter(function(v){return v.next_visit_date<=endD;});
+      _smsGroup=_smsGroup||'mon';
+    } else {
+      var inFilter=_smsDates.join(',');
+      visitRows=await sbGet('visits',{next_visit_date:'in.('+inFilter+')',select:'chart_no,next_visit_date',order:'next_visit_date.asc',limit:'500'});
+    }
     var seen={},uniqueVisits=[];
     visitRows.forEach(function(v){if(!seen[v.chart_no]){seen[v.chart_no]=true;uniqueVisits.push(v);}});
     var chartNos=uniqueVisits.map(function(v){return v.chart_no;});
@@ -780,8 +745,9 @@ async function loadSmsList(){
     _smsList=uniqueVisits.map(function(v){var p=patMap[v.chart_no]||{};return{chart_no:v.chart_no,phone:p.phone||'',sms_yn:p.sms_yn||'Y',next_visit:v.next_visit_date};});
     renderSmsList();document.getElementById('smsListCard').classList.remove('hidden');
   }catch(err){alert('조회 실패: '+err.message);}
-  finally{btn.disabled=false;btn.textContent='🔍 대상자 조회';}
+  finally{btn.disabled=false;btn.textContent='🔍 조회';}
 }
+
 function renderSmsList(){
   var tbody=document.getElementById('smsBody');tbody.innerHTML='';
   var active=_smsList.filter(function(p){return p.sms_yn!=='N'&&p.phone;}).length;
@@ -791,42 +757,34 @@ function renderSmsList(){
     var tr=document.createElement('tr');
     tr.innerHTML='<td><input type="checkbox" class="sms-check" data-idx="'+i+'" '+(hasSms&&hasPhone?'checked':'')+((!hasPhone)?' disabled':'')+'></td>'
       +'<td><span class="chart-tag">'+p.chart_no+'</span></td>'
-      +'<td style="font-family:monospace;font-size:12px;">'+(p.phone||'<span style="color:var(--danger)">미등록</span>')+'</td>'
-      +'<td><span class="code-badge">'+displayDate(p.next_visit)+'</span></td>'
-      +'<td><label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" '+(hasSms?'checked':'')+' onchange="toggleSmsFlag(\''+p.chart_no+'\',this.checked,'+i+')"><span style="font-size:11px;color:'+(hasSms?'var(--success)':'var(--danger)')+';">'+(hasSms?'발송':'제외')+'</span></label></td>'
-      +'<td id="smsSt_'+i+'" style="font-size:12px;color:var(--text2);">대기</td>';
+      +'<td style="font-size:12px;">'+displayDate(p.next_visit)+'</td>'
+      +'<td style="font-family:monospace;font-size:12px;">'+(p.phone||'<span style="color:#f75f5f">미등록</span>')+'</td>'
+      +'<td><label style="cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" '+(hasSms?'checked':'')+' onchange="toggleSmsFlag(\''+p.chart_no+'\',this.checked,'+i+')"><span style="font-size:11px;">'+(hasSms?'발송':'제외')+'</span></label></td>'
+      +'<td id="smsSt_'+i+'" style="font-size:12px;color:#aaa;">대기</td>';
     tbody.appendChild(tr);
   });
 }
 function toggleAll(m){document.querySelectorAll('.sms-check:not([disabled])').forEach(function(c){c.checked=m.checked;});}
-async function toggleSmsFlag(chartNo,checked,idx){
-  _smsList[idx].sms_yn=checked?'Y':'N';
-  var cb=document.querySelector('.sms-check[data-idx="'+idx+'"]');if(cb)cb.checked=checked&&!!_smsList[idx].phone;
-  try{await sbUpsert('patients',{chart_no:chartNo,sms_yn:checked?'Y':'N'});}catch(e){}
-}
+async function toggleSmsFlag(cn,checked,idx){_smsList[idx].sms_yn=checked?'Y':'N';var cb=document.querySelector('.sms-check[data-idx="'+idx+'"]');if(cb)cb.checked=checked&&!!_smsList[idx].phone;try{await sbUpsert('patients',{chart_no:cn,sms_yn:checked?'Y':'N'});}catch(e){}}
 async function sendSms(){
   var key=localStorage.getItem('aligo_key'),id=localStorage.getItem('aligo_id'),sender=localStorage.getItem('aligo_sender');
-  if(!key||!id||!sender){alert('먼저 알리고 API 설정을 저장해주세요.');return;}
+  if(!key||!id||!sender){alert('알리고 API 설정을 저장해주세요.');return;}
   var checks=document.querySelectorAll('.sms-check:checked'),targets=[];
   checks.forEach(function(cb){var p=_smsList[+cb.dataset.idx];if(p&&p.phone)targets.push({chart_no:p.chart_no,phone:p.phone,message:SMS_MSG[_smsGroup]});});
   if(!targets.length){alert('발송 대상이 없습니다.');return;}
-  if(!confirm(targets.length+'명에게 문자를 발송합니다.')) return;
+  if(!confirm(targets.length+'명에게 문자를 발송합니다.'))return;
   var btn=document.querySelector('#smsListCard .btn-success');btn.disabled=true;btn.textContent='발송 중...';
   try{
     var data=await sheetPost({action:'send_sms',aligo_key:key,aligo_id:id,aligo_sender:sender,targets:targets});
     var ok=0;
-    (data.results||[]).forEach(function(r,i){
-      var cb=document.querySelectorAll('.sms-check:checked')[i];
-      if(cb){var idx=+cb.dataset.idx;document.getElementById('smsSt_'+idx).innerHTML=r.success?'<span style="color:var(--success);">✓발송</span>':'<span style="color:var(--danger);">✕실패</span>';}
-      if(r.success)ok++;
-    });
-    setStatus('smsSendStatus',ok===targets.length?'success':'error',ok+'명 발송 완료'+(targets.length-ok>0?' / '+(targets.length-ok)+'명 실패':''));
+    (data.results||[]).forEach(function(r,i){var cb=document.querySelectorAll('.sms-check:checked')[i];if(cb){var idx=+cb.dataset.idx;document.getElementById('smsSt_'+idx).innerHTML=r.success?'<span style="color:green;">✓</span>':'<span style="color:red;">✕</span>';}if(r.success)ok++;});
+    setStatus('smsSendStatus',ok===targets.length?'success':'error',ok+'명 발송'+(targets.length-ok>0?' / '+(targets.length-ok)+'명 실패':''));
   }catch(err){alert('발송 실패: '+err.message);}
-  finally{btn.disabled=false;btn.innerHTML='&#128241; 전체 발송';}
+  finally{btn.disabled=false;btn.innerHTML='📱 전체 발송';}
 }
 
 function setStatus(id,type,msg){
-  var el=document.getElementById(id);
+  var el=document.getElementById(id);if(!el)return;
   el.className='status-bar status-'+type;el.classList.remove('hidden');
   if(type==='loading')el.innerHTML='<div class="spinner"></div><span>'+msg+'</span>';
   else el.textContent=msg;
