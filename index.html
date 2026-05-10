@@ -140,11 +140,13 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
     </div>
     <div style="margin-bottom:14px;">
       <label style="display:block;margin-bottom:6px;">다음내원일</label>
-      <div style="display:flex;gap:6px;align-items:center;">
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
         <input type="text" id="pNextVisitDate" placeholder="미선택" readonly style="cursor:pointer;max-width:140px;background:#fff;" onclick="openCal('pNextVisitDate')">
         <button onclick="openCal('pNextVisitDate')" class="btn btn-outline" style="padding:9px 12px;">📅</button>
         <button onclick="document.getElementById('pNextVisitDate').value=''" class="btn btn-outline" style="padding:9px 12px;color:var(--danger);">✕</button>
+        <button id="btnSaveVisit" onclick="saveVisitDate()" class="btn btn-success" style="font-size:12px;padding:7px 12px;">저장</button>
       </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;">※ 진료일·다음내원일·대리처방·선택의료 저장</div>
     </div>
     <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -162,10 +164,14 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
     </div>
     <div style="margin-bottom:12px;">
       <label style="display:block;margin-bottom:6px;">선택의료</label>
-      <div class="toggle-group" id="pSelCare" data-val="N">
-        <button class="toggle-btn toggle-y" onclick="toggleBtn('pSelCare','Y')">예</button>
-        <button class="toggle-btn toggle-n active" onclick="toggleBtn('pSelCare','N')">아니오</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="toggle-group" id="pSelCare" data-val="N" style="flex:1;">
+          <button class="toggle-btn toggle-y" onclick="toggleBtn('pSelCare','Y')">예</button>
+          <button class="toggle-btn toggle-n active" onclick="toggleBtn('pSelCare','N')">아니오</button>
+        </div>
+        <button id="btnSaveExtra" onclick="saveExtraOnly()" class="btn btn-success" style="font-size:12px;padding:7px 12px;">저장</button>
       </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;">※ 대리처방·선택의료만 저장</div>
     </div>
     <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border);">
       <div class="input-row">
@@ -177,9 +183,11 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
             <span style="font-size:13px;">허용</span>
           </label>
         </div>
+        <button id="btnSavePhone" onclick="savePhoneOnly()" class="btn btn-success" style="font-size:12px;padding:7px 12px;align-self:flex-end;margin-bottom:1px;">저장</button>
       </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;">※ 전화번호·문자발송 여부만 저장</div>
     </div>
-    <button class="btn btn-success btn-lg" id="saveAllBtn" onclick="saveVisitAll()">💾 저장</button>
+    <button class="btn btn-success btn-lg" id="saveAllBtn" onclick="saveVisitAll()">💾 전체 저장</button>
     <div id="visitSaveStatus" class="hidden" style="margin-top:8px;"></div>
   </div>
 </div>
@@ -499,6 +507,72 @@ function setToggleBtn(id,val){
 }
 function toggleBtn(id,val){setToggleBtn(id,val);}
 
+// ── 개별 저장 함수들 ────────────────────────────────
+async function saveVisitDate(){
+  if(!_currentChart)return;
+  var btn=document.getElementById('btnSaveVisit');btn.disabled=true;btn.textContent='저장중...';
+  try{
+    var vd=today6(),nd=document.getElementById('pNextVisitDate').value.trim();
+    var proxyRx=document.getElementById('pProxyRx').dataset.val||'N';
+    var selCare=document.getElementById('pSelCare').dataset.val||'N';
+    var visitData={chart_no:_currentChart,visit_date:vd,next_visit_date:nd,proxy_rx:proxyRx,selective_care:selCare,updated_at:new Date().toISOString()};
+    var existing=await sbGet('visits',{chart_no:'eq.'+_currentChart,select:'id',limit:'1'});
+    if(existing&&existing.length>0){await sbUpdate('visits',{chart_no:_currentChart},visitData);}
+    else{await sbInsert('visits',visitData);}
+    setStatus('visitSaveStatus','success','✓ 내원일 저장됨');
+    searchPatient();
+  }catch(err){setStatus('visitSaveStatus','error','내원일 저장 실패: '+err.message);}
+  finally{btn.disabled=false;btn.textContent='저장';}
+}
+
+async function saveDrugsOnly(){
+  if(!_currentChart)return;
+  var btn=document.getElementById('btnSaveDrugs');btn.disabled=true;btn.textContent='저장중...';
+  try{
+    await sbDelete('drugs',{chart_no:_currentChart});
+    if(_patientDrugs.length>0){
+      var rows=_patientDrugs.map(function(d){return{chart_no:_currentChart,drug_code:d.drug_code||'',drug_name:d.drug_name||'',dose:d.dose||'',daily_freq:d.daily_freq||'',days:d.days||'',method:d.method||''};});
+      await sbInsert('drugs',rows);
+    }
+    _drugsChanged=false;
+    setStatus('visitSaveStatus','success','✓ 약물 저장됨');
+  }catch(err){setStatus('visitSaveStatus','error','약물 저장 실패: '+err.message);}
+  finally{btn.disabled=false;btn.textContent='저장';}
+}
+
+async function savePhoneOnly(){
+  if(!_currentChart)return;
+  var btn=document.getElementById('btnSavePhone');btn.disabled=true;btn.textContent='저장중...';
+  try{
+    var phone=document.getElementById('pPhone').value.trim();
+    var smsYn=document.getElementById('pSmsYn').checked?'Y':'N';
+    if(!phone){setStatus('visitSaveStatus','error','전화번호를 입력해주세요.');return;}
+    await sbUpsert('patients',{chart_no:_currentChart,phone:phone,sms_yn:smsYn,updated_at:new Date().toISOString()});
+    setStatus('visitSaveStatus','success','✓ 전화번호 저장됨');
+    searchPatient();
+  }catch(err){setStatus('visitSaveStatus','error','전화번호 저장 실패: '+err.message);}
+  finally{btn.disabled=false;btn.textContent='저장';}
+}
+
+async function saveExtraOnly(){
+  if(!_currentChart)return;
+  var btn=document.getElementById('btnSaveExtra');btn.disabled=true;btn.textContent='저장중...';
+  try{
+    var proxyRx=document.getElementById('pProxyRx').dataset.val||'N';
+    var selCare=document.getElementById('pSelCare').dataset.val||'N';
+    var existing=await sbGet('visits',{chart_no:'eq.'+_currentChart,select:'id',limit:'1'});
+    if(existing&&existing.length>0){
+      await sbUpdate('visits',{chart_no:_currentChart},{proxy_rx:proxyRx,selective_care:selCare,updated_at:new Date().toISOString()});
+    }else{
+      await sbInsert('visits',{chart_no:_currentChart,proxy_rx:proxyRx,selective_care:selCare});
+    }
+    setStatus('visitSaveStatus','success','✓ 대리처방/선택의료 저장됨');
+    searchPatient();
+  }catch(err){setStatus('visitSaveStatus','error','저장 실패: '+err.message);}
+  finally{btn.disabled=false;btn.textContent='저장';}
+}
+
+// ── 전체 저장 ────────────────────────────────────────
 async function saveVisitAll(){
   if(!_currentChart)return;
   var btn=document.getElementById('saveAllBtn');btn.disabled=true;btn.textContent='저장 중...';
@@ -522,12 +596,13 @@ async function saveVisitAll(){
       }
     }
     await Promise.all(saves);
-    setStatus('visitSaveStatus','success','✓ 저장 완료');
+    _drugsChanged=false;
+    setStatus('visitSaveStatus','success','✓ 전체 저장 완료');
     searchPatient();
     document.getElementById('visitForm').classList.add('hidden');
     window.scrollTo({top:0,behavior:'smooth'});
   }catch(err){setStatus('visitSaveStatus','error','저장 실패: '+err.message);}
-  finally{btn.disabled=false;btn.innerHTML='&#128190; 저장';}
+  finally{btn.disabled=false;btn.innerHTML='&#128190; 전체 저장';}
 }
 
 function renderPatientDrugs(){
@@ -562,9 +637,11 @@ function renderPatientDrugs(){
     });
   }
   html+='</tbody></table></div>';
-  html+='<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">'
+  html+='<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;">'
     +'<button onclick="addPatientDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">+ 행 추가</button>'
     +'<button onclick="goUpdateDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">&#10022; 이미지로 업데이트</button>'
+    +'<button id="btnSaveDrugs" onclick="saveDrugsOnly()" class="btn btn-success" style="font-size:12px;padding:6px 12px;">약물 저장</button>'
+    +'<span style="font-size:11px;color:var(--text2);">※ 약물 정보만 저장</span>'
     +'</div>';
   el.innerHTML=html;
 }
