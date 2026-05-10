@@ -101,6 +101,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
   <button class="nav-tab" id="navProxy" onclick="switchTab('proxy')">📋 대리처방</button>
   <button class="nav-tab" id="navSelcare" onclick="switchTab('selcare')">⭐ 선택의료</button>
   <button class="nav-tab" id="navSms" onclick="switchTab('sms')">📱 문자발송</button>
+  <button class="nav-tab" id="navStats" onclick="switchTab('stats');loadVisitStats()">📊 내원현황</button>
 </div>
 
 <!-- ══ 진료 탭 ══ -->
@@ -349,6 +350,33 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
   </div>
 </div>
 
+<!-- ══ 내원현황 탭 ══ -->
+<div id="tabStats" class="container hidden">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div class="card-title" style="margin-bottom:0;">📊 내원현황 (오늘~90일)</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="statsTotalCount" style="font-size:12px;color:var(--text2);"></span>
+        <button id="statsLoadBtn" class="btn btn-primary" onclick="loadVisitStats()" style="font-size:12px;padding:6px 12px;">🔍 조회</button>
+      </div>
+    </div>
+    <div id="statsStatus" class="hidden" style="margin-bottom:10px;"></div>
+    <div id="statsTableWrap" class="hidden" style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:80px;">날짜</th>
+            <th style="min-width:30px;">요일</th>
+            <th style="min-width:50px;text-align:center;">예상</th>
+            <th>챠트번호 목록 (클릭하면 진료 탭으로)</th>
+          </tr>
+        </thead>
+        <tbody id="statsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- 달력 오버레이 -->
 <div id="calWrap" class="hidden" onclick="if(event.target===this)closeCal()">
   <div id="calBox">
@@ -399,7 +427,7 @@ async function claudeCall(body){var r=await fetch(PROXY,{method:'POST',headers:{
 async function sheetPost(body){body._sheet_action=true;var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ANON_KEY},body:JSON.stringify(body)});return r.json();}
 
 // ── 탭 ───────────────────────────────────────────────
-var TABS=['patient','drug','proxy','selcare','sms'];
+var TABS=['patient','drug','proxy','selcare','sms','stats'];
 function switchTab(tab){
   TABS.forEach(function(t){
     var T=t.charAt(0).toUpperCase()+t.slice(1);
@@ -863,6 +891,80 @@ async function sendSms(){
     setStatus('smsSendStatus',ok===targets.length?'success':'error',ok+'명 발송'+(targets.length-ok>0?' / '+(targets.length-ok)+'명 실패':''));
   }catch(err){alert('발송 실패: '+err.message);}
   finally{btn.disabled=false;btn.innerHTML='📱 전체 발송';}
+}
+
+// ══ 내원현황 탭 ══════════════════════════════════════
+async function loadVisitStats(){
+  var btn=document.getElementById('statsLoadBtn');
+  btn.disabled=true;btn.textContent='조회 중...';
+  setStatus('statsStatus','loading','90일 내원현황 조회 중...');
+  try{
+    // 오늘부터 90일 날짜 배열 생성
+    var dates=[];
+    var base=new Date();
+    for(var i=0;i<90;i++){
+      var d=new Date(base);
+      d.setDate(d.getDate()+i);
+      dates.push(toD6(d));
+    }
+
+    // Supabase에서 해당 기간 visits 한번에 조회
+    var inFilter=dates.join(',');
+    var rows=await sbGet('visits',{
+      next_visit_date:'in.('+inFilter+')',
+      select:'chart_no,next_visit_date',
+      order:'next_visit_date.asc,chart_no.asc',
+      limit:'5000'
+    });
+
+    // 날짜별로 그룹핑
+    var grouped={};
+    rows.forEach(function(r){
+      var d=r.next_visit_date;
+      if(!grouped[d]) grouped[d]=[];
+      grouped[d].push(r.chart_no);
+    });
+
+    // 테이블 렌더링
+    var tbody=document.getElementById('statsBody');
+    tbody.innerHTML='';
+    var days=['일','월','화','수','목','금','토'];
+    var totalExpected=0;
+
+    dates.forEach(function(d6){
+      var charts=grouped[d6]||[];
+      if(charts.length===0&&i>30) return; // 환자없는 날은 30일 이후는 스킵하지 않음
+      var y=2000+parseInt(d6.slice(0,2)),mo=parseInt(d6.slice(2,4)),dd=parseInt(d6.slice(4,6));
+      var dow=new Date(y,mo-1,dd).getDay();
+      var isToday=d6===toD6(new Date());
+      var isSun=dow===0,isSat=dow===6;
+      totalExpected+=charts.length;
+
+      var tr=document.createElement('tr');
+      if(isToday) tr.style.background='#eef3fe';
+
+      var dateCell='<td style="font-family:monospace;font-size:13px;font-weight:'+(isToday?'700':'400')+';color:'+(isToday?'#4f8ef7':'#222')+';">'+d6+'</td>';
+      var dayCell='<td style="font-size:13px;color:'+(isSun?'#e53e3e':isSat?'#4f8ef7':'#444')+';">'+days[dow]+'</td>';
+      var countCell='<td style="text-align:center;font-weight:600;font-size:14px;color:'+(charts.length>0?'#1a1d2e':'#bbb')+';">'+(charts.length||'-')+'</td>';
+      var chartCell='<td style="font-size:12px;color:#666;line-height:1.8;">'+charts.map(function(c){
+        return '<span style="display:inline-block;background:#f0f4ff;border:1px solid #c7d9fb;border-radius:4px;padding:1px 6px;margin:1px;font-family:monospace;cursor:pointer;" onclick="goToPatient(\'' + c + '\')" title="' + c + ' 조회">' + c + '</span>';
+      }).join('')+'</td>';
+
+      tr.innerHTML=dateCell+dayCell+countCell+chartCell;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('statsTotalCount').textContent='90일 총 예상환자: '+totalExpected+'명';
+    document.getElementById('statsTableWrap').classList.remove('hidden');
+    setStatus('statsStatus','success','조회 완료');
+  }catch(err){setStatus('statsStatus','error','조회 실패: '+err.message);}
+  finally{btn.disabled=false;btn.textContent='🔍 조회';}
+}
+
+function goToPatient(chartNo){
+  switchTab('patient');
+  document.getElementById('pChartNo').value=chartNo;
+  searchPatient();
 }
 
 function setStatus(id,type,msg){
