@@ -558,9 +558,22 @@ function renderPatientDrugs() {
   html+='</tr></thead><tbody>';
   _patientDrugs.forEach(function(d,i){
     html+='<tr>';
-    fields.forEach(function(f,fi){
+    // 약물코드 - 자동완성
+    var codeVal=((d.drug_code!==undefined?d.drug_code:'')).toString().replace(/"/g,'&quot;');
+    html+='<td style="'+ts+';position:relative;">'
+      +'<input style="'+is+'width:70px;" value="'+codeVal+'" data-pidx="'+i+'" data-pfield="drug_code"'
+      +' oninput="showDrugSuggest(this,'+i+')" onchange="_patientDrugs[+this.dataset.pidx].drug_code=this.value"'
+      +' onblur="hideSuggest('+i+',this)" autocomplete="off">'
+      +'<div id="suggest_'+i+'" style="display:none;position:absolute;top:100%;left:0;z-index:999;background:var(--surface2);border:1px solid var(--border);border-radius:8px;max-height:160px;overflow-y:auto;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.4);"></div>'
+      +'</td>';
+    // 약물명
+    var nameVal=((d.drug_name!==undefined?d.drug_name:'')).toString().replace(/"/g,'&quot;');
+    html+='<td style="'+ts+'"><input id="drugname_'+i+'" style="'+is+'width:120px;" value="'+nameVal+'" data-pidx="'+i+'" data-pfield="drug_name" onchange="_patientDrugs[+this.dataset.pidx].drug_name=this.value"></td>';
+    // 나머지 필드
+    ['dose','daily_freq','days','method'].forEach(function(f,fi){
+      var fw=['36px','30px','30px','36px'][fi];
       var val=((d[f]!==undefined?d[f]:'')).toString().replace(/"/g,'&quot;');
-      html+='<td style="'+ts+'"><input style="'+is+'width:'+widths[fi]+';" value="'+val+'" data-pidx="'+i+'" data-pfield="'+f+'" onchange="_patientDrugs[+this.dataset.pidx][this.dataset.pfield]=this.value"></td>';
+      html+='<td style="'+ts+'"><input style="'+is+'width:'+fw+';" value="'+val+'" data-pidx="'+i+'" data-pfield="'+f+'" onchange="_patientDrugs[+this.dataset.pidx][this.dataset.pfield]=this.value"></td>';
     });
     html+='<td style="'+ts+'"><button onclick="delPatientDrug('+i+')" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;">&#10005;</button></td>';
     html+='</tr>';
@@ -743,6 +756,55 @@ async function sendSms(){
     setStatus('smsSendStatus',ok===targets.length?'success':'error',ok+'명 발송 완료'+(targets.length-ok>0?' / '+(targets.length-ok)+'명 실패':''));
   } catch(err){alert('발송 실패: '+err.message);}
   finally{btn.disabled=false;btn.innerHTML='&#128241; 전체 발송';}
+}
+
+// ── 약물코드 자동완성 ──────────────────────────────────
+function showDrugSuggest(input, idx) {
+  var query = input.value.toLowerCase().trim();
+  var box = document.getElementById('suggest_'+idx);
+  if (!query || query.length < 1) { box.style.display='none'; return; }
+
+  var matches = [];
+  Object.keys(DRUG_LIST).forEach(function(code) {
+    var name = DRUG_LIST[code];
+    if (code.toLowerCase().indexOf(query) !== -1 || name.indexOf(query) !== -1) {
+      matches.push({code:code, name:name});
+    }
+  });
+  matches = matches.slice(0, 10); // 최대 10개
+
+  if (!matches.length) { box.style.display='none'; return; }
+
+  box.innerHTML = matches.map(function(m) {
+    var codeHl = m.code.replace(new RegExp('('+query+')', 'gi'), '<strong style="color:var(--accent);">$1</strong>');
+    var safeCode = m.code.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var safeName = m.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div onmousedown="selectDrug('+idx+',\''+safeCode+'\',\''+safeName+'\',this)" '
+      +'style="padding:7px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;">'
+      +'<span style="font-family:monospace;color:var(--accent);min-width:70px;">'+codeHl+'</span>'
+      +'<span style="color:var(--text2);">'+m.name+'</span>'
+      +'</div>';
+  }).join('');
+  box.style.display = 'block';
+}
+
+function selectDrug(idx, code, name, el) {
+  _patientDrugs[idx].drug_code = code;
+  _patientDrugs[idx].drug_name = name;
+  // 입력창 업데이트
+  var codeInput = el.closest('td').querySelector('input');
+  if (codeInput) codeInput.value = code;
+  var nameInput = document.getElementById('drugname_'+idx);
+  if (nameInput) nameInput.value = name;
+  // 드롭다운 닫기
+  document.getElementById('suggest_'+idx).style.display = 'none';
+}
+
+function hideSuggest(idx, input) {
+  setTimeout(function() {
+    var box = document.getElementById('suggest_'+idx);
+    if (box) box.style.display = 'none';
+  }, 150);
 }
 
 // ── 공통 유틸 ──────────────────────────────────────────
