@@ -409,7 +409,7 @@ function switchTab(tab){
 // ── 날짜 ─────────────────────────────────────────────
 function today6(){var d=new Date();return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
 function fmt6(val){if(!val)return '';var s=String(val).trim();if(/^\d{6}$/.test(s))return s;var d=new Date(val);if(!isNaN(d.getTime()))return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');return s;}
-function displayDate(d6){if(!d6||d6.length!==6)return d6||'없음';var days=['일','월','화','수','목','금','토'];var y=2000+parseInt(d6.slice(0,2)),mo=parseInt(d6.slice(2,4)),d=parseInt(d6.slice(4,6));return mo+'/'+d+'('+days[new Date(y,mo-1,d).getDay()]+')';}
+function displayDate(d6){if(!d6||d6.length!==6)return d6||'없음';var days=['일','월','화','수','목','금','토'];var y=2000+parseInt(d6.slice(0,2)),mo=parseInt(d6.slice(2,4)),d=parseInt(d6.slice(4,6));return d6+'('+days[new Date(y,mo-1,d).getDay()]+')';}
 
 // ── 달력 오버레이 ─────────────────────────────────────
 var calY,calM,calTarget=null;
