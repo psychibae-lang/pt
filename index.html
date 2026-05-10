@@ -156,22 +156,27 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
       <div id="piDrugArea"></div>
     </div>
     <div style="margin-bottom:12px;padding-top:12px;border-top:1px solid var(--border);">
-      <label style="display:block;margin-bottom:6px;">대리처방</label>
-      <div class="toggle-group" id="pProxyRx" data-val="N">
-        <button class="toggle-btn toggle-y" onclick="toggleBtn('pProxyRx','Y')">예</button>
-        <button class="toggle-btn toggle-n active" onclick="toggleBtn('pProxyRx','N')">아니오</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:12px;font-weight:600;color:var(--text2);">대리처방 / 선택의료</span>
+        <button id="btnSaveExtra" onclick="saveExtraOnly()" class="btn btn-success" style="font-size:12px;padding:6px 12px;">저장</button>
       </div>
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="display:block;margin-bottom:6px;">선택의료</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <div class="toggle-group" id="pSelCare" data-val="N" style="flex:1;">
-          <button class="toggle-btn toggle-y" onclick="toggleBtn('pSelCare','Y')">예</button>
-          <button class="toggle-btn toggle-n active" onclick="toggleBtn('pSelCare','N')">아니오</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="display:block;margin-bottom:5px;font-size:11px;">대리처방</label>
+          <div class="toggle-group" id="pProxyRx" data-val="N">
+            <button class="toggle-btn toggle-y" onclick="toggleBtn('pProxyRx','Y')">예</button>
+            <button class="toggle-btn toggle-n active" onclick="toggleBtn('pProxyRx','N')">아니오</button>
+          </div>
         </div>
-        <button id="btnSaveExtra" onclick="saveExtraOnly()" class="btn btn-success" style="font-size:12px;padding:7px 12px;">저장</button>
+        <div>
+          <label style="display:block;margin-bottom:5px;font-size:11px;">선택의료</label>
+          <div class="toggle-group" id="pSelCare" data-val="N">
+            <button class="toggle-btn toggle-y" onclick="toggleBtn('pSelCare','Y')">예</button>
+            <button class="toggle-btn toggle-n active" onclick="toggleBtn('pSelCare','N')">아니오</button>
+          </div>
+        </div>
       </div>
-      <div style="font-size:11px;color:var(--text2);margin-top:4px;">※ 대리처방·선택의료만 저장</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px;">※ 대리처방·선택의료만 저장</div>
     </div>
     <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border);">
       <div class="input-row">
