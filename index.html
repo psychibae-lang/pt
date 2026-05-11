@@ -96,7 +96,8 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
   <span id="keyStatus" style="font-size:11px;color:var(--text2);"></span>
 </div>
 <div class="nav-bar">
-  <button class="nav-tab active" id="navPatient" onclick="switchTab('patient')">👤 진료</button>
+  <button class="nav-tab active" id="navAppt" onclick="switchTab('appt');loadAppts()">📅 예약</button>
+  <button class="nav-tab" id="navPatient" onclick="switchTab('patient')">👤 진료</button>
   <button class="nav-tab" id="navDrug" onclick="switchTab('drug')">💊 약물입력</button>
   <button class="nav-tab" id="navProxy" onclick="switchTab('proxy')">📋 대리처방</button>
   <button class="nav-tab" id="navSelcare" onclick="switchTab('selcare')">⭐ 선택의료</button>
@@ -104,8 +105,34 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
   <button class="nav-tab" id="navStats" onclick="switchTab('stats');loadVisitStats()">📊 내원현황</button>
 </div>
 
+<!-- ══ 예약 탭 ══ -->
+<div id="tabAppt" class="container">
+  <div class="card" style="padding:14px 16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:13px;font-weight:700;color:#333;">📅 예약 현황 (오늘~8일)</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span style="font-size:11px;color:#aaa;">셀 클릭 후 입력, 포커스 이탈 시 자동 저장</span>
+        <button id="apptLoadBtn" class="btn btn-outline" onclick="loadAppts()" style="font-size:11px;padding:5px 10px;">🔄 새로고침</button>
+      </div>
+    </div>
+    <!-- 진료이유 범례 -->
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding:8px 10px;background:#f7f8fc;border-radius:7px;">
+      <span style="font-size:10px;color:#888;font-weight:600;">진료이유:</span>
+      <span style="font-size:10px;color:#555;">1.우울</span>
+      <span style="font-size:10px;color:#555;">2.불면</span>
+      <span style="font-size:10px;color:#555;">3.불안</span>
+      <span style="font-size:10px;color:#555;">4.강박</span>
+      <span style="font-size:10px;color:#555;">5.트라우마</span>
+      <span style="font-size:10px;color:#555;">6.ADHD</span>
+      <span style="font-size:10px;color:#555;">7.틱</span>
+      <span style="font-size:10px;color:#555;">8.환청환시</span>
+    </div>
+  </div>
+  <div id="apptContainer"></div>
+</div>
+
 <!-- ══ 진료 탭 ══ -->
-<div id="tabPatient" class="container">
+<div id="tabPatient" class="container hidden">
   <div class="card">
     <div class="card-title">환자 조회</div>
     <div class="input-row">
@@ -459,7 +486,7 @@ async function claudeCall(body){var r=await fetch(PROXY,{method:'POST',headers:{
 async function sheetPost(body){body._sheet_action=true;var r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ANON_KEY},body:JSON.stringify(body)});return r.json();}
 
 // ── 탭 ───────────────────────────────────────────────
-var TABS=['patient','drug','proxy','selcare','sms','stats'];
+var TABS=['appt','patient','drug','proxy','selcare','sms','stats'];
 function switchTab(tab){
   TABS.forEach(function(t){
     var T=t.charAt(0).toUpperCase()+t.slice(1);
@@ -505,6 +532,7 @@ var _currentChart=null,_patientDrugs=[],_drugsChanged=false;
 window.addEventListener('DOMContentLoaded',function(){
   checkKey();
   document.getElementById('pVisitDateDisp').textContent=displayDate(today6());
+  loadAppts();
   document.getElementById('pChartNo').addEventListener('keydown',function(e){if(e.key==='Enter')searchPatient();});
   document.getElementById('chartNo').addEventListener('input',updateConvertBtn);
   document.getElementById('fileInput').addEventListener('change',function(e){if(e.target.files[0])loadImg(e.target.files[0]);});
@@ -1111,6 +1139,185 @@ function goToPatient(chartNo){
   switchTab('patient');
   document.getElementById('pChartNo').value=chartNo;
   searchPatient();
+}
+
+// ══ 예약 탭 ══════════════════════════════════════════
+var APPT_TIMES = ['10:00','11:00','3:00','4:00'];
+var REASONS = {1:'우울',2:'불면',3:'불안',4:'강박',5:'트라우마',6:'ADHD',7:'틱',8:'환청 환시'};
+var _apptData = {}; // {date: [{id,time,name,phone,age,reason,note,memo}]}
+var _apptDates = [];
+
+function getApptDates(){
+  var dates=[];
+  var base=new Date();
+  for(var i=0;i<8;i++){
+    var d=new Date(base);
+    d.setDate(d.getDate()+i);
+    dates.push(toD6(d));
+  }
+  return dates;
+}
+
+async function loadAppts(){
+  var btn=document.getElementById('apptLoadBtn');
+  if(btn){btn.disabled=true;btn.textContent='로딩중...';}
+  _apptDates=getApptDates();
+  try{
+    var inFilter=_apptDates.join(',');
+    var rows=await sbGet('appointments',{
+      appt_date:'in.('+inFilter+')',
+      select:'*',order:'appt_date.asc,appt_time.asc',limit:'1000'
+    });
+    _apptData={};
+    _apptDates.forEach(function(d){_apptData[d]=[];});
+    rows.forEach(function(r){
+      if(_apptData[r.appt_date]) _apptData[r.appt_date].push(r);
+    });
+    renderApptTable();
+  }catch(err){alert('예약 로딩 실패: '+err.message);}
+  finally{if(btn){btn.disabled=false;btn.textContent='🔄 새로고침';}}
+}
+
+function renderApptTable(){
+  var days=['일','월','화','수','목','금','토'];
+  var container=document.getElementById('apptContainer');
+  if(!container)return;
+  container.innerHTML='';
+
+  _apptDates.forEach(function(d6){
+    var y=2000+parseInt(d6.slice(0,2)),mo=parseInt(d6.slice(2,4)),dd=parseInt(d6.slice(4,6));
+    var dow=new Date(y,mo-1,dd).getDay();
+    var isToday=d6===toD6(new Date());
+    var dayName=days[dow];
+    var isSun=dow===0,isSat=dow===6,isWed=dow===3;
+
+    var dayColor=isSun?'#e53e3e':isSat?'#4f8ef7':isWed?'#888':'#222';
+    var bgColor=isWed?'#f5f5f5':isSat?'#f0f4ff':isSun?'#fff5f5':'#fff';
+
+    var block=document.createElement('div');
+    block.style.cssText='margin-bottom:20px;border:1px solid #e0e4ef;border-radius:10px;overflow:hidden;';
+
+    // 날짜 헤더
+    var header='<div style="background:'+(isToday?'#4f8ef7':bgColor)+';padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:2px solid #e0e4ef;">'
+      +'<span style="font-family:monospace;font-size:15px;font-weight:700;color:'+(isToday?'#fff':dayColor)+';">'+d6+'</span>'
+      +'<span style="font-size:14px;font-weight:600;color:'+(isToday?'#fff':dayColor)+';">('+dayName+')</span>'
+      +(isWed?'<span style="font-size:11px;background:#888;color:#fff;padding:2px 7px;border-radius:4px;">휴진</span>':'')
+      +(isToday?'<span style="font-size:11px;background:rgba(255,255,255,0.3);color:#fff;padding:2px 7px;border-radius:4px;">오늘</span>':'')
+      +'</div>';
+
+    // 시간별 행
+    var tableHtml='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
+      +'<thead><tr style="background:#f7f8fc;">'
+      +'<th style="padding:8px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:55px;">시간</th>'
+      +'<th style="padding:8px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:80px;">성함</th>'
+      +'<th style="padding:8px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:110px;">전화</th>'
+      +'<th style="padding:8px 10px;text-align:center;border-bottom:1px solid #e0e4ef;width:40px;">나이</th>'
+      +'<th style="padding:8px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:120px;">진료이유</th>'
+      +'<th style="padding:8px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:120px;">기타</th>'
+      +'<th style="padding:8px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:140px;">비고</th>'
+      +'<th style="padding:8px 10px;border-bottom:1px solid #e0e4ef;width:60px;"></th>'
+      +'</tr></thead><tbody>';
+
+    APPT_TIMES.forEach(function(time){
+      // 해당 시간 기존 데이터 찾기
+      var existing=(_apptData[d6]||[]).filter(function(r){return r.appt_time===time;});
+      if(existing.length===0){
+        // 빈 행
+        tableHtml+=renderApptRow(d6,time,null);
+      } else {
+        existing.forEach(function(r){
+          tableHtml+=renderApptRow(d6,time,r);
+        });
+        // 추가 빈 행
+        tableHtml+=renderApptRow(d6,time,null,true);
+      }
+    });
+
+    tableHtml+='</tbody></table></div>';
+    block.innerHTML=header+tableHtml;
+    container.appendChild(block);
+  });
+}
+
+function renderApptRow(d6,time,data,isExtra){
+  var id=data?data.id:0;
+  var bgStyle=isExtra?'background:#fafbff;':'';
+  var td='padding:5px 6px;border-bottom:1px solid #f0f2f8;vertical-align:middle;';
+  var inp='width:100%;background:transparent;border:none;border-bottom:1px solid #e0e4ef;padding:3px 4px;font-size:12px;outline:none;font-family:Noto Sans KR,sans-serif;';
+  var reasonVal=data?data.reason||'':'';
+  var reasonNums=reasonVal.replace(/[^1-8]/g,'');
+  var uid=id?String(id):(d6+'_'+time+'_'+Math.random().toString(36).slice(2,6));
+
+  var row='<tr style="'+bgStyle+'" data-d6="'+d6+'" data-time="'+time+'" data-id="'+id+'">'
+    +'<td style="'+td+'font-weight:600;color:#555;font-size:12px;">'+time+'</td>'
+    +'<td style="'+td+'"><input style="'+inp+'width:75px;" value="'+(data?escQ(data.name||''):'')+'" placeholder="성함" class="appt-inp" data-field="name" onblur="saveApptRow(this)"></td>'
+    +'<td style="'+td+'"><input style="'+inp+'width:105px;" value="'+(data?escQ(data.phone||''):'')+'" placeholder="전화번호" class="appt-inp" data-field="phone" onblur="saveApptRow(this)"></td>'
+    +'<td style="'+td+';text-align:center;"><input style="'+inp+'width:35px;text-align:center;" value="'+(data?escQ(data.age||''):'')+'" placeholder="나이" class="appt-inp" data-field="age" onblur="saveApptRow(this)"></td>'
+    +'<td style="'+td+'">'
+    +'<input style="'+inp+'width:50px;" value="'+reasonNums+'" placeholder="1 2 3" maxlength="10" class="appt-inp" data-field="reason" oninput="updateReasonDisplay(this)" onblur="saveApptRow(this)">'
+    +'<div style="font-size:10px;color:#888;margin-top:2px;" class="reason-disp">'+formatReason(reasonNums)+'</div>'
+    +'</td>'
+    +'<td style="'+td+'"><input style="'+inp+'width:115px;" value="'+(data?escQ(data.note||''):'')+'" placeholder="기타" class="appt-inp" data-field="note" onblur="saveApptRow(this)"></td>'
+    +'<td style="'+td+'"><input style="'+inp+'width:130px;" value="'+(data?escQ(data.memo||''):'')+'" placeholder="비고(내부용)" class="appt-inp" data-field="memo" onblur="saveApptRow(this)"></td>'
+    +'<td style="'+td+';text-align:center;">'
+    +(id?'<button onclick="deleteAppt('+id+')" style="background:none;border:none;color:#bbb;cursor:pointer;font-size:12px;" title="삭제">✕</button>':'')
+    +'</td>'
+    +'</tr>';
+  return row;
+}
+function escQ(v){return (v||'').toString().replace(/"/g,'&quot;');}
+
+function formatReason(nums){
+  if(!nums) return '';
+  return nums.split('').filter(function(n){return REASONS[n];}).map(function(n){return n+'.'+REASONS[n];}).join(' ');
+}
+
+function updateReasonDisplay(input){
+  var nums=input.value.replace(/[^1-8]/g,'');
+  input.value=nums;
+  // find display div - closest approach
+  var td=input.parentElement;
+  var div=td?td.querySelector('div'):null;
+  if(div) div.textContent=formatReason(nums);
+}
+
+async function saveApptRow(input){
+  var row=input.closest('tr');
+  if(!row) return;
+  var d6=row.dataset.d6, time=row.dataset.time, id=parseInt(row.dataset.id)||0;
+  var getVal=function(f){var el=row.querySelector('[data-field="'+f+'"]');return el?el.value.trim():'';};
+  var name=getVal('name'),phone=getVal('phone'),age=getVal('age');
+  var reason=getVal('reason'),note=getVal('note'),memo=getVal('memo');
+
+  // 모두 비어있으면 스킵
+  if(!name&&!phone&&!age&&!reason&&!note&&!memo) return;
+
+  try{
+    if(id){
+      // 기존 행 업데이트
+      await sbUpdate('appointments',{id:id},{name:name,phone:phone,age:age,reason:reason,note:note,memo:memo,updated_at:new Date().toISOString()});
+    } else {
+      // 신규 저장
+      var r=await fetch(SUPA_URL+'/rest/v1/appointments',{
+        method:'POST',
+        headers:Object.assign({},sbH(),{'Prefer':'return=representation'}),
+        body:JSON.stringify({appt_date:d6,appt_time:time,name:name,phone:phone,age:age,reason:reason,note:note,memo:memo})
+      });
+      var newRow=await r.json();
+      if(newRow&&newRow[0]){
+        // 저장된 id로 행 업데이트
+        loadAppts();
+      }
+    }
+  }catch(err){console.error('예약 저장 실패',err);}
+}
+
+async function deleteAppt(id){
+  if(!confirm('삭제하시겠습니까?'))return;
+  try{
+    await sbDelete('appointments',{id:id});
+    loadAppts();
+  }catch(err){alert('삭제 실패: '+err.message);}
 }
 
 function setStatus(id,type,msg){
