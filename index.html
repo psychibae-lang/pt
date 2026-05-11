@@ -1195,14 +1195,16 @@ function renderApptTable(){
     var dayColor=isSun?'#e53e3e':isSat?'#4f8ef7':isWed?'#888':'#222';
     var bgColor=isWed?'#f5f5f5':isSat?'#f0f4ff':isSun?'#fff5f5':'#fff';
 
+    // 수요일(3), 일요일(0) 스킵
+    if(dow===0||dow===3) return;
+
     var block=document.createElement('div');
     block.style.cssText='margin-bottom:20px;border:1px solid #e0e4ef;border-radius:10px;overflow:hidden;';
 
     // 날짜 헤더
-    var header='<div style="background:'+(isToday?'#4f8ef7':bgColor)+';padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:2px solid #e0e4ef;">'
-      +'<span style="font-family:monospace;font-size:15px;font-weight:700;color:'+(isToday?'#fff':dayColor)+';">'+d6+'</span>'
-      +'<span style="font-size:14px;font-weight:600;color:'+(isToday?'#fff':dayColor)+';">('+dayName+')</span>'
-      +(isWed?'<span style="font-size:11px;background:#888;color:#fff;padding:2px 7px;border-radius:4px;">휴진</span>':'')
+    var header='<div style="background:#4f8ef7;padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:2px solid #3a7ef0;">'
+      +'<span style="font-family:monospace;font-size:15px;font-weight:700;color:#fff;">'+d6+'</span>'
+      +'<span style="font-size:14px;font-weight:600;color:#fff;">('+dayName+')</span>'
       +(isToday?'<span style="font-size:11px;background:rgba(255,255,255,0.3);color:#fff;padding:2px 7px;border-radius:4px;">오늘</span>':'')
       +'</div>';
 
