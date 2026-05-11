@@ -1142,7 +1142,8 @@ function goToPatient(chartNo){
 }
 
 // ══ 예약 탭 ══════════════════════════════════════════
-var APPT_TIMES = ['10:00','11:00','3:00','4:00'];
+var APPT_TIMES_FULL = ['10:00','11:00','3:00','4:00'];
+var APPT_TIMES_SAT  = ['10:00','11:00'];
 var REASONS = {1:'우울',2:'불면',3:'불안',4:'강박',5:'트라우마',6:'ADHD',7:'틱',8:'환청 환시'};
 var _apptData = {}; // {date: [{id,time,name,phone,age,reason,note,memo}]}
 var _apptDates = [];
@@ -1218,19 +1219,22 @@ function renderApptTable(){
       +'<th style="padding:8px 10px;border-bottom:1px solid #e0e4ef;width:60px;"></th>'
       +'</tr></thead><tbody>';
 
-    APPT_TIMES.forEach(function(time){
-      // 해당 시간 기존 데이터 찾기
+
+    var times=isSat?APPT_TIMES_SAT:APPT_TIMES_FULL;
+    times.forEach(function(time){
       var existing=(_apptData[d6]||[]).filter(function(r){return r.appt_time===time;});
       if(existing.length===0){
-        // 빈 행
         tableHtml+=renderApptRow(d6,time,null);
       } else {
         existing.forEach(function(r){
           tableHtml+=renderApptRow(d6,time,r);
         });
-        // 추가 빈 행
-        tableHtml+=renderApptRow(d6,time,null,true);
       }
+      // + 행 추가 버튼
+      tableHtml+='<tr class="appt-add-row" data-d6="'+d6+'" data-time="'+time+'">'
+        +'<td colspan="8" style="padding:2px 8px;border-bottom:1px solid #f0f2f8;">'
+        +'<button onclick="addApptRow(this)" style="font-size:11px;padding:2px 10px;background:none;border:1px dashed #c7d9fb;border-radius:4px;color:#4f8ef7;cursor:pointer;">+ 행 추가</button>'
+        +'</td></tr>';
     });
 
     tableHtml+='</tbody></table></div>';
@@ -1239,9 +1243,21 @@ function renderApptTable(){
   });
 }
 
+function addApptRow(btn){
+  var tr=btn.closest('tr');
+  var d6=tr.dataset.d6, time=tr.dataset.time;
+  var newRowHtml=renderApptRow(d6,time,null);
+  // Insert new row before the add button row
+  var tmp=document.createElement('tbody');
+  tmp.innerHTML=newRowHtml;
+  var newTr=tmp.firstChild;
+  tr.parentNode.insertBefore(newTr,tr);
+}
+
 function renderApptRow(d6,time,data,isExtra){
   var id=data?data.id:0;
-  var bgStyle=isExtra?'background:#fafbff;':'';
+  var hasFill=data&&(data.name||data.phone);
+  var bgStyle=hasFill?'background:#f0f7ff;':'';
   var td='padding:5px 6px;border-bottom:1px solid #f0f2f8;vertical-align:middle;';
   var inp='width:100%;background:transparent;border:none;border-bottom:1px solid #e0e4ef;padding:3px 4px;font-size:12px;outline:none;font-family:Noto Sans KR,sans-serif;';
   var reasonVal=data?data.reason||'':'';
