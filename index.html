@@ -325,6 +325,15 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
         </div>
       </div>
       <button class="btn btn-primary" id="smsSearchBtn" onclick="loadSmsList()" disabled style="align-self:flex-start;">🔍 조회</button>
+      <div style="padding-top:12px;border-top:1px solid var(--border);margin-top:4px;">
+        <label style="display:block;margin-bottom:6px;">챠트번호 직접 추가</label>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="smsManualChart" placeholder="챠트번호 입력" style="max-width:160px;"
+            onkeydown="if(event.key==='Enter')addManualSmsChart()">
+          <button class="btn btn-outline" onclick="addManualSmsChart()" style="padding:9px 14px;">+ 추가</button>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px;">조회 전에도 직접 추가 가능 · 엔터 또는 추가 버튼</div>
+      </div>
     </div>
   </div>
 
@@ -756,10 +765,45 @@ function renderDrugTable(chartNo,arr){
 function appendDrugRow(d,chartNo,i){
   var cn=chartNo||document.getElementById('chartNo').value.trim();
   var tr=document.createElement('tr');
+  tr.dataset.idx=i;
+  var codeVal=(d.drug_code||'').toString().replace(/"/g,'&quot;');
+  var nameVal=(d.drug_name||'').toString().replace(/"/g,'&quot;');
   function ei(f,v,w){var val=(v||'').toString().replace(/"/g,'&quot;');return '<input class="edit-input" style="width:'+w+';" value="'+val+'" data-idx="'+i+'" data-field="'+f+'" onchange="drugs[+this.dataset.idx][this.dataset.field]=this.value;updateJsonPreview(document.getElementById(\'chartNo\').value.trim())">';}
-  tr.innerHTML='<td><span class="chart-tag">'+cn+'</span></td><td>'+ei('drug_code',d.drug_code,'75px')+'</td><td>'+ei('drug_name',d.drug_name,'130px')+'</td><td>'+ei('dose',d.dose,'38px')+'</td><td>'+ei('daily_freq',d.daily_freq,'33px')+'</td><td>'+ei('days',d.days,'33px')+'</td><td>'+ei('method',d.method,'43px')+'</td><td><button class="icon-btn" onclick="delDrugRow('+i+')">✕</button></td>';
+  tr.innerHTML='<td><span class="chart-tag">'+cn+'</span></td>'
+    +'<td style="position:relative;">'
+    +'<input class="edit-input" style="width:75px;" value="'+codeVal+'" data-idx="'+i+'" data-field="drug_code"'
+    +' oninput="showDrugSuggestConvert(this,'+i+')" onblur="hideSuggestConvert('+i+')" autocomplete="off"'
+    +' onchange="drugs[+this.dataset.idx].drug_code=this.value;updateJsonPreview(document.getElementById(\'chartNo\').value.trim())">'
+    +'<div id="csuggest_'+i+'" style="display:none;position:absolute;top:100%;left:0;z-index:999;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:160px;overflow-y:auto;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.15);"></div>'
+    +'</td>'
+    +'<td><input id="cdname_'+i+'" class="edit-input" style="width:130px;" value="'+nameVal+'" data-idx="'+i+'" data-field="drug_name" onchange="drugs[+this.dataset.idx].drug_name=this.value;updateJsonPreview(document.getElementById(\'chartNo\').value.trim())"></td>'
+    +'<td>'+ei('dose',d.dose,'38px')+'</td><td>'+ei('daily_freq',d.daily_freq,'33px')+'</td><td>'+ei('days',d.days,'33px')+'</td><td>'+ei('method',d.method,'43px')+'</td>'
+    +'<td><button class="icon-btn" onclick="delDrugRow('+i+')">✕</button></td>';
   document.getElementById('drugTableBody').appendChild(tr);
 }
+function showDrugSuggestConvert(input,idx){
+  var query=input.value.toLowerCase().trim(),box=document.getElementById('csuggest_'+idx);
+  if(!query){box.style.display='none';return;}
+  var matches=[];
+  Object.keys(DRUG_LIST).forEach(function(code){var name=DRUG_LIST[code];if(code.toLowerCase().indexOf(query)!==-1||name.indexOf(query)!==-1)matches.push({code:code,name:name});});
+  matches=matches.slice(0,10);
+  if(!matches.length){box.style.display='none';return;}
+  box.innerHTML=matches.map(function(m){
+    var sc=m.code.replace(/\\/g,'\\\\').replace(/'/g,"\\'"),sn=m.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var hl=m.code.replace(new RegExp('('+query+')','gi'),'<strong style="color:#4f8ef7;">$1</strong>');
+    return '<div onmousedown="selectDrugConvert('+idx+',\''+sc+'\',\''+sn+'\')" style="padding:7px 12px;cursor:pointer;font-size:12px;border-bottom:1px solid #eee;display:flex;gap:8px;"><span style="font-family:monospace;color:#4f8ef7;min-width:70px;">'+hl+'</span><span style="color:#666;">'+m.name+'</span></div>';
+  }).join('');
+  box.style.display='block';
+}
+function selectDrugConvert(idx,code,name){
+  drugs[idx].drug_code=code;drugs[idx].drug_name=name;
+  var ci=document.querySelector('#drugTableBody tr[data-idx="'+idx+'"] input[data-field="drug_code"]');if(ci)ci.value=code;
+  var ni=document.getElementById('cdname_'+idx);if(ni)ni.value=name;
+  var box=document.getElementById('csuggest_'+idx);if(box)box.style.display='none';
+  updateJsonPreview(document.getElementById('chartNo').value.trim());
+}
+function hideSuggestConvert(idx){setTimeout(function(){var b=document.getElementById('csuggest_'+idx);if(b)b.style.display='none';},150);}
+
 function delDrugRow(i){drugs.splice(i,1);renderDrugTable(document.getElementById('chartNo').value.trim(),drugs);}
 function addDrugRow(){var i=drugs.length;drugs.push({drug_code:'',drug_name:'',dose:'',daily_freq:'',days:'',method:''});appendDrugRow(drugs[i],document.getElementById('chartNo').value.trim(),i);}
 function updateJsonPreview(cn){document.getElementById('jsonPreview').textContent=JSON.stringify(drugs.map(function(d){return Object.assign({chart_no:cn},d);}),null,2);}
@@ -798,7 +842,7 @@ async function loadSpecialList(type){
     var tbody=document.getElementById(bodyId);tbody.innerHTML='';
     rows.forEach(function(r){
       var tr=document.createElement('tr');
-      tr.innerHTML='<td><span class="chart-tag">'+r.chart_no+'</span></td>'
+      tr.innerHTML='<td><span class="chart-tag" style="cursor:pointer;" onclick="goToPatient(\'' + r.chart_no + '\')">'+r.chart_no+'</span></td>'
         +'<td style="font-size:12px;">'+displayDate(fmt6(r.visit_date))+'</td>'
         +'<td style="font-size:12px;">'+(r.next_visit_date?displayDate(fmt6(r.next_visit_date)):'-')+'</td>'
         +'<td style="font-family:monospace;font-size:12px;">'+(pMap[r.chart_no]||'-')+'</td>';
@@ -856,6 +900,29 @@ async function loadSmsList(){
     renderSmsList();document.getElementById('smsListCard').classList.remove('hidden');
   }catch(err){alert('조회 실패: '+err.message);}
   finally{btn.disabled=false;btn.textContent='🔍 조회';}
+}
+
+// SMS 수동 챠트번호 추가
+var _smsManualList = [];
+
+function addManualSmsChart(){
+  var input = document.getElementById('smsManualChart');
+  var chartNo = input.value.trim();
+  if(!chartNo) return;
+  // 중복 체크
+  if(_smsList.some(function(p){return p.chart_no===chartNo;})||_smsManualList.some(function(p){return p.chart_no===chartNo;})){
+    alert(chartNo+' 은 이미 목록에 있습니다.');return;
+  }
+  // 전화번호 조회 후 추가
+  sbGet('patients',{chart_no:'eq.'+chartNo,select:'chart_no,phone,sms_yn'}).then(function(rows){
+    var p=rows[0]||{};
+    var newEntry={chart_no:chartNo,phone:p.phone||'',sms_yn:p.sms_yn||'Y',next_visit:'수동추가'};
+    _smsList.push(newEntry);
+    _smsManualList.push(newEntry);
+    renderSmsList();
+    document.getElementById('smsListCard').classList.remove('hidden');
+  });
+  input.value='';
 }
 
 function renderSmsList(){
@@ -943,12 +1010,16 @@ async function loadVisitStats(){
       var tr=document.createElement('tr');
       if(isToday) tr.style.background='#eef3fe';
 
+      var chartJson=JSON.stringify(charts).replace(/"/g,'&quot;');
       var dateCell='<td style="font-family:monospace;font-size:13px;font-weight:'+(isToday?'700':'400')+';color:'+(isToday?'#4f8ef7':'#222')+';">'+d6+'</td>';
       var dayCell='<td style="font-size:13px;color:'+(isSun?'#e53e3e':isSat?'#4f8ef7':'#444')+';">'+days[dow]+'</td>';
       var countCell='<td style="text-align:center;font-weight:600;font-size:14px;color:'+(charts.length>0?'#1a1d2e':'#bbb')+';">'+(charts.length||'-')+'</td>';
-      var chartCell='<td style="font-size:12px;color:#666;line-height:1.8;">'+charts.map(function(c){
-        return '<span style="display:inline-block;background:#f0f4ff;border:1px solid #c7d9fb;border-radius:4px;padding:1px 6px;margin:1px;font-family:monospace;cursor:pointer;" onclick="goToPatient(\'' + c + '\')" title="' + c + ' 조회">' + c + '</span>';
-      }).join('')+'</td>';
+      var chartCell='<td>'
+        +'<div style="font-size:12px;color:#666;line-height:1.8;margin-bottom:4px;">'+charts.map(function(c){
+          return '<span style="display:inline-block;background:#f0f4ff;border:1px solid #c7d9fb;border-radius:4px;padding:1px 6px;margin:1px;font-family:monospace;cursor:pointer;" onclick="goToPatient(\'' + c + '\')" title="' + c + ' 조회">' + c + '</span>';
+        }).join('')+'</div>'
+        +(charts.length>0?'<button onclick="downloadStatsCsv(\'' + d6 + '\','+chartJson+')" style="font-size:10px;padding:3px 8px;background:#fff;border:1px solid #c7d9fb;border-radius:4px;color:#4f8ef7;cursor:pointer;">📥 CSV</button>':'')
+        +'</td>';
 
       tr.innerHTML=dateCell+dayCell+countCell+chartCell;
       tbody.appendChild(tr);
@@ -959,6 +1030,22 @@ async function loadVisitStats(){
     setStatus('statsStatus','success','조회 완료');
   }catch(err){setStatus('statsStatus','error','조회 실패: '+err.message);}
   finally{btn.disabled=false;btn.textContent='🔍 조회';}
+}
+
+function downloadStatsCsv(date6, charts){
+  // 전화번호 조회 후 CSV 다운로드
+  if(!charts||!charts.length){alert('환자가 없습니다.');return;}
+  sbGet('patients',{chart_no:'in.('+charts.join(',')+')',select:'chart_no,phone'}).then(function(rows){
+    var pMap={};rows.forEach(function(r){pMap[r.chart_no]=r.phone||'';});
+    var csv='챠트번호,전화번호\n';
+    charts.forEach(function(c){csv+=c+','+pMap[c]+'\n';});
+    var blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download=date6+'_patients.csv';
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);URL.revokeObjectURL(url);
+  });
 }
 
 function goToPatient(chartNo){
