@@ -1209,7 +1209,7 @@ function renderApptTable(){
     // 시간별 행
     var tableHtml='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
       +'<thead><tr style="background:#f7f8fc;">'
-      +'<th style="padding:8px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:55px;">시간</th>'
+      +'<th style="padding:9px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:55px;font-size:13px;">시간</th>'
       +'<th style="padding:8px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:80px;">성함</th>'
       +'<th style="padding:8px 10px;text-align:left;border-bottom:1px solid #e0e4ef;min-width:110px;">전화</th>'
       +'<th style="padding:8px 10px;text-align:center;border-bottom:1px solid #e0e4ef;width:40px;">나이</th>'
@@ -1257,21 +1257,21 @@ function addApptRow(btn){
 function renderApptRow(d6,time,data,isExtra){
   var id=data?data.id:0;
   var hasFill=data&&(data.name||data.phone);
-  var bgStyle=hasFill?'background:#f0f7ff;':'';
-  var td='padding:5px 6px;border-bottom:1px solid #f0f2f8;vertical-align:middle;';
-  var inp='width:100%;background:transparent;border:none;border-bottom:1px solid #e0e4ef;padding:3px 4px;font-size:12px;outline:none;font-family:Noto Sans KR,sans-serif;';
+  var bgStyle=hasFill?'background:#dbeafe;':'';
+  var td='padding:8px 8px;border-bottom:1px solid #e8edf8;vertical-align:middle;';
+  var inp='width:100%;background:transparent;border:none;border-bottom:1px solid #e0e4ef;padding:4px 5px;font-size:14px;outline:none;font-family:Noto Sans KR,sans-serif;';
   var reasonVal=data?data.reason||'':'';
   var reasonNums=reasonVal.replace(/[^1-8]/g,'');
   var uid=id?String(id):(d6+'_'+time+'_'+Math.random().toString(36).slice(2,6));
 
   var row='<tr style="'+bgStyle+'" data-d6="'+d6+'" data-time="'+time+'" data-id="'+id+'">'
-    +'<td style="'+td+'font-weight:600;color:#555;font-size:12px;">'+time+'</td>'
+    +'<td style="'+td+'font-weight:700;color:#444;font-size:14px;">'+time+'</td>'
     +'<td style="'+td+'"><input style="'+inp+'width:75px;" value="'+(data?escQ(data.name||''):'')+'" placeholder="성함" class="appt-inp" data-field="name" onblur="saveApptRow(this)"></td>'
     +'<td style="'+td+'"><input style="'+inp+'width:105px;" value="'+(data?escQ(data.phone||''):'')+'" placeholder="전화번호" class="appt-inp" data-field="phone" onblur="saveApptRow(this)"></td>'
     +'<td style="'+td+';text-align:center;"><input style="'+inp+'width:35px;text-align:center;" value="'+(data?escQ(data.age||''):'')+'" placeholder="나이" class="appt-inp" data-field="age" onblur="saveApptRow(this)"></td>'
     +'<td style="'+td+'">'
     +'<input style="'+inp+'width:50px;" value="'+reasonNums+'" placeholder="1 2 3" maxlength="10" class="appt-inp" data-field="reason" oninput="updateReasonDisplay(this)" onblur="saveApptRow(this)">'
-    +'<div style="font-size:10px;color:#888;margin-top:2px;" class="reason-disp">'+formatReason(reasonNums)+'</div>'
+    +'<div style="font-size:12px;color:#555;margin-top:3px;" class="reason-disp">'+formatReason(reasonNums)+'</div>'
     +'</td>'
     +'<td style="'+td+'"><input style="'+inp+'width:115px;" value="'+(data?escQ(data.note||''):'')+'" placeholder="기타" class="appt-inp" data-field="note" onblur="saveApptRow(this)"></td>'
     +'<td style="'+td+'"><input style="'+inp+'width:130px;" value="'+(data?escQ(data.memo||''):'')+'" placeholder="비고(내부용)" class="appt-inp" data-field="memo" onblur="saveApptRow(this)"></td>'
