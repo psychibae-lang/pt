@@ -144,10 +144,10 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
         <input type="text" id="pNextVisitDate" placeholder="미선택" readonly style="cursor:pointer;max-width:140px;background:#fff;" onclick="openCal('pNextVisitDate')">
         <button onclick="openCal('pNextVisitDate')" class="btn btn-outline" style="padding:9px 12px;">📅</button>
-        <button onclick="document.getElementById('pNextVisitDate').value=''" class="btn btn-outline" style="padding:9px 12px;color:var(--danger);">✕</button>
+        <button onclick="document.getElementById('pNextVisitDate').value=''" class="btn btn-outline" style="padding:9px 12px;color:var(--danger);" title="날짜 지우기">✕</button>
         <button id="btnSaveVisit" onclick="saveVisitDate()" class="btn btn-success" style="font-size:12px;padding:7px 12px;">저장</button>
       </div>
-      <div style="font-size:11px;color:var(--text2);margin-top:4px;">※ 진료일·다음내원일·대리처방·선택의료 저장</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:4px;">📅선택 · ✕지우기 · 저장(진료일+다음내원일+대리처방+선택의료)</div>
     </div>
     <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -340,8 +340,9 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
   <div class="card hidden" id="smsListCard">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;">
       <div class="card-title" style="margin-bottom:0;">발송 목록</div>
-      <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span id="smsCount" style="font-size:11px;color:var(--text2);"></span>
+        <button class="btn btn-outline" onclick="resetSmsList()" style="font-size:11px;padding:6px 10px;">🔄 초기화</button>
         <button class="btn btn-success" onclick="sendSms()">📱 전체 발송</button>
       </div>
     </div>
@@ -352,8 +353,11 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
       </tr></thead><tbody id="smsBody"></tbody></table>
     </div>
     <div style="background:#f7f8fc;border:1px solid var(--border);border-radius:7px;padding:10px;margin-bottom:10px;">
-      <div style="font-size:10px;color:var(--text2);margin-bottom:4px;font-weight:700;text-transform:uppercase;">발송 문자</div>
-      <div id="smsMsgPreview" style="font-size:13px;color:var(--text);line-height:1.5;"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;">발송 문자 (직접 수정 가능)</span>
+        <button onclick="resetSmsMsg()" style="font-size:10px;padding:2px 8px;background:#fff;border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--text2);">원래대로</button>
+      </div>
+      <textarea id="smsMsgPreview" rows="3" style="width:100%;font-size:13px;color:var(--text);line-height:1.5;background:#fff;border:1px solid var(--border);border-radius:6px;padding:8px;resize:vertical;outline:none;font-family:'Noto Sans KR',sans-serif;"></textarea>
     </div>
     <div id="smsSendStatus" class="hidden"></div>
   </div>
@@ -853,7 +857,25 @@ async function loadSpecialList(type){
 }
 
 // ══ 문자 발송 탭 ══════════════════════════════════════
-var _smsGroup=null,_smsDates=[],_smsList=[];
+var _smsGroup=null,_smsDates=[],_smsList=[],_smsOrigMsg='';
+function resetSmsMsg(){
+  if(_smsOrigMsg) document.getElementById('smsMsgPreview').value=_smsOrigMsg;
+}
+
+function resetSmsList(){
+  _smsList=[];
+  _smsManualList=[];
+  document.getElementById('smsBody').innerHTML='';
+  document.getElementById('smsCount').textContent='';
+  document.getElementById('smsListCard').classList.add('hidden');
+  // 그룹 버튼도 초기화
+  document.querySelectorAll('.sms-group-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('smsGroupInfo').classList.add('hidden');
+  document.getElementById('smsSearchBtn').disabled=true;
+  document.getElementById('smsStartDate').value='';
+  document.getElementById('smsEndDate').value='';
+}
+
 function saveAligo(){var k=document.getElementById('aligoKey').value.trim(),id=document.getElementById('aligoId').value.trim(),s=document.getElementById('aligoSender').value.trim();if(!k||!id||!s){document.getElementById('aligoStatus').textContent='⚠️';return;}localStorage.setItem('aligo_key',k);localStorage.setItem('aligo_id',id);localStorage.setItem('aligo_sender',s);document.getElementById('aligoStatus').textContent='✓';document.getElementById('aligoKey').value='';}
 function loadAligoConfig(){if(localStorage.getItem('aligo_key'))document.getElementById('aligoStatus').textContent='✓ 로드됨';}
 function addDays(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
@@ -872,7 +894,7 @@ function selectGroup(btn,group){
   document.getElementById('smsGroupInfo').innerHTML='📅 '+_smsDates.map(displayDate).join(', ')+'<br><small>'+SMS_MSG[group]+'</small>';
   document.getElementById('smsGroupInfo').classList.remove('hidden');
   document.getElementById('smsSearchBtn').disabled=false;
-  document.getElementById('smsMsgPreview').textContent=SMS_MSG[group];
+  document.getElementById('smsMsgPreview').value=SMS_MSG[group]; _smsOrigMsg=SMS_MSG[group];
   document.getElementById('smsListCard').classList.add('hidden');
 }
 
@@ -947,7 +969,7 @@ async function sendSms(){
   var key=localStorage.getItem('aligo_key'),id=localStorage.getItem('aligo_id'),sender=localStorage.getItem('aligo_sender');
   if(!key||!id||!sender){alert('알리고 API 설정을 저장해주세요.');return;}
   var checks=document.querySelectorAll('.sms-check:checked'),targets=[];
-  checks.forEach(function(cb){var p=_smsList[+cb.dataset.idx];if(p&&p.phone)targets.push({chart_no:p.chart_no,phone:p.phone,message:SMS_MSG[_smsGroup]});});
+  checks.forEach(function(cb){var p=_smsList[+cb.dataset.idx];if(p&&p.phone)targets.push({chart_no:p.chart_no,phone:p.phone,message:document.getElementById('smsMsgPreview').value||SMS_MSG[_smsGroup]});});
   if(!targets.length){alert('발송 대상이 없습니다.');return;}
   if(!confirm(targets.length+'명에게 문자를 발송합니다.'))return;
   var btn=document.querySelector('#smsListCard .btn-success');btn.disabled=true;btn.textContent='발송 중...';
