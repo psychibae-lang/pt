@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MED·RX — 한강의원</title>
+<title>MED·RX — 한강의원 환자관리시스템(의사용)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -85,9 +85,16 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
 </style>
 </head>
 <body>
-<header>
-  <span class="logo">MED·RX</span>
-  <span style="font-size:14px;color:var(--text2);font-weight:500;">한강의원</span>
+<header style="background:#1a1d2e;border-bottom:1px solid #2d3154;box-shadow:0 2px 8px rgba(0,0,0,0.25);">
+  <span class="logo" style="background:#2d3154;border-color:#4f8ef7;color:#7ab8ff;font-size:15px;padding:5px 13px;">MED·RX</span>
+  <span style="font-size:18px;color:#ffffff;font-weight:800;letter-spacing:0.02em;flex:1;">한강의원 <span style="font-size:13px;font-weight:400;color:#a0aec0;">환자관리시스템(의사용)</span></span>
+  <a href="https://psychibae-lang.github.io/admin-test/" target="_blank" rel="noopener"
+     style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#4f8ef7,#7c5cfc);color:#fff;
+            text-decoration:none;font-size:13px;font-weight:700;padding:8px 16px;border-radius:8px;
+            box-shadow:0 2px 10px rgba(79,142,247,0.4);white-space:nowrap;transition:opacity 0.15s;"
+     onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+    📋 검사지 확인
+  </a>
 </header>
 <div id="keyBanner">
   <span style="font-size:11px;color:var(--text2);">🔑 Supabase Key</span>
