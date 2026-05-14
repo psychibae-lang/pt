@@ -817,19 +817,18 @@ function renderPatientDrugs(){
     });
   }
   html+='</tbody></table></div>';
-  html+='<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;">'
-    +'<button onclick="addPatientDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">+ 행 추가</button>'
-    +'<button onclick="goUpdateDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">&#10022; 이미지로 업데이트</button>'
-    +'<button id="btnSaveDrugs" onclick="saveDrugsOnly()" class="btn btn-success" style="font-size:12px;padding:6px 12px;">약물 저장</button>'
-    +'</div>'
-    +'<div style="display:flex;gap:6px;margin-top:8px;align-items:center;background:#f0f4ff;border-radius:7px;padding:8px 10px;flex-wrap:wrap;">'
+  html+='<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center;background:#f0f4ff;border-radius:7px;padding:7px 10px;flex-wrap:wrap;">'
     +'<span style="font-size:11px;color:#666;white-space:nowrap;">일괄입력:</span>'
     +'<input id="bulkDose" type="text" placeholder="용량" style="width:46px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:center;">'
     +'<input id="bulkFreq" type="text" placeholder="일투" style="width:40px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:center;">'
     +'<input id="bulkDays" type="text" placeholder="일수" style="width:40px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:center;">'
     +'<input id="bulkMethod" type="text" placeholder="용법" style="width:46px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:center;">'
     +'<button onclick="applyBulkFill()" style="padding:4px 12px;background:#4f8ef7;color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;">전체 적용</button>'
-    +'<span style="font-size:10px;color:#999;">입력한 항목만 전체 행에 적용</span>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;align-items:center;">'
+    +'<button onclick="addPatientDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">+ 행 추가</button>'
+    +'<button onclick="goUpdateDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">&#10022; 이미지로 업데이트</button>'
+    +'<button id="btnSaveDrugs" onclick="saveDrugsOnly()" class="btn btn-success" style="font-size:12px;padding:6px 12px;">약물 저장</button>'
     +'</div>';
   el.innerHTML=html;
 }
@@ -887,7 +886,16 @@ async function convertImage(){
   document.getElementById('convertBtn').disabled=true;
   document.getElementById('resultCard').classList.add('hidden');
   var dls=Object.entries(DRUG_LIST).map(function(e){return e[0]+'\t'+e[1];}).join('\n');
-  var prompt='다음은 EMR 약물 처방 화면 캡처입니다. 아래 약물코드 목록과 대조해 매칭하세요(대소문자 무시):\n'+dls+'\n\n반환 형식(JSON 배열만):\n[{"drug_code":"코드","drug_name":"약물명","dose":"용량","daily_freq":"일투","days":"일수","method":"용법코드"}]';
+  var prompt='다음은 EMR 약물 처방 화면 캡처입니다. 아래 약물코드 목록과 대조해 매칭하세요(대소문자 무시):\n'+dls+'\n\n'
+    +'【반드시 지킬 규칙】\n'
+    +'1. dose(용량), daily_freq(일투), days(일수) 필드는 반드시 숫자만 입력. 단위(mg, 정, 회 등) 제외. 예: "10mg" → "10", "1회" → "1", "28일" → "28"\n'
+    +'2. method(용법) 필드는 아래 코드 중 하나만 사용:\n'
+    +'   b1(아침), b2(점심), b3(저녁), b4(자기전), b12(아침점심), b13(아침저녁), b14(아침자기전),\n'
+    +'   b23(점심저녁), b24(점심자기전), b34(저녁자기전), b123(아침점심저녁), b124(아침점심자기전),\n'
+    +'   b234(점심저녁자기전), b1234(아침점심저녁자기전), prn(필요시)\n'
+    +'   이미지에서 "취침전/수면전/hs" → "b4", "조석" → "b13", "1일3회" 등 → 적절한 b코드로 변환\n'
+    +'3. JSON 배열만 반환. 설명 텍스트 없이.\n\n'
+    +'반환 형식(JSON 배열만):\n[{"drug_code":"코드","drug_name":"약물명","dose":"숫자만","daily_freq":"숫자만","days":"숫자만","method":"b코드또는prn"}]';
   try{
     var data=await claudeCall({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMime,data:imageBase64}},{type:'text',text:prompt}]}]});
     if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
@@ -895,6 +903,17 @@ async function convertImage(){
     var text=data.content.map(function(i){return i.text||'';}).join('');
     var m=text.match(/\[[\s\S]*\]/);if(!m)throw new Error('JSON 없음');
     drugs=JSON.parse(m[0]);
+    // 후처리: 용량/일투/일수 숫자 정규화, 용법 코드 검증
+    var VALID_METHODS=['b1','b2','b3','b4','b12','b13','b14','b23','b24','b34','b123','b124','b234','b1234','prn'];
+    drugs=drugs.map(function(d){
+      ['dose','daily_freq','days'].forEach(function(f){
+        if(d[f]!==undefined){var s=String(d[f]);var n=s.match(/[\d.]+/);d[f]=n?n[0]:'';}
+      });
+      var meth=(d.method||'').toLowerCase().trim();
+      if(!VALID_METHODS.includes(meth)) meth='b4';
+      d.method=meth;
+      return d;
+    });
     renderDrugTable(chartNo,drugs);
     setStatus('convertStatus','success',drugs.length+'개 추출 완료'+(_replaceMode?' (교체모드)':''));
     document.getElementById('resultCard').classList.remove('hidden');
