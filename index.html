@@ -82,6 +82,13 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
 .cal-day.selected{background:var(--accent);color:#fff;font-weight:700;}
 .cal-day.sun{color:var(--danger);}
 @media(max-width:600px){.nav-tab{padding:9px 10px;font-size:12px;}.pt-card{grid-template-columns:1fr;}.container{padding:10px 8px;}}
+/* 대리처방 테이블 컬럼 폭 */
+#proxyTable th, #proxyTable td { white-space:nowrap; }
+#proxyTable th:nth-child(3), #proxyTable td:nth-child(3) { max-width:120px; white-space:normal; font-size:11px; word-break:keep-all; }
+#proxyTable th:nth-child(2), #proxyTable td:nth-child(2),
+#proxyTable th:nth-child(4), #proxyTable td:nth-child(4) { min-width:60px; }
+#proxyTable th { cursor:pointer; user-select:none; }
+#proxyTable th:hover { background:#e8edf8; }
 
 @media(max-width:520px){
   header{justify-content:center;padding:8px 10px;}
@@ -317,17 +324,31 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
 <!-- ══ 대리처방 탭 ══ -->
 <div id="tabProxy" class="container hidden">
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
       <div class="card-title" style="margin-bottom:0;">대리처방 환자 명단</div>
       <div style="display:flex;align-items:center;gap:8px;">
         <span id="proxyCount" style="font-size:12px;color:var(--text2);"></span>
         <button class="btn btn-primary" onclick="loadSpecialList('proxy')" style="font-size:11px;padding:6px 10px;">🔄 새로고침</button>
       </div>
     </div>
+    <!-- 검색 -->
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">
+      <input id="proxySearchChart" type="text" placeholder="챠트" style="width:70px;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;" oninput="filterProxyTable()">
+      <input id="proxySearchName" type="text" placeholder="환자명" style="width:80px;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;" oninput="filterProxyTable()">
+      <input id="proxySearchYear" type="text" placeholder="년도(예:2604)" style="width:90px;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;" oninput="filterProxyTable()">
+      <button onclick="document.getElementById('proxySearchChart').value='';document.getElementById('proxySearchName').value='';document.getElementById('proxySearchYear').value='';filterProxyTable();" style="padding:5px 10px;border:1px solid #ddd;border-radius:6px;font-size:11px;background:#f7f8fc;cursor:pointer;color:#888;">초기화</button>
+    </div>
     <div id="proxyStatus" class="hidden" style="margin-bottom:10px;"></div>
     <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>챠트</th><th>방문자</th><th>관계</th><th>환자명</th><th>방문자 전화</th><th>신청일</th></tr></thead>
+      <table id="proxyTable">
+        <thead><tr>
+          <th onclick="sortProxyTable('chart')" style="cursor:pointer;white-space:nowrap;min-width:56px;">챠트 <span id="sort_chart">↕</span></th>
+          <th onclick="sortProxyTable('visitor_name')" style="cursor:pointer;min-width:60px;">방문자 <span id="sort_visitor_name">↕</span></th>
+          <th onclick="sortProxyTable('relation')" style="cursor:pointer;min-width:50px;">관계 <span id="sort_relation">↕</span></th>
+          <th onclick="sortProxyTable('patient_name')" style="cursor:pointer;min-width:60px;">환자명 <span id="sort_patient_name">↕</span></th>
+          <th onclick="sortProxyTable('visitor_phone')" style="cursor:pointer;min-width:90px;">방문자 전화 <span id="sort_visitor_phone">↕</span></th>
+          <th onclick="sortProxyTable('created_at')" style="cursor:pointer;min-width:56px;">신청일 <span id="sort_created_at">↕</span></th>
+        </tr></thead>
         <tbody id="proxyBody"></tbody>
       </table>
     </div>
@@ -817,19 +838,19 @@ function renderPatientDrugs(){
     });
   }
   html+='</tbody></table></div>';
-  html+='<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;">'
+  html+='<div style="display:flex;gap:6px;margin-top:10px;align-items:center;background:#f0f4ff;border-radius:7px;padding:7px 10px;flex-wrap:wrap;">'
+    +'<span style="font-size:11px;color:#666;font-weight:600;white-space:nowrap;">일괄입력:</span>'
+    +'<input id="bulkDose" type="text" placeholder="용량" style="width:46px;padding:4px 6px;border:1px solid #c7d9fb;border-radius:5px;font-size:12px;text-align:center;">'
+    +'<input id="bulkFreq" type="text" placeholder="일투" style="width:40px;padding:4px 6px;border:1px solid #c7d9fb;border-radius:5px;font-size:12px;text-align:center;">'
+    +'<input id="bulkDays" type="text" placeholder="일수" style="width:40px;padding:4px 6px;border:1px solid #c7d9fb;border-radius:5px;font-size:12px;text-align:center;">'
+    +'<input id="bulkMethod" type="text" placeholder="용법" style="width:46px;padding:4px 6px;border:1px solid #c7d9fb;border-radius:5px;font-size:12px;text-align:center;">'
+    +'<button onclick="applyBulkFill()" style="padding:4px 12px;background:#4f8ef7;color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;">전체 적용</button>'
+    +'<span style="font-size:10px;color:#999;">입력한 항목만 전체 행에 적용</span>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;">'
     +'<button onclick="addPatientDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">+ 행 추가</button>'
     +'<button onclick="goUpdateDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">&#10022; 이미지로 업데이트</button>'
     +'<button id="btnSaveDrugs" onclick="saveDrugsOnly()" class="btn btn-success" style="font-size:12px;padding:6px 12px;">약물 저장</button>'
-    +'</div>'
-    +'<div style="display:flex;gap:6px;margin-top:8px;align-items:center;background:#f0f4ff;border-radius:7px;padding:8px 10px;flex-wrap:wrap;">'
-    +'<span style="font-size:11px;color:#666;white-space:nowrap;">일괄입력:</span>'
-    +'<input id="bulkDose" type="text" placeholder="용량" style="width:46px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:center;">'
-    +'<input id="bulkFreq" type="text" placeholder="일투" style="width:40px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:center;">'
-    +'<input id="bulkDays" type="text" placeholder="일수" style="width:40px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:center;">'
-    +'<input id="bulkMethod" type="text" placeholder="용법" style="width:46px;padding:4px 6px;border:1px solid #ddd;border-radius:5px;font-size:12px;text-align:center;">'
-    +'<button onclick="applyBulkFill()" style="padding:4px 12px;background:#4f8ef7;color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;">전체 적용</button>'
-    +'<span style="font-size:10px;color:#999;">입력한 항목만 전체 행에 적용</span>'
     +'</div>';
   el.innerHTML=html;
 }
@@ -974,6 +995,10 @@ async function saveDrugs(){
 }
 
 // ══ 대리처방 / 선택의료 탭 ═══════════════════════════
+var _proxyAllRows = [];   // 전체 데이터 캐시
+var _proxySortCol = 'created_at';
+var _proxySortDir = -1;   // -1=내림차순, 1=오름차순
+
 async function loadSpecialList(type){
   var statusId=type==='proxy'?'proxyStatus':'selcareStatus';
   var bodyId=type==='proxy'?'proxyBody':'selcareBody';
@@ -981,27 +1006,12 @@ async function loadSpecialList(type){
   setStatus(statusId,'loading','조회 중...');
   try{
     if(type==='proxy'){
-      // daeri 테이블에서 직접 조회
       var rows=await sbGet('daeri',{select:'chart,visitor_name,visitor_phone,relation,patient_name,created_at',order:'created_at.desc',limit:'500'});
+      _proxyAllRows=rows;
       document.getElementById(countId).textContent=rows.length+'명';
-      var tbody=document.getElementById(bodyId);tbody.innerHTML='';
-      rows.forEach(function(r){
-        var ca=r.created_at||'';
-        var caDisp='-';
-        if(ca){var d=new Date(ca);if(!isNaN(d.getTime())){caDisp=String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}}
-        var chart=r.chart||'-';
-        var tr=document.createElement('tr');
-        tr.innerHTML='<td><span class="chart-tag" style="cursor:pointer;" onclick="goToPatient(\''+chart+'\')">'+chart+'</span></td>'
-          +'<td style="font-size:12px;">'+(r.visitor_name||'-')+'</td>'
-          +'<td style="font-size:12px;">'+(r.relation||'-')+'</td>'
-          +'<td style="font-size:12px;">'+(r.patient_name||'-')+'</td>'
-          +'<td style="font-family:monospace;font-size:12px;">'+(r.visitor_phone||'-')+'</td>'
-          +'<td style="font-size:12px;">'+caDisp+'</td>';
-        tbody.appendChild(tr);
-      });
+      renderProxyTable();
       setStatus(statusId,'success','조회 완료');
     } else {
-      // 선택의료: 기존 visits 테이블 조회 유지
       var rows=await sbGet('visits',{'selective_care':'eq.Y',select:'chart_no,visit_date,next_visit_date',order:'next_visit_date.desc',limit:'500'});
       var chartNos=rows.map(function(r){return r.chart_no;});
       var patients=chartNos.length>0?await sbGet('patients',{chart_no:'in.('+chartNos.join(',')+')',select:'chart_no,phone'}):[];
@@ -1019,6 +1029,61 @@ async function loadSpecialList(type){
       setStatus(statusId,'success','조회 완료');
     }
   }catch(err){setStatus(statusId,'error','실패: '+err.message);}
+}
+
+function caToD6(ca){
+  if(!ca) return '';
+  var d=new Date(ca);
+  if(isNaN(d.getTime())) return '';
+  return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+}
+
+function renderProxyTable(){
+  var sc=document.getElementById('proxySearchChart')?document.getElementById('proxySearchChart').value.trim().toLowerCase():'';
+  var sn=document.getElementById('proxySearchName')?document.getElementById('proxySearchName').value.trim().toLowerCase():'';
+  var sy=document.getElementById('proxySearchYear')?document.getElementById('proxySearchYear').value.trim():'';
+  var filtered=_proxyAllRows.filter(function(r){
+    var d6=caToD6(r.created_at);
+    if(sc && !(r.chart||'').toLowerCase().includes(sc)) return false;
+    if(sn && !(r.patient_name||'').toLowerCase().includes(sn)) return false;
+    if(sy && !d6.startsWith(sy)) return false;
+    return true;
+  });
+  // 정렬
+  var col=_proxySortCol, dir=_proxySortDir;
+  filtered.sort(function(a,b){
+    var av = col==='created_at' ? (a.created_at||'') : (a[col]||'');
+    var bv = col==='created_at' ? (b.created_at||'') : (b[col]||'');
+    if(av<bv) return -dir; if(av>bv) return dir; return 0;
+  });
+  // 헤더 화살표 갱신
+  ['chart','visitor_name','relation','patient_name','visitor_phone','created_at'].forEach(function(c){
+    var el=document.getElementById('sort_'+c);
+    if(el) el.textContent = c===col ? (dir===1?'↑':'↓') : '↕';
+  });
+  var tbody=document.getElementById('proxyBody');tbody.innerHTML='';
+  filtered.forEach(function(r){
+    var d6=caToD6(r.created_at);
+    var chart=r.chart||'-';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="chart-tag" style="cursor:pointer;" onclick="goToPatient(\''+chart+'\')">'+chart+'</span></td>'
+      +'<td style="font-size:13px;white-space:nowrap;">'+(r.visitor_name||'-')+'</td>'
+      +'<td style="font-size:11px;color:#555;max-width:110px;">'+(r.relation||'-')+'</td>'
+      +'<td style="font-size:13px;white-space:nowrap;">'+(r.patient_name||'-')+'</td>'
+      +'<td style="font-family:monospace;font-size:12px;white-space:nowrap;">'+(r.visitor_phone||'-')+'</td>'
+      +'<td style="font-size:12px;white-space:nowrap;">'+d6+'</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function filterProxyTable(){
+  renderProxyTable();
+}
+
+function sortProxyTable(col){
+  if(_proxySortCol===col){ _proxySortDir*=-1; }
+  else { _proxySortCol=col; _proxySortDir=1; }
+  renderProxyTable();
 }
 // ══ 문자 발송 탭 ══════════════════════════════════════
 var _smsGroup=null,_smsDates=[],_smsList=[],_smsOrigMsg='';
