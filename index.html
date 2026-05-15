@@ -113,7 +113,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
       📋 검사지
     </a>
-    <a href="https://psychibae-lang.github.io/clinic/" target="_blank" rel="noopener"
+    <a href="https://psychibae-lang.github.io/adm_clinic/" target="_blank" rel="noopener"
        style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#18a97a,#0e7c59);color:#fff;
               text-decoration:none;font-size:12px;font-weight:700;padding:8px 13px;border-radius:0;border-left:1px solid rgba(255,255,255,0.2);
               white-space:nowrap;transition:opacity 0.15s;"
@@ -239,9 +239,18 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
       <div>
         <label style="display:block;margin-bottom:5px;font-size:11px;">선택의료</label>
         <div class="toggle-group" id="pSelCare" data-val="N">
-          <button class="toggle-btn toggle-y" onclick="toggleBtn('pSelCare','Y')">예</button>
-          <button class="toggle-btn toggle-n active" onclick="toggleBtn('pSelCare','N')">아니오</button>
+          <button class="toggle-btn toggle-y" onclick="toggleSelCare('Y')">예</button>
+          <button class="toggle-btn toggle-n active" onclick="toggleSelCare('N')">아니오</button>
         </div>
+      </div>
+      <div id="pSelCareDateWrap" style="margin-top:8px;display:none;">
+        <label style="display:block;margin-bottom:5px;font-size:11px;">서류받은날짜 <span style="color:#aaa;">(서류받은 경우 날짜 입력, 미수령이면 빈칸)</span></label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="text" id="pSelCareDate" placeholder="예: 260515" readonly style="cursor:pointer;max-width:130px;background:#fff;" onclick="openCal('pSelCareDate')">
+          <button onclick="openCal('pSelCareDate')" class="btn btn-outline" style="padding:7px 10px;">📅</button>
+          <button onclick="document.getElementById('pSelCareDate').value=''" class="btn btn-outline" style="padding:7px 10px;color:var(--danger);" title="날짜 지우기">✕</button>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;">서류받은 날짜 또는 경고사 인표시 예를 들어 빨간색으로 서류받음 등</div>
       </div>
       <div style="font-size:11px;color:var(--text2);margin-top:6px;">※ 선택의료만 저장 (대리처방은 신청 데이터 자동 조회)</div>
     </div>
@@ -367,7 +376,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
     <div id="selcareStatus" class="hidden" style="margin-bottom:10px;"></div>
     <div style="overflow-x:auto;">
       <table>
-        <thead><tr><th>챠트번호</th><th>최근내원일</th><th>다음내원일</th><th>전화번호</th></tr></thead>
+        <thead><tr><th>챠트번호</th><th>최근내원일</th><th>다음내원일</th><th>전화번호</th><th>서류받은날짜</th></tr></thead>
         <tbody id="selcareBody"></tbody>
       </table>
     </div>
@@ -376,21 +385,6 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
 
 <!-- ══ 문자발송 탭 ══ -->
 <div id="tabSms" class="container hidden">
-  <div class="card">
-    <div class="card-title">알리고 API 설정</div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <div class="input-row">
-        <div class="input-group"><label>API Key</label><input type="password" id="aligoKey" placeholder="알리고 API Key"></div>
-        <div class="input-group"><label>사용자 ID</label><input type="text" id="aligoId" placeholder="ID"></div>
-        <div class="input-group"><label>발신번호</label><input type="text" id="aligoSender" placeholder="0212345678"></div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-primary" onclick="saveAligo()" style="font-size:11px;padding:6px 12px;">저장</button>
-        <span id="aligoStatus" style="font-size:11px;color:var(--text2);"></span>
-      </div>
-    </div>
-  </div>
-
   <div class="card">
     <div class="card-title">발송 대상 조회</div>
     <div style="display:flex;flex-direction:column;gap:12px;">
@@ -444,6 +438,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span id="smsCount" style="font-size:11px;color:var(--text2);"></span>
         <button class="btn btn-outline" onclick="resetSmsList()" style="font-size:11px;padding:6px 10px;">🔄 초기화</button>
+        <button class="btn btn-outline" onclick="downloadSmsCsv()" style="font-size:11px;padding:6px 10px;">📥 CSV 다운로드</button>
         <button class="btn btn-success" onclick="sendSms()">📱 전체 발송</button>
       </div>
     </div>
@@ -683,14 +678,26 @@ async function searchPatient(){
     document.getElementById('pcNext').textContent=(visit&&visit.next_visit_date)?displayDate(fmt6(visit.next_visit_date)):'없음';
     // 상단 환자카드 대리처방: daeri 테이블 건수 표시
     document.getElementById('pcProxyRx').textContent=daeriList.length?daeriList.length+'건':'없음';
-    document.getElementById('pcSelCare').textContent=(visit&&visit.selective_care==='Y')?'예':'-';
+    // 선택의료: 서류받은날짜 포함 표시
+    var selVal=visit?visit.selective_care:'N';
+    var selDate=visit?visit.proxy_rx:''; // proxy_rx 컬럼을 서류받은날짜로 재활용
+    var selText='-';
+    if(selVal==='Y'){
+      selText=selDate?'예 (서류: '+selDate+')':'예 (서류미수령)';
+    }
+    document.getElementById('pcSelCare').textContent=selText;
     document.getElementById('patientCard').classList.remove('hidden');
 
     document.getElementById('pPhone').value=patient?(patient.phone||''):'';
     document.getElementById('pSmsYn').checked=patient?patient.sms_yn!=='N':true;
     document.getElementById('pNextVisitDate').value='';
-    // 선택의료만 토글
-    setToggleBtn('pSelCare',(visit&&visit.selective_care==='Y')?'Y':'N');
+    // 선택의료 토글 + 서류날짜
+    var selVal=(visit&&visit.selective_care==='Y')?'Y':'N';
+    setToggleBtn('pSelCare',selVal);
+    var selDateWrap=document.getElementById('pSelCareDateWrap');
+    if(selDateWrap) selDateWrap.style.display=selVal==='Y'?'block':'none';
+    var selDateInput=document.getElementById('pSelCareDate');
+    if(selDateInput) selDateInput.value=(visit&&visit.proxy_rx&&selVal==='Y')?visit.proxy_rx:'';
     // 대리처방 daeri 목록 렌더
     _currentDaeriList=daeriList;
     renderDaeriList(daeriList);
@@ -744,6 +751,12 @@ function setToggleBtn(id,val){
   el.querySelector('.toggle-n').classList.toggle('active',val==='N');
 }
 function toggleBtn(id,val){setToggleBtn(id,val);}
+function toggleSelCare(val){
+  setToggleBtn('pSelCare',val);
+  var wrap=document.getElementById('pSelCareDateWrap');
+  if(wrap) wrap.style.display=val==='Y'?'block':'none';
+  if(val==='N'){var d=document.getElementById('pSelCareDate');if(d)d.value='';}
+}
 
 // ── 개별 저장 함수들 ────────────────────────────────
 async function saveVisitDate(){
@@ -752,8 +765,8 @@ async function saveVisitDate(){
   try{
     var vd=today6(),nd=document.getElementById('pNextVisitDate').value.trim();
     var selCare=document.getElementById('pSelCare').dataset.val||'N';
-    var proxyRx='N'; // 대리처방은 daeri 테이블에서 관리 (직접 입력 안 함)
-    var visitData={chart_no:_currentChart,visit_date:vd,next_visit_date:nd,proxy_rx:proxyRx,selective_care:selCare,updated_at:new Date().toISOString()};
+    var selCareDate=selCare==='Y'?(document.getElementById('pSelCareDate')?document.getElementById('pSelCareDate').value.trim():''):'';
+    var visitData={chart_no:_currentChart,visit_date:vd,next_visit_date:nd,proxy_rx:selCareDate,selective_care:selCare,updated_at:new Date().toISOString()};
     var existing=await sbGet('visits',{chart_no:'eq.'+_currentChart,select:'id',limit:'1'});
     if(existing&&existing.length>0){await sbUpdate('visits',{chart_no:_currentChart},visitData);}
     else{await sbInsert('visits',visitData);}
@@ -797,11 +810,12 @@ async function saveExtraOnly(){
   var btn=document.getElementById('btnSaveExtra');btn.disabled=true;btn.textContent='저장중...';
   try{
     var selCare=document.getElementById('pSelCare').dataset.val||'N';
+    var selCareDate=selCare==='Y'?(document.getElementById('pSelCareDate')?document.getElementById('pSelCareDate').value.trim():''):'';
     var existing=await sbGet('visits',{chart_no:'eq.'+_currentChart,select:'id',limit:'1'});
     if(existing&&existing.length>0){
-      await sbUpdate('visits',{chart_no:_currentChart},{selective_care:selCare,updated_at:new Date().toISOString()});
+      await sbUpdate('visits',{chart_no:_currentChart},{proxy_rx:selCareDate,selective_care:selCare,updated_at:new Date().toISOString()});
     }else{
-      await sbInsert('visits',{chart_no:_currentChart,selective_care:selCare});
+      await sbInsert('visits',{chart_no:_currentChart,proxy_rx:selCareDate,selective_care:selCare});
     }
     setStatus('visitSaveStatus','success','✓ 선택의료 저장됨');
     searchPatient();
@@ -818,9 +832,10 @@ async function saveVisitAll(){
     var phone=document.getElementById('pPhone').value.trim();
     var smsYn=document.getElementById('pSmsYn').checked?'Y':'N';
     var selCare=document.getElementById('pSelCare').dataset.val||'N';
+    var selCareDate=selCare==='Y'?(document.getElementById('pSelCareDate')?document.getElementById('pSelCareDate').value.trim():''):'';
     var saves=[];
     if(phone) saves.push(sbUpsert('patients',{chart_no:_currentChart,phone:phone,sms_yn:smsYn,updated_at:new Date().toISOString()}));
-    var visitData={chart_no:_currentChart,visit_date:vd,next_visit_date:nd,selective_care:selCare,updated_at:new Date().toISOString()};
+    var visitData={chart_no:_currentChart,visit_date:vd,next_visit_date:nd,proxy_rx:selCareDate,selective_care:selCare,updated_at:new Date().toISOString()};
     var existing=await sbGet('visits',{chart_no:'eq.'+_currentChart,select:'id',limit:'1'});
     if(existing&&existing.length>0){saves.push(sbUpdate('visits',{chart_no:_currentChart},visitData));}
     else{saves.push(sbInsert('visits',visitData));}
@@ -1047,18 +1062,23 @@ async function loadSpecialList(type){
       renderProxyTable();
       setStatus(statusId,'success','조회 완료');
     } else {
-      var rows=await sbGet('visits',{'selective_care':'eq.Y',select:'chart_no,visit_date,next_visit_date',order:'next_visit_date.desc',limit:'500'});
+      var rows=await sbGet('visits',{'selective_care':'eq.Y',select:'chart_no,visit_date,next_visit_date,proxy_rx',order:'next_visit_date.desc',limit:'500'});
       var chartNos=rows.map(function(r){return r.chart_no;});
       var patients=chartNos.length>0?await sbGet('patients',{chart_no:'in.('+chartNos.join(',')+')',select:'chart_no,phone'}):[];
       var pMap={};patients.forEach(function(p){pMap[p.chart_no]=p.phone||'';});
       document.getElementById(countId).textContent=rows.length+'명';
       var tbody=document.getElementById(bodyId);tbody.innerHTML='';
       rows.forEach(function(r){
+        var selDate=r.proxy_rx||'';
+        var selDateDisp=selDate
+          ?'<span style="color:#065f46;font-weight:600;">'+selDate+'</span>'
+          :'<span style="color:#e53e3e;font-weight:600;">미수령</span>';
         var tr=document.createElement('tr');
         tr.innerHTML='<td><span class="chart-tag" style="cursor:pointer;" onclick="goToPatient(\''+r.chart_no+'\')">'+r.chart_no+'</span></td>'
           +'<td style="font-size:12px;">'+displayDate(fmt6(r.visit_date))+'</td>'
           +'<td style="font-size:12px;">'+(r.next_visit_date?displayDate(fmt6(r.next_visit_date)):'-')+'</td>'
-          +'<td style="font-family:monospace;font-size:12px;">'+(pMap[r.chart_no]||'-')+'</td>';
+          +'<td style="font-family:monospace;font-size:12px;">'+(pMap[r.chart_no]||'-')+'</td>'
+          +'<td style="font-size:12px;">'+selDateDisp+'</td>';
         tbody.appendChild(tr);
       });
       setStatus(statusId,'success','조회 완료');
@@ -1140,8 +1160,35 @@ function resetSmsList(){
   document.getElementById('smsEndDate').value='';
 }
 
-function saveAligo(){var k=document.getElementById('aligoKey').value.trim(),id=document.getElementById('aligoId').value.trim(),s=document.getElementById('aligoSender').value.trim();if(!k||!id||!s){document.getElementById('aligoStatus').textContent='⚠️';return;}localStorage.setItem('aligo_key',k);localStorage.setItem('aligo_id',id);localStorage.setItem('aligo_sender',s);document.getElementById('aligoStatus').textContent='✓';document.getElementById('aligoKey').value='';}
-function loadAligoConfig(){if(localStorage.getItem('aligo_key'))document.getElementById('aligoStatus').textContent='✓ 로드됨';}
+function saveAligo(){var k=document.getElementById('aligoKey')?document.getElementById('aligoKey').value.trim():'',id=document.getElementById('aligoId')?document.getElementById('aligoId').value.trim():'',s=document.getElementById('aligoSender')?document.getElementById('aligoSender').value.trim():'';if(!k||!id||!s)return;localStorage.setItem('aligo_key',k);localStorage.setItem('aligo_id',id);localStorage.setItem('aligo_sender',s);}
+function loadAligoConfig(){}
+
+function downloadSmsCsv(){
+  if(!_smsList||!_smsList.length){alert('발송 목록이 없습니다.');return;}
+  // 문자발송 동의 그룹만 (sms_yn != N)
+  var rows=_smsList.filter(function(p){return p.sms_yn!=='N';});
+  // 날짜별 그룹핑
+  var byDate={};
+  rows.forEach(function(p){
+    var d=p.next_visit||'기타';
+    if(!byDate[d])byDate[d]={date:d,count:0,charts:[],phones:[]};
+    byDate[d].count++;
+    byDate[d].charts.push(p.chart_no);
+    if(p.phone) byDate[d].phones.push(p.phone);
+  });
+  // CSV: 내원날짜, 총인원, 차트번호목록, 전화번호목록
+  var csv='내원날짜,총인원,챠트번호목록,전화번호목록\n';
+  Object.keys(byDate).sort().forEach(function(d){
+    var g=byDate[d];
+    csv+=g.date+','+g.count+',"'+g.charts.join(' ')+'","'+g.phones.join(' ')+'"\n';
+  });
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='sms_list.csv';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
 function addDays(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function toD6(d){return String(d.getFullYear()).slice(2)+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');}
 
@@ -1329,7 +1376,7 @@ async function loadVisitStats(){
       tbody.appendChild(tr);
     });
 
-    document.getElementById('statsTotalCount').textContent='90일 총 예상환자: '+totalExpected+'명';
+    document.getElementById('statsTotalCount').textContent='90일 총 예상환자: '+totalExpected+'명 (오늘 제외: '+(totalExpected-(grouped[toD6(new Date())]||[]).length)+'명)';
     document.getElementById('statsTableWrap').classList.remove('hidden');
     setStatus('statsStatus','success','조회 완료');
   }catch(err){setStatus('statsStatus','error','조회 실패: '+err.message);}
