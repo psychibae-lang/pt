@@ -252,6 +252,10 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
         </div>
         <div style="font-size:11px;color:var(--text2);margin-top:3px;">서류받은 날짜 또는 경고사 인표시 예를 들어 빨간색으로 서류받음 등</div>
       </div>
+      <div style="margin-top:10px;">
+        <button id="btnSaveSelcareOnly" onclick="saveSelcareOnly()" class="btn btn-success" style="font-size:12px;padding:7px 14px;">✓ 선택의료 저장</button>
+        <span id="selcareSaveStatus" style="font-size:11px;margin-left:8px;color:var(--text2);"></span>
+      </div>
       <div style="font-size:11px;color:var(--text2);margin-top:6px;">※ 선택의료만 저장 (대리처방은 신청 데이터 자동 조회)</div>
     </div>
     <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border);">
@@ -671,6 +675,11 @@ async function searchPatient(){
 
     document.getElementById('pcChart').textContent=chartNo;
     var isNew=!patient&&!visit;
+    // 신환이고 약물도 없으면 5칸 자동 삽입
+    if(isNew&&_patientDrugs.length===0){
+      for(var ni=0;ni<5;ni++) _patientDrugs.push({drug_code:'',drug_name:'',dose:'1',daily_freq:'1',days:'21',method:'b4'});
+      _drugsChanged=true;
+    }
     document.getElementById('pcTag').innerHTML=isNew?'<span class="tag-new">신환</span>':'<span class="tag-exist">기존</span>';
     document.getElementById('pcPhone').textContent=patient?(patient.phone||'미등록'):'미등록';
     document.getElementById('pcSmsYn').textContent=patient?(patient.sms_yn==='N'?'제외':'발송'):'발송';
@@ -823,6 +832,29 @@ async function saveExtraOnly(){
   finally{btn.disabled=false;btn.textContent='저장';}
 }
 
+async function saveSelcareOnly(){
+  if(!_currentChart)return;
+  var btn=document.getElementById('btnSaveSelcareOnly');
+  var statusEl=document.getElementById('selcareSaveStatus');
+  btn.disabled=true;btn.textContent='저장중...';
+  if(statusEl) statusEl.textContent='';
+  try{
+    var selCare=document.getElementById('pSelCare').dataset.val||'N';
+    var selCareDate=selCare==='Y'?(document.getElementById('pSelCareDate')?document.getElementById('pSelCareDate').value.trim():''):'';
+    var existing=await sbGet('visits',{chart_no:'eq.'+_currentChart,select:'id',limit:'1'});
+    if(existing&&existing.length>0){
+      await sbUpdate('visits',{chart_no:_currentChart},{proxy_rx:selCareDate,selective_care:selCare,updated_at:new Date().toISOString()});
+    }else{
+      await sbInsert('visits',{chart_no:_currentChart,proxy_rx:selCareDate,selective_care:selCare});
+    }
+    if(statusEl){statusEl.textContent='✓ 저장됨';statusEl.style.color='var(--success)';setTimeout(function(){statusEl.textContent='';},2000);}
+    searchPatient();
+  }catch(err){
+    if(statusEl){statusEl.textContent='✕ 저장 실패';statusEl.style.color='var(--danger)';}
+  }
+  finally{btn.disabled=false;btn.textContent='✓ 선택의료 저장';}
+}
+
 // ── 전체 저장 ────────────────────────────────────────
 async function saveVisitAll(){
   if(!_currentChart)return;
@@ -861,34 +893,10 @@ function renderPatientDrugs(){
   cnt.textContent=_patientDrugs.length?_patientDrugs.length+'개':'';
   var ts='padding:5px 6px;border-bottom:1px solid #eee;';
   var is='background:transparent;border:none;border-bottom:1px solid #ddd;color:#222;font-size:12px;outline:none;padding:2px 3px;';
-  var fields=['drug_code','drug_name','dose','daily_freq','days','method'];
-  var widths=['70px','120px','36px','30px','30px','36px'];
-  var html='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';
-  ['약물코드','약물명','용량','일투','일수','용법',''].forEach(function(h){html+='<th style="background:#f5f7fa;color:#666;font-size:10px;font-weight:700;text-transform:uppercase;padding:6px 8px;text-align:left;border-bottom:2px solid #e0e4ef;">'+h+'</th>';});
-  html+='</tr></thead><tbody>';
-  if(!_patientDrugs.length){
-    html+='<tr><td colspan="7" style="padding:12px;color:#aaa;text-align:center;">약물 정보 없음 — 아래 + 버튼으로 추가하세요</td></tr>';
-  } else {
-    _patientDrugs.forEach(function(d,i){
-      html+='<tr>';
-      var codeVal=((d.drug_code||'')).toString().replace(/"/g,'&quot;');
-      html+='<td style="'+ts+';position:relative;">'
-        +'<input style="'+is+'width:70px;" value="'+codeVal+'" oninput="showDrugSuggest(this,'+i+')" onchange="onDrugChange('+i+',\'drug_code\',this.value)" onblur="hideSuggest('+i+')" autocomplete="off">'
-        +'<div id="suggest_'+i+'" style="display:none;position:absolute;top:100%;left:0;z-index:999;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:160px;overflow-y:auto;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.15);"></div>'
-        +'</td>';
-      var nameVal=((d.drug_name||'')).toString().replace(/"/g,'&quot;');
-      html+='<td style="'+ts+'"><input id="drugname_'+i+'" style="'+is+'width:120px;" value="'+nameVal+'" onchange="onDrugChange('+i+',\'drug_name\',this.value)"></td>';
-      ['dose','daily_freq','days','method'].forEach(function(f,fi){
-        var fw=['36px','30px','30px','36px'][fi];
-        var val=((d[f]||'')).toString().replace(/"/g,'&quot;');
-        html+='<td style="'+ts+'"><input style="'+is+'width:'+fw+';" value="'+val+'" onchange="onDrugChange('+i+',\''+f+'\',this.value)"></td>';
-      });
-      html+='<td style="'+ts+'"><button onclick="delPatientDrug('+i+')" style="background:none;border:none;color:#bbb;cursor:pointer;font-size:12px;">✕</button></td>';
-      html+='</tr>';
-    });
-  }
-  html+='</tbody></table></div>';
-  html+='<div style="display:flex;gap:6px;margin-top:10px;align-items:center;background:#f0f4ff;border-radius:7px;padding:7px 10px;flex-wrap:wrap;">'
+
+  // ── 버튼 / 일괄입력 영역 (테이블 위) ──
+  var html=''
+    +'<div style="display:flex;gap:6px;margin-bottom:8px;align-items:center;background:#f0f4ff;border-radius:7px;padding:7px 10px;flex-wrap:wrap;">'
     +'<span style="font-size:11px;color:#666;font-weight:600;white-space:nowrap;">일괄입력:</span>'
     +'<input id="bulkDose" type="text" placeholder="용량" style="width:46px;padding:4px 6px;border:1px solid #c7d9fb;border-radius:5px;font-size:12px;text-align:center;">'
     +'<input id="bulkFreq" type="text" placeholder="일투" style="width:40px;padding:4px 6px;border:1px solid #c7d9fb;border-radius:5px;font-size:12px;text-align:center;">'
@@ -897,11 +905,38 @@ function renderPatientDrugs(){
     +'<button onclick="applyBulkFill()" style="padding:4px 12px;background:#4f8ef7;color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;">전체 적용</button>'
     +'<span style="font-size:10px;color:#999;">입력한 항목만 전체 행에 적용</span>'
     +'</div>'
-    +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;">'
+    +'<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center;">'
     +'<button onclick="addPatientDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">+ 행 추가</button>'
-    +'<button onclick="goUpdateDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">&#10022; 이미지로 업데이트</button>'
+    +'<button onclick="goUpdateDrug()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;">✦ 이미지로 업데이트</button>'
     +'<button id="btnSaveDrugs" onclick="saveDrugsOnly()" class="btn btn-success" style="font-size:12px;padding:6px 12px;">약물 저장</button>'
     +'</div>';
+
+  // ── 테이블 ──
+  html+='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr>';
+  ['약물코드','약물명','용량','일투','일수','용법',''].forEach(function(h){html+='<th style="background:#f5f7fa;color:#666;font-size:10px;font-weight:700;text-transform:uppercase;padding:6px 8px;text-align:left;border-bottom:2px solid #e0e4ef;">'+h+'</th>';});
+  html+='</tr></thead><tbody>';
+  if(!_patientDrugs.length){
+    html+='<tr><td colspan="7" style="padding:12px;color:#aaa;text-align:center;">약물 정보 없음 — 위 + 버튼으로 추가하세요</td></tr>';
+  } else {
+    _patientDrugs.forEach(function(d,i){
+      html+='<tr>';
+      var codeVal=((d.drug_code||'')).toString().replace(/"/g,'&quot;');
+      html+='<td style="'+ts+';position:relative;">'
+        +'<input data-pidx="'+i+'" data-pfield="drug_code" style="'+is+'width:70px;" value="'+codeVal+'" oninput="showDrugSuggest(this,'+i+')" onchange="onDrugChange('+i+',\'drug_code\',this.value)" onblur="hideSuggest('+i+')" autocomplete="off">'
+        +'<div id="suggest_'+i+'" style="display:none;position:absolute;top:100%;left:0;z-index:999;background:#fff;border:1px solid #ddd;border-radius:8px;max-height:160px;overflow-y:auto;min-width:220px;box-shadow:0 4px 16px rgba(0,0,0,0.15);"></div>'
+        +'</td>';
+      var nameVal=((d.drug_name||'')).toString().replace(/"/g,'&quot;');
+      html+='<td style="'+ts+'"><input id="drugname_'+i+'" data-pidx="'+i+'" data-pfield="drug_name" style="'+is+'width:120px;" value="'+nameVal+'" onchange="onDrugChange('+i+',\'drug_name\',this.value)"></td>';
+      ['dose','daily_freq','days','method'].forEach(function(f,fi){
+        var fw=['36px','30px','30px','36px'][fi];
+        var val=((d[f]||'')).toString().replace(/"/g,'&quot;');
+        html+='<td style="'+ts+'"><input data-pidx="'+i+'" data-pfield="'+f+'" style="'+is+'width:'+fw+';" value="'+val+'" onchange="onDrugChange('+i+',\''+f+'\',this.value)"></td>';
+      });
+      html+='<td style="'+ts+'"><button onclick="delPatientDrug('+i+')" style="background:none;border:none;color:#bbb;cursor:pointer;font-size:12px;">✕</button></td>';
+      html+='</tr>';
+    });
+  }
+  html+='</tbody></table></div>';
   el.innerHTML=html;
 }
 
