@@ -1200,22 +1200,24 @@ function loadAligoConfig(){}
 
 function downloadSmsCsv(){
   if(!_smsList||!_smsList.length){alert('발송 목록이 없습니다.');return;}
-  // 문자발송 동의 그룹만 (sms_yn != N)
-  var rows=_smsList.filter(function(p){return p.sms_yn!=='N';});
+  // 문자발송 동의 + 전화번호 있는 환자만
+  var rows=_smsList.filter(function(p){return p.sms_yn!=='N'&&p.phone;});
   // 날짜별 그룹핑
   var byDate={};
   rows.forEach(function(p){
     var d=p.next_visit||'기타';
-    if(!byDate[d])byDate[d]={date:d,count:0,charts:[],phones:[]};
-    byDate[d].count++;
-    byDate[d].charts.push(p.chart_no);
-    if(p.phone) byDate[d].phones.push(p.phone);
+    if(!byDate[d])byDate[d]=[];
+    byDate[d].push(p);
   });
-  // CSV: 내원날짜, 총인원, 차트번호목록, 전화번호목록
-  var csv='내원날짜,총인원,챠트번호목록,전화번호목록\n';
+  // CSV: 날짜그룹마다 첫 행에 내원날짜+총인원, 이후 행마다 챠트+전화번호 한 명씩
+  var csv='내원날짜,총인원,챠트번호,전화번호\n';
   Object.keys(byDate).sort().forEach(function(d){
-    var g=byDate[d];
-    csv+=g.date+','+g.count+',"'+g.charts.join(' ')+'","'+g.phones.join(' ')+'"\n';
+    var group=byDate[d];
+    group.forEach(function(p,idx){
+      var dateCol=idx===0?d:'';
+      var countCol=idx===0?group.length:'';
+      csv+=dateCol+','+countCol+','+p.chart_no+','+p.phone+'\n';
+    });
   });
   var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   var url=URL.createObjectURL(blob);
