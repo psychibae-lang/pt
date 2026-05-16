@@ -202,9 +202,12 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
 
   <div class="card hidden" id="visitForm">
     <div class="card-title">진료 입력</div>
-    <div style="background:#eef3fe;border:1px solid #c7d9fb;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-      <span style="font-size:11px;color:var(--text2);">진료일</span>
-      <span style="font-size:15px;font-weight:700;color:var(--accent);" id="pVisitDateDisp"></span>
+    <div style="background:#eef3fe;border:1px solid #c7d9fb;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:var(--text2);white-space:nowrap;">진료일</span>
+      <span id="pVisitDateDisp" style="font-size:15px;font-weight:700;color:var(--accent);min-width:90px;"></span>
+      <input type="text" id="pVisitDate" readonly style="cursor:pointer;max-width:110px;background:#fff;font-size:13px;display:none;" onclick="openCal('pVisitDate')">
+      <button onclick="toggleVisitDateEdit()" id="btnVisitDateEdit" style="font-size:11px;padding:4px 10px;background:#fff;border:1px solid #c7d9fb;border-radius:6px;cursor:pointer;color:var(--accent);">날짜 변경</button>
+      <button onclick="resetVisitDateToToday()" id="btnVisitDateReset" style="font-size:11px;padding:4px 10px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text2);display:none;">오늘로</button>
     </div>
     <div style="margin-bottom:14px;">
       <label style="display:block;margin-bottom:6px;">다음내원일</label>
@@ -627,7 +630,7 @@ function renderCal(){
     var btn=document.createElement('button');
     btn.className='cal-day'+(isSel?' selected':isToday?' today':isSun?' sun':'');
     btn.textContent=d;
-    (function(v){btn.onclick=function(){if(calTarget)document.getElementById(calTarget).value=v;closeCal();};})(val);
+    (function(v){btn.onclick=function(){if(calTarget){document.getElementById(calTarget).value=v;if(calTarget==='pVisitDate'){document.getElementById('pVisitDateDisp').textContent=displayDate(v);}}closeCal();};})(val);
     grid.appendChild(btn);
   }
 }
@@ -716,7 +719,13 @@ async function searchPatient(){
 
 function openVisitForm(){
   document.getElementById('visitForm').classList.remove('hidden');
-  document.getElementById('pVisitDateDisp').textContent=displayDate(today6());
+  document.getElementById("pVisitDateDisp").textContent=displayDate(today6());
+  var pVD=document.getElementById("pVisitDate");
+  if(pVD){pVD.value=today6();pVD.style.display="none";}
+  var editBtn=document.getElementById("btnVisitDateEdit");
+  var resetBtn=document.getElementById("btnVisitDateReset");
+  if(editBtn)editBtn.style.display="";
+  if(resetBtn)resetBtn.style.display="none";
   _drugsChanged=false;
   renderPatientDrugs();
   renderDaeriList(_currentDaeriList||[]);
@@ -767,12 +776,30 @@ function toggleSelCare(val){
   if(val==='N'){var d=document.getElementById('pSelCareDate');if(d)d.value='';}
 }
 
+function toggleVisitDateEdit(){
+  var inp=document.getElementById('pVisitDate');
+  var editBtn=document.getElementById('btnVisitDateEdit');
+  var resetBtn=document.getElementById('btnVisitDateReset');
+  inp.style.display='';
+  editBtn.style.display='none';
+  resetBtn.style.display='';
+  openCal('pVisitDate');
+}
+function resetVisitDateToToday(){
+  var td=today6();
+  document.getElementById('pVisitDate').value=td;
+  document.getElementById('pVisitDateDisp').textContent=displayDate(td);
+  document.getElementById('pVisitDate').style.display='none';
+  document.getElementById('btnVisitDateEdit').style.display='';
+  document.getElementById('btnVisitDateReset').style.display='none';
+}
+
 // ── 개별 저장 함수들 ────────────────────────────────
 async function saveVisitDate(){
   if(!_currentChart)return;
   var btn=document.getElementById('btnSaveVisit');btn.disabled=true;btn.textContent='저장중...';
   try{
-    var vd=today6(),nd=document.getElementById('pNextVisitDate').value.trim();
+    var pVDel=document.getElementById('pVisitDate');var vd=(pVDel&&pVDel.value)?pVDel.value:today6();var nd=document.getElementById('pNextVisitDate').value.trim();
     var selCare=document.getElementById('pSelCare').dataset.val||'N';
     var selCareDate=selCare==='Y'?(document.getElementById('pSelCareDate')?document.getElementById('pSelCareDate').value.trim():''):'';
     var visitData={chart_no:_currentChart,visit_date:vd,next_visit_date:nd,proxy_rx:selCareDate,selective_care:selCare,updated_at:new Date().toISOString()};
@@ -860,7 +887,7 @@ async function saveVisitAll(){
   if(!_currentChart)return;
   var btn=document.getElementById('saveAllBtn');btn.disabled=true;btn.textContent='저장 중...';
   try{
-    var vd=today6(),nd=document.getElementById('pNextVisitDate').value.trim();
+    var pVDel=document.getElementById('pVisitDate');var vd=(pVDel&&pVDel.value)?pVDel.value:today6();var nd=document.getElementById('pNextVisitDate').value.trim();
     var phone=document.getElementById('pPhone').value.trim();
     var smsYn=document.getElementById('pSmsYn').checked?'Y':'N';
     var selCare=document.getElementById('pSelCare').dataset.val||'N';
