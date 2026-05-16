@@ -678,8 +678,8 @@ async function searchPatient(){
 
     document.getElementById('pcChart').textContent=chartNo;
     var isNew=!patient&&!visit;
-    // 신환이고 약물도 없으면 5칸 자동 삽입
-    if(isNew&&_patientDrugs.length===0){
+    // 약물 정보 없으면 신환/구환 무관하게 5칸 자동 삽입
+    if(_patientDrugs.length===0){
       for(var ni=0;ni<5;ni++) _patientDrugs.push({drug_code:'',drug_name:'',dose:'1',daily_freq:'1',days:'21',method:'b4'});
       _drugsChanged=true;
     }
@@ -714,6 +714,8 @@ async function searchPatient(){
     _currentDaeriList=daeriList;
     renderDaeriList(daeriList);
     setStatus('searchStatus','success',isNew?'신환입니다.':'조회 완료');
+    // 조회 완료 후 진료 입력창 자동 열기
+    openVisitForm();
   }catch(err){setStatus('searchStatus','error','조회 실패: '+err.message);}
 }
 
