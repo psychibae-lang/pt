@@ -187,13 +187,6 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="font-family:monospace;font-size:18px;font-weight:700;" id="pcChart"></span>
         <span id="pcTag"></span>
-        <!-- 챠트번호 변경 (신환만) -->
-        <div id="pcChartEditWrap" style="display:none;align-items:center;gap:5px;flex-wrap:wrap;">
-          <input type="text" id="pcChartNewNo" placeholder="새 챠트번호" style="max-width:110px;font-size:13px;padding:5px 8px;">
-          <button onclick="changeChartNo()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;color:var(--accent);">변경</button>
-          <button onclick="toggleChartEdit(false)" class="btn btn-outline" style="font-size:11px;padding:5px 8px;color:var(--text2);">취소</button>
-        </div>
-        <button id="btnChartEdit" onclick="toggleChartEdit(true)" style="font-size:10px;padding:3px 8px;background:#fff;border:1px solid #c7d9fb;border-radius:5px;cursor:pointer;color:var(--accent);display:none;" title="챠트번호 변경 (신환만 가능)">✎ 변경</button>
         <button onclick="confirmDeletePatient()" style="font-size:10px;padding:3px 8px;background:#fff;border:1px solid #fca5a5;border-radius:5px;cursor:pointer;color:var(--danger);" title="이 환자의 모든 데이터 삭제">🗑 삭제</button>
       </div>
       <button class="btn btn-primary" onclick="openVisitForm()" style="padding:9px 16px;">✏️ 진료 입력</button>
@@ -230,7 +223,20 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
     <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <div class="card-title" style="margin-bottom:0;">복용약물</div>
-        <span id="piDrugCount" style="font-size:11px;color:var(--text2);"></span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="piDrugCount" style="font-size:11px;color:var(--text2);"></span>
+          <button onclick="openCopyDrugPanel()" style="font-size:11px;padding:4px 10px;background:#fff;border:1px solid #c7d9fb;border-radius:6px;cursor:pointer;color:var(--accent);" title="다른 챠트의 약물 복사">📋 다른 챠트에서 복사</button>
+        </div>
+      </div>
+      <!-- 약물 복사 패널 -->
+      <div id="copyDrugPanel" style="display:none;background:#f0f4ff;border:1px solid #c7d9fb;border-radius:8px;padding:10px 12px;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px;">📋 다른 챠트에서 약물 복사</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="copyDrugChartNo" placeholder="복사할 챠트번호" style="max-width:130px;font-size:13px;" onkeydown="if(event.key==='Enter')loadCopyDrugs()">
+          <button onclick="loadCopyDrugs()" class="btn btn-outline" style="font-size:12px;padding:5px 10px;">🔍 조회</button>
+          <button onclick="closeCopyDrugPanel()" style="font-size:11px;padding:5px 8px;background:#fff;border:1px solid var(--border);border-radius:5px;cursor:pointer;color:var(--text2);">✕ 닫기</button>
+        </div>
+        <div id="copyDrugPreview" style="margin-top:8px;"></div>
       </div>
       <div id="piDrugArea"></div>
     </div>
@@ -666,28 +672,60 @@ function clearPatient(){
   _currentChart=null;
 }
 
-function toggleChartEdit(show){
-  document.getElementById('pcChartEditWrap').style.display=show?'flex':'none';
-  var btn=document.getElementById('btnChartEdit');
-  if(btn) btn.style.display=show?'none':'';
-  if(show){
-    var inp=document.getElementById('pcChartNewNo');
-    inp.value='';inp.focus();
+function toggleChartEdit(show){}
+function changeChartNo(){}
+
+function openCopyDrugPanel(){
+  document.getElementById('copyDrugPanel').style.display='block';
+  document.getElementById('copyDrugChartNo').value='';
+  document.getElementById('copyDrugPreview').innerHTML='';
+  document.getElementById('copyDrugChartNo').focus();
+}
+function closeCopyDrugPanel(){
+  document.getElementById('copyDrugPanel').style.display='none';
+}
+async function loadCopyDrugs(){
+  var srcChart=document.getElementById('copyDrugChartNo').value.trim();
+  if(!srcChart){alert('챠트번호를 입력하세요.');return;}
+  if(srcChart===_currentChart){alert('현재 환자와 같은 챠트번호입니다.');return;}
+  var preview=document.getElementById('copyDrugPreview');
+  preview.innerHTML='<span style="font-size:12px;color:#999;">조회 중...</span>';
+  try{
+    var drugs=await sbGet('drugs',{chart_no:'eq.'+srcChart,select:'*',order:'id.asc'});
+    if(!drugs||!drugs.length){
+      preview.innerHTML='<span style="font-size:12px;color:var(--danger);">챠트 '+srcChart+' 의 약물 정보가 없습니다.</span>';
+      return;
+    }
+    var html='<div style="font-size:11px;color:#555;margin-bottom:6px;">챠트 <b>'+srcChart+'</b> 의 약물 '+drugs.length+'개:</div>';
+    html+='<div style="background:#fff;border:1px solid #dde;border-radius:6px;padding:6px 10px;font-size:11px;line-height:1.8;">';
+    drugs.forEach(function(d){
+      html+='<span style="color:#333;">'+d.drug_name+(d.dose?' '+d.dose:'')+(d.days?' '+d.days+'일':'')+'</span><span style="color:#bbb;margin:0 6px;">|</span>';
+    });
+    html=html.replace(/\|<\/span>$/,'')+'</div>';
+    html+='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">'
+      +'<button onclick="applyDrugCopy(\'append\')" class="btn btn-outline" style="font-size:12px;padding:5px 12px;color:var(--accent);">➕ 기존에 추가</button>'
+      +'<button onclick="applyDrugCopy(\'replace\')" style="font-size:12px;padding:5px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">🔄 전체 교체</button>'
+      +'</div>';
+    preview.innerHTML=html;
+    preview._drugs=drugs;
+  }catch(err){
+    preview.innerHTML='<span style="font-size:12px;color:var(--danger);">조회 실패: '+err.message+'</span>';
   }
 }
-
-async function changeChartNo(){
-  var newNo=document.getElementById('pcChartNewNo').value.trim();
-  if(!newNo){alert('새 챠트번호를 입력하세요.');return;}
-  if(newNo===_currentChart){toggleChartEdit(false);return;}
-  // 신환만 변경 가능 (DB에 데이터 없는 상태)
-  if(!confirm('챠트번호를 '+_currentChart+' → '+newNo+' 로 변경할까요?\n(약물 정보도 함께 변경됩니다)'))return;
-  // 혹시 입력 중 약물이 있으면 _currentChart를 newNo로 교체 (DB 저장 전 메모리만)
-  _currentChart=newNo;
-  document.getElementById('pcChart').textContent=newNo;
-  document.getElementById('pChartNo').value=newNo;
-  toggleChartEdit(false);
-  // 진료 입력창 챠트번호도 갱신
+function applyDrugCopy(mode){
+  var preview=document.getElementById('copyDrugPreview');
+  var drugs=preview._drugs;
+  if(!drugs||!drugs.length)return;
+  var newDrugs=drugs.map(function(d){return{drug_code:d.drug_code||'',drug_name:d.drug_name||'',dose:d.dose||'',daily_freq:d.daily_freq||'',days:d.days||'',method:d.method||''};});
+  if(mode==='replace'){
+    _patientDrugs=newDrugs;
+  } else {
+    // 기존 빈 행 제거 후 추가
+    _patientDrugs=_patientDrugs.filter(function(d){return d.drug_code||d.drug_name;});
+    _patientDrugs=_patientDrugs.concat(newDrugs);
+  }
+  _drugsChanged=true;
+  closeCopyDrugPanel();
   renderPatientDrugs();
 }
 
