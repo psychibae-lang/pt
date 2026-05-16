@@ -184,9 +184,17 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#fafbff;}
 
   <div class="card hidden" id="patientCard">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <div style="display:flex;align-items:center;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <span style="font-family:monospace;font-size:18px;font-weight:700;" id="pcChart"></span>
         <span id="pcTag"></span>
+        <!-- 챠트번호 변경 (신환만) -->
+        <div id="pcChartEditWrap" style="display:none;align-items:center;gap:5px;flex-wrap:wrap;">
+          <input type="text" id="pcChartNewNo" placeholder="새 챠트번호" style="max-width:110px;font-size:13px;padding:5px 8px;">
+          <button onclick="changeChartNo()" class="btn btn-outline" style="font-size:11px;padding:5px 10px;color:var(--accent);">변경</button>
+          <button onclick="toggleChartEdit(false)" class="btn btn-outline" style="font-size:11px;padding:5px 8px;color:var(--text2);">취소</button>
+        </div>
+        <button id="btnChartEdit" onclick="toggleChartEdit(true)" style="font-size:10px;padding:3px 8px;background:#fff;border:1px solid #c7d9fb;border-radius:5px;cursor:pointer;color:var(--accent);display:none;" title="챠트번호 변경 (신환만 가능)">✎ 변경</button>
+        <button onclick="confirmDeletePatient()" style="font-size:10px;padding:3px 8px;background:#fff;border:1px solid #fca5a5;border-radius:5px;cursor:pointer;color:var(--danger);" title="이 환자의 모든 데이터 삭제">🗑 삭제</button>
       </div>
       <button class="btn btn-primary" onclick="openVisitForm()" style="padding:9px 16px;">✏️ 진료 입력</button>
     </div>
@@ -658,6 +666,51 @@ function clearPatient(){
   _currentChart=null;
 }
 
+function toggleChartEdit(show){
+  document.getElementById('pcChartEditWrap').style.display=show?'flex':'none';
+  var btn=document.getElementById('btnChartEdit');
+  if(btn) btn.style.display=show?'none':'';
+  if(show){
+    var inp=document.getElementById('pcChartNewNo');
+    inp.value='';inp.focus();
+  }
+}
+
+async function changeChartNo(){
+  var newNo=document.getElementById('pcChartNewNo').value.trim();
+  if(!newNo){alert('새 챠트번호를 입력하세요.');return;}
+  if(newNo===_currentChart){toggleChartEdit(false);return;}
+  // 신환만 변경 가능 (DB에 데이터 없는 상태)
+  if(!confirm('챠트번호를 '+_currentChart+' → '+newNo+' 로 변경할까요?\n(약물 정보도 함께 변경됩니다)'))return;
+  // 혹시 입력 중 약물이 있으면 _currentChart를 newNo로 교체 (DB 저장 전 메모리만)
+  _currentChart=newNo;
+  document.getElementById('pcChart').textContent=newNo;
+  document.getElementById('pChartNo').value=newNo;
+  toggleChartEdit(false);
+  // 진료 입력창 챠트번호도 갱신
+  renderPatientDrugs();
+}
+
+async function confirmDeletePatient(){
+  if(!_currentChart){alert('조회된 환자가 없습니다.');return;}
+  if(!confirm('챠트 '+_currentChart+' 의 모든 데이터(방문정보+약물정보+환자정보)를 삭제할까요?\n이 작업은 되돌릴 수 없습니다.'))return;
+  var statusEl=document.getElementById('searchStatus');
+  try{
+    setStatus('searchStatus','loading','삭제 중...');
+    await Promise.all([
+      sbDelete('drugs',{chart_no:_currentChart}),
+      sbDelete('visits',{chart_no:_currentChart}),
+      sbDelete('patients',{chart_no:_currentChart})
+    ]);
+    document.getElementById('pChartNo').value='';
+    clearPatient();
+    setStatus('searchStatus','success','✓ 챠트 '+_currentChart+' 데이터가 모두 삭제되었습니다.');
+    _currentChart=null;
+  }catch(err){
+    setStatus('searchStatus','error','삭제 실패: '+err.message);
+  }
+}
+
 async function searchPatient(){
   var chartNo=document.getElementById('pChartNo').value.trim();
   if(!chartNo)return;
@@ -684,6 +737,10 @@ async function searchPatient(){
       _drugsChanged=true;
     }
     document.getElementById('pcTag').innerHTML=isNew?'<span class="tag-new">신환</span>':'<span class="tag-exist">기존</span>';
+    // 신환만 챠트번호 변경 버튼 표시
+    var btnChartEdit=document.getElementById('btnChartEdit');
+    if(btnChartEdit) btnChartEdit.style.display=isNew?'':'none';
+    toggleChartEdit(false);
     document.getElementById('pcPhone').textContent=patient?(patient.phone||'미등록'):'미등록';
     document.getElementById('pcSmsYn').textContent=patient?(patient.sms_yn==='N'?'제외':'발송'):'발송';
     document.getElementById('pcVisit').textContent=visit?displayDate(fmt6(visit.visit_date)):'없음';
